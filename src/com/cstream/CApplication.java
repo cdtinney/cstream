@@ -2,12 +2,11 @@ package com.cstream;
 	
 import java.util.logging.Logger;
 
-import com.cstream.utils.logging.CLogHandler;
-
 import javafx.application.Application;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+import com.cstream.logging.CLogHandler;
 
 public class CApplication extends Application {
 		
@@ -25,12 +24,15 @@ public class CApplication extends Application {
 		controller.initialize(primaryStage);
 		
 		primaryStage.show();
+		
 	}
 	
 	@Override
 	public void stop() {
+		
 		controller.stop();
 		LOGGER.info("Application has stopped.");
+		
 	}
 	
 	public static void main(String[] args) {
@@ -39,4 +41,5 @@ public class CApplication extends Application {
 		
 		launch(args);
 	}
+	
 }

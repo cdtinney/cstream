@@ -1,4 +1,4 @@
-package com.cstream.utils.logging;
+package com.cstream.logging;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -13,6 +13,7 @@ public class LogFormatter extends Formatter{
 	
 	@Override
 	public String format(LogRecord record) {
+		
 		StringBuilder builder = new StringBuilder(1000);
         builder.append(df.format(new Date(record.getMillis()))).append(" - ");
         builder.append("[").append(record.getSourceClassName()).append(".");
@@ -21,6 +22,7 @@ public class LogFormatter extends Formatter{
         builder.append(formatMessage(record));
         builder.append("\n");
         return builder.toString();
+        
 	}
 	
 	public String getHead(Handler h) {

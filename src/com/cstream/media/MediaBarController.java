@@ -1,15 +1,16 @@
-package com.cstream.Media;
+package com.cstream.media;
 
 import java.util.logging.Logger;
-
-import com.cstream.common.Controller;
-import com.cstream.utils.logging.CLogHandler;
 
 import javafx.scene.Node;
 import javafx.scene.media.MediaPlayer;
 
+import com.cstream.controller.Controller;
+import com.cstream.logging.CLogHandler;
+
 public class MediaBarController extends Controller{
 
+	@SuppressWarnings("unused")
 	private static Logger LOGGER = Logger.getLogger(MediaBarController.class.getName());
 	
 	private MediaBarView view; 
@@ -19,6 +20,7 @@ public class MediaBarController extends Controller{
 	//Networking Object
 		
 	public void initialize(MediaPlayer mp) {
+		
 		this.mp = mp;
 		
 		view = new MediaBarView();
@@ -30,7 +32,6 @@ public class MediaBarController extends Controller{
 		addListeners();
 		
 	}
-	
     
     private void addListeners() {
     	

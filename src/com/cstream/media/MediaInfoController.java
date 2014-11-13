@@ -1,4 +1,4 @@
-package com.cstream.Media;
+package com.cstream.media;
 
 import javafx.scene.Node;
 
