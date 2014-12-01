@@ -1,4 +1,4 @@
-package com.cstream.Media;
+package com.cstream.media;
 
 
 import javafx.collections.FXCollections;
@@ -11,6 +11,7 @@ public class MediaLibraryView extends HBox {
 
 	public void initialize() {
 		setPrefWidth(600);
+		setSpacing(5);
 
 		addArtistList();
 		addSongList();

@@ -2,9 +2,10 @@ package com.cstream;
 
 import java.util.logging.Logger;
 
-import com.cstream.Media.MediaBarController;
-import com.cstream.Media.MediaLibraryController;
 import com.cstream.common.Controller;
+import com.cstream.media.MediaBarController;
+import com.cstream.media.MediaInfoController;
+import com.cstream.media.MediaLibraryController;
 import com.cstream.utils.logging.CLogHandler;
 
 import javafx.event.Event;
@@ -26,6 +27,7 @@ public class CApplicationController extends Controller {
 	// Sub-Controller
 	private MediaBarController mediaBarController = new MediaBarController();
 	private MediaLibraryController mediaLibController = new MediaLibraryController();
+	private MediaInfoController mediaInfoController = new MediaInfoController();
 	
 	// TODO: MediaPlayer needs a source of Media to be initialized
 	private MediaPlayer mp;
@@ -66,7 +68,8 @@ public class CApplicationController extends Controller {
 	private void addSubViews() {
 		
 		view.addToBorderPane(mediaBarController.getView(), "bottom");
-		view.addToBorderPane(mediaLibController.getView(), "center");
+		view.addToBorderPane(mediaLibController.getView(), "right");
+		view.addToBorderPane(mediaInfoController.getView(), "left");
 
 	}
 	

@@ -1,4 +1,4 @@
-package com.cstream.Media;
+package com.cstream.media;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -13,7 +13,8 @@ public class MediaBarView extends HBox {
 
 	private Label status;
 	
-    public void initialize() {    	
+    public void initialize() { 
+    	setSpacing(5);
     	setPrefHeight(150);
     	setAlignment(Pos.CENTER);
     	getStyleClass().add("mediabar");

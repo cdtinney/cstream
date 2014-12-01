@@ -1,4 +1,4 @@
-package com.cstream.Media;
+package com.cstream.media;
 
 import java.util.logging.Logger;
 

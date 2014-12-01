@@ -5,7 +5,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import com.cstream.CApplicationView;
-import com.cstream.Media.MediaBarView;
+import com.cstream.media.MediaBarView;
 
 public class CLogHandler extends Handler {
 	
