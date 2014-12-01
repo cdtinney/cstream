@@ -1,8 +1,186 @@
 package com.cstream.model;
 
+import java.io.IOException;
+import java.util.logging.Logger;
+
+import com.cstream.media.MediaBarController;
+import com.mpatric.mp3agic.ID3v1;
+import com.mpatric.mp3agic.ID3v1Tag;
+import com.mpatric.mp3agic.ID3v2;
+import com.mpatric.mp3agic.InvalidDataException;
+import com.mpatric.mp3agic.Mp3File;
+import com.mpatric.mp3agic.NotSupportedException;
+import com.mpatric.mp3agic.UnsupportedTagException;
+
 public class Song {
 	
-	private String title;
-	private String artist;
-	private String album;
+	@SuppressWarnings("unused")
+	private static Logger LOGGER = Logger.getLogger(MediaBarController.class.getName());
+	
+	private Mp3File mp3;
+	private ID3v1 v1tag;
+	private ID3v2 v2tag;
+	private String path;
+	
+	public Song(String filepath) throws UnsupportedTagException, InvalidDataException, IOException, NotSupportedException {
+		
+		this.mp3 = new Mp3File(filepath);
+		setupTagVersion();
+		saveTagChanges();
+	}
+	
+	private void setupTagVersion() {
+		
+		if (mp3.hasId3v1Tag()) {
+			
+			 v1tag = mp3.getId3v1Tag();
+			 
+		} else if (!mp3.hasId3v2Tag()) {
+			  
+			  // mp3 does not have v1 or v2 .. create v1
+			  v1tag = new ID3v1Tag();
+			  mp3.setId3v1Tag(v1tag);
+			  v1tag.setTrack("");
+			  v1tag.setArtist("");
+			  v1tag.setTitle("");
+			  v1tag.setAlbum("");
+			  v1tag.setYear("");
+			  v1tag.setGenre(1);
+			  v1tag.setComment("");
+			  
+		} else {
+			
+			v2tag = mp3.getId3v2Tag();
+			
+		}
+		
+	}
+	
+	public void saveTagChanges() throws NotSupportedException, IOException {
+		
+		if(mp3 != null && getPath() != null) {
+			mp3.save(path);
+		}
+		
+	}
+
+	public String getPath() {
+		
+		return path;
+		
+	}
+
+	public void setPath(String path) {
+		
+		this.path = path;
+		
+	}
+	
+	public long getLengthInSeconds() {
+		
+		return mp3.getLengthInSeconds();
+		
+	}
+	
+	public int getSampleRate() {
+		
+		return mp3.getSampleRate();
+		
+	}
+	
+	public long getLastModified() {
+		
+		return mp3.getLastModified();
+		
+	}
+
+	public String getTrack() {
+		
+		return mp3.hasId3v2Tag() ? v2tag.getTrack() : v1tag.getTrack();
+		
+	}
+	
+	public String getTitle() {
+		
+		return mp3.hasId3v2Tag() ? v2tag.getTitle() : v1tag.getTitle();
+		
+	}
+	
+	public String getArtist() {
+		
+		return mp3.hasId3v2Tag() ? v2tag.getArtist() : v1tag.getArtist();
+		
+	}
+	
+	public String getAlbum() {
+		
+		return mp3.hasId3v2Tag() ? v2tag.getAlbum() : v1tag.getAlbum();
+		
+	}
+	
+	public String getYear() {
+		
+		return mp3.hasId3v2Tag() ? v2tag.getYear() : v1tag.getYear();
+		
+	}
+	
+	public int getGenre() {
+		
+		return mp3.hasId3v2Tag() ? v2tag.getGenre() : v1tag.getGenre();
+		
+	}
+	
+	public String getGenreDes() {
+		
+		return mp3.hasId3v2Tag() ? v2tag.getGenreDescription() : v1tag.getGenreDescription();
+		
+	}
+	
+	public String getComment() {
+		
+		return mp3.hasId3v2Tag() ? v2tag.getComment() : v1tag.getComment();
+		
+	}
+	
+	public String getComposer() {
+		
+		return mp3.hasId3v2Tag() ? v2tag.getComposer() : "";
+		
+	}
+	
+	public String getPublisher() {
+		
+		return mp3.hasId3v2Tag() ? v2tag.getPublisher() : "";
+		
+	}
+	
+	public String getOriginalArtist() {
+		
+		return mp3.hasId3v2Tag() ? v2tag.getOriginalArtist() : "";
+		
+	}
+	
+	public String getAlbumArtist() {
+		
+		return mp3.hasId3v2Tag() ? v2tag.getAlbumArtist() : "";
+		
+	}
+	
+	public String getCopyRight() {
+		
+		return mp3.hasId3v2Tag() ? v2tag.getCopyright() : "";
+		
+	}
+	
+	public String getURL() {
+		
+		return mp3.hasId3v2Tag() ? v2tag.getUrl() : "";
+		
+	}
+	
+	public String getEncoder() {
+		
+		return mp3.hasId3v2Tag() ? v2tag.getEncoder() : "";
+		
+	}
 }

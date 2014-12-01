@@ -2,10 +2,10 @@ package com.cstream.media;
 
 import java.util.logging.Logger;
 
-
 import com.cstream.controller.Controller;
 import com.cstream.utils.logging.CLogHandler;
 
+import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.media.MediaPlayer;
 
@@ -32,6 +32,10 @@ public class MediaBarController extends Controller{
 		
 	}
 	
+	protected void handlePlayButton(Event event) {
+		
+	}
+	
 
     private void addListeners() {
     	
@@ -46,6 +50,7 @@ public class MediaBarController extends Controller{
 	private void addHandlers() {
 		
 		addEventHandler(view, "playButton", "setOnAction", "handlePlayButton");
+		//addEventHandler(view, "", "set")
 		
 	}
 	
