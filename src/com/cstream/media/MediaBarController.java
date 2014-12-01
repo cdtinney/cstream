@@ -2,7 +2,8 @@ package com.cstream.media;
 
 import java.util.logging.Logger;
 
-import com.cstream.common.Controller;
+
+import com.cstream.controller.Controller;
 import com.cstream.utils.logging.CLogHandler;
 
 import javafx.scene.Node;
@@ -31,7 +32,7 @@ public class MediaBarController extends Controller{
 		
 	}
 	
-    
+
     private void addListeners() {
     	
     	// TODO: Volume listener, time listener

@@ -1,23 +1,23 @@
 package com.cstream.media;
 
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 
-
 public class MediaLibraryView extends HBox {
 
 	public void initialize() {
+		
 		setPrefWidth(600);
-		setSpacing(5);
 
 		addArtistList();
 		addSongList();
+		
 	}
 
 	private void addArtistList() {
+		
 		ObservableList<String> names = FXCollections.observableArrayList();
 		ObservableList<String> data = FXCollections.observableArrayList();
 
@@ -38,9 +38,11 @@ public class MediaLibraryView extends HBox {
 		artists.setItems(names);
 		//artists.setCellFactory(ComboBoxListCell.forListView(names));              
 		getChildren().add(artists);
+		
 	}
 
 	private void addSongList() {
+		
 		ObservableList<String> names = FXCollections.observableArrayList();
 		ObservableList<String> data = FXCollections.observableArrayList();
 
@@ -61,6 +63,7 @@ public class MediaLibraryView extends HBox {
 		songs.setItems(names);
 		//songs.setCellFactory(ComboBoxListCell.forListView(names));              
 		getChildren().add(songs);
+		
 	}
 
 }

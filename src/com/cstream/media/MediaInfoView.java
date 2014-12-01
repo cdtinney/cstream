@@ -8,6 +8,7 @@ import javafx.scene.layout.VBox;
 public class MediaInfoView extends VBox {
 
 	public void initialize() {
+		
 		setSpacing(5);
 		setPrefWidth(500);
 		setAlignment(Pos.CENTER_LEFT);
@@ -15,6 +16,7 @@ public class MediaInfoView extends VBox {
 		
 		addFileThumbNail();
 		addDetailLabels();
+		
 	}
 	
 	private void addFileThumbNail() {
@@ -22,7 +24,7 @@ public class MediaInfoView extends VBox {
 	}
 	
 	private void addDetailLabels() {
-		// TODO: song, artist, album, play count, added on, produced, etc..
+		
 		Label title = new Label("Title: ");
 		title.setPrefWidth(130);
 		title.setMinWidth(50);
@@ -47,7 +49,7 @@ public class MediaInfoView extends VBox {
     	addedDate.setPrefWidth(130);
     	addedDate.setMinWidth(50);
     	getChildren().add(addedDate);
+    	
 	}
-	
 	
 }

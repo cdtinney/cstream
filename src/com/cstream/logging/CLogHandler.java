@@ -1,12 +1,9 @@
-package com.cstream.utils.logging;
+package com.cstream.logging;
 
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import com.cstream.CApplicationView;
-import com.cstream.logging.LogFormatter;
-import com.cstream.logging.LogLevel;
 import com.cstream.media.MediaBarView;
 
 public class CLogHandler extends Handler {
@@ -37,12 +34,10 @@ public class CLogHandler extends Handler {
 	@Override
 	public void publish(LogRecord r) {
 		
-		// Display status messages on the view
 		if (r.getLevel() == LogLevel.STATUS && view != null) {
 			view.setStatusText(r.getMessage());
 		}
 		
-		// Print to stdout
 		System.out.println(getFormatter().format(r));
 		
 	}
@@ -56,4 +51,5 @@ public class CLogHandler extends Handler {
 	public void flush() {
 		// Do nothing
 	}
+	
 }

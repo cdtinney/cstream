@@ -1,7 +1,5 @@
 package com.cstream;
 
-import com.cstream.utils.FxUtils;
-
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -9,6 +7,8 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
+
+import com.cstream.utils.FxUtils;
 
 public class CApplicationView extends Scene {
 	
@@ -22,6 +22,7 @@ public class CApplicationView extends Scene {
 		root = (BorderPane) getRoot();
 		
 		FxUtils.addStyleSheet(getClass(), this, "/css/application.css");
+		
 	}
 	
 	public void initialize() {

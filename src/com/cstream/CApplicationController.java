@@ -2,16 +2,15 @@ package com.cstream;
 
 import java.util.logging.Logger;
 
-import com.cstream.common.Controller;
-import com.cstream.media.MediaBarController;
-import com.cstream.media.MediaInfoController;
-import com.cstream.media.MediaLibraryController;
-import com.cstream.utils.logging.CLogHandler;
-
 import javafx.event.Event;
 import javafx.scene.Parent;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
+
+import com.cstream.controller.Controller;
+import com.cstream.media.MediaBarController;
+import com.cstream.media.MediaInfoController;
+import com.cstream.media.MediaLibraryController;
 
 public class CApplicationController extends Controller {
 
