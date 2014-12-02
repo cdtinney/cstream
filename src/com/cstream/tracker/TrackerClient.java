@@ -24,12 +24,11 @@ public final class TrackerClient {
 	private static final String JOIN = SERVER + "/join";
 	private static final String REMOVE = SERVER + "/remove";
 	
-	private static HttpClient client;
-	private static Gson json;
+	private static HttpClient client = HttpClientBuilder.create().build();	
+	private static Gson json = new Gson();
 	
 	private TrackerClient() {
-		client = HttpClientBuilder.create().build();	
-		json = new Gson();
+		// Empty
 	}
 	
 	public static String getLibrary() {
