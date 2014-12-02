@@ -21,7 +21,9 @@ public class Song {
 	@SuppressWarnings("unused")
 	private static Logger LOGGER = Logger.getLogger(MediaBarController.class.getName());
 	
-	private String hash;
+	// Unique identifier for the song (MD5 hash)
+	private String id;
+	
 	private Mp3File mp3;
 	private ID3v1 v1tag;
 	private ID3v2 v2tag;
@@ -29,7 +31,7 @@ public class Song {
 	
 	public Song(String filepath) {
 		
-		buildFileHash(filepath);
+		generateId(filepath);
 		
 		try {
 			mp3 = new Mp3File(filepath);
@@ -53,8 +55,8 @@ public class Song {
 		this.path = path;		
 	}
 	
-	public String getHash() {		
-		return this.hash;		
+	public String getId() {		
+		return id;		
 	}
 	
 	public long getLengthInSeconds() {		
@@ -169,10 +171,10 @@ public class Song {
 		
 	}
 	
-	private void buildFileHash(String path) {
+	private void generateId(String path) {
 
 		try (FileInputStream fis = new FileInputStream(new File(path)) ){
-			hash = DigestUtils.md5Hex(fis);
+			id = DigestUtils.md5Hex(fis);
 			
 		} catch (IOException e) {
 			e.printStackTrace();

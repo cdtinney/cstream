@@ -2,7 +2,7 @@ package com.cstream.tracker;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
+import java.util.Map;
 
 import com.cstream.model.Song;
 
@@ -13,9 +13,9 @@ public class TrackerPeer {
 	private String ip;
 	private String port;
 	
-	private ArrayList<Song> files;
+	private Map<String, Song> files;
 	
-	public TrackerPeer(String id, String port, ArrayList<Song> files) {
+	public TrackerPeer(String id, String port, Map<String, Song> files) {
 		
 		this.id = id;
 		this.port = port;
@@ -38,7 +38,7 @@ public class TrackerPeer {
 		return port;
 	}
 
-	public ArrayList<Song> getFiles() {
+	public Map<String, Song> getFiles() {
 		return files;
 	}
 	
