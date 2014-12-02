@@ -5,6 +5,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+/**
+ * FileUtils contains a collection of functions for modifying files
+ * on the OS's file system.
+ *
+ * @author Ben Sweett & Colin Tinney
+ * @version 1.0
+ * @since 2014-09-29
+ */
+
+
+
 public class FileUtils {
 	
 	private static Logger LOGGER = Logger.getLogger(FileUtils.class.getName());
