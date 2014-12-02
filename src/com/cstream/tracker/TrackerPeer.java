@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 import java.util.Map;
 
 import com.cstream.model.Song;
+import com.cstream.utils.OSUtils;
 
 public class TrackerPeer {
 
@@ -15,9 +16,9 @@ public class TrackerPeer {
 	
 	private Map<String, Song> files;
 	
-	public TrackerPeer(String id, String port, Map<String, Song> files) {
+	public TrackerPeer(String port, Map<String, Song> files) {
 		
-		this.id = id;
+		this.id = generateId();
 		this.port = port;
 		
 		this.ip = getLocalIp();
@@ -55,6 +56,22 @@ public class TrackerPeer {
 		
 		return null;
 		
+	}
+	
+	private String generateId() {
+		
+		String os = "unknown";
+		String name = System.getProperty("user.home");
+		
+		if(OSUtils.isMac()) {
+			os = "mac";
+		} else if(OSUtils.isWindows()) {
+			os = "windows";
+		} else if(OSUtils.isUnix()) {
+			os = "unix";
+		}
+		
+		return name + "_" + os;
 	}
 
 }
