@@ -1,7 +1,12 @@
 package com.cstream.model;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.logging.Logger;
+
+import org.apache.commons.codec.digest.DigestUtils;
 
 import com.cstream.media.MediaBarController;
 import com.mpatric.mp3agic.ID3v1;
@@ -17,16 +22,20 @@ public class Song {
 	@SuppressWarnings("unused")
 	private static Logger LOGGER = Logger.getLogger(MediaBarController.class.getName());
 	
+	private String hash;
 	private Mp3File mp3;
 	private ID3v1 v1tag;
 	private ID3v2 v2tag;
 	private String path;
 	
-	public Song(String filepath) throws UnsupportedTagException, InvalidDataException, IOException, NotSupportedException {
+	public Song(String filepath) throws UnsupportedTagException, InvalidDataException, IOException, NotSupportedException, NoSuchAlgorithmException {
+		
+		buildFileHash(filepath);
 		
 		this.mp3 = new Mp3File(filepath);
 		setupTagVersion();
 		saveTagChanges();
+		
 	}
 	
 	private void setupTagVersion() {
@@ -53,6 +62,14 @@ public class Song {
 			v2tag = mp3.getId3v2Tag();
 			
 		}
+		
+	}
+	
+	private void buildFileHash(String path) throws IOException {
+		
+		FileInputStream fis = new FileInputStream(new File(path));
+		this.hash = DigestUtils.md5Hex(fis);
+		fis.close();
 		
 	}
 	
@@ -181,6 +198,12 @@ public class Song {
 	public String getEncoder() {
 		
 		return mp3.hasId3v2Tag() ? v2tag.getEncoder() : "";
+		
+	}
+	
+	public String getHash() {
+		
+		return this.hash;
 		
 	}
 }
