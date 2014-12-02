@@ -3,7 +3,6 @@ package com.cstream.model;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.logging.Logger;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -28,20 +27,111 @@ public class Song {
 	private ID3v2 v2tag;
 	private String path;
 	
-	public Song(String filepath) throws UnsupportedTagException, InvalidDataException, IOException, NotSupportedException, NoSuchAlgorithmException {
+	public Song(String filepath) {
 		
 		buildFileHash(filepath);
 		
-		this.mp3 = new Mp3File(filepath);
+		try {
+			mp3 = new Mp3File(filepath);
+			
+		} catch (UnsupportedTagException | InvalidDataException | IOException e) {
+			e.printStackTrace();
+			return;
+			
+		}
+		
 		setupTagVersion();
 		saveTagChanges();
 		
+	}
+
+	public String getPath() {		
+		return path;		
+	}
+
+	public void setPath(String path) {		
+		this.path = path;		
+	}
+	
+	public String getHash() {		
+		return this.hash;		
+	}
+	
+	public long getLengthInSeconds() {		
+		return mp3.getLengthInSeconds();		
+	}
+	
+	public int getSampleRate() {		
+		return mp3.getSampleRate();		
+	}
+	
+	public long getLastModified() {		
+		return mp3.getLastModified();		
+	}
+
+	public String getTrack() {		
+		return mp3.hasId3v2Tag() ? v2tag.getTrack() : v1tag.getTrack();		
+	}
+	
+	public String getTitle() {		
+		return mp3.hasId3v2Tag() ? v2tag.getTitle() : v1tag.getTitle();		
+	}
+	
+	public String getArtist() {		
+		return mp3.hasId3v2Tag() ? v2tag.getArtist() : v1tag.getArtist();		
+	}
+	
+	public String getAlbum() {		
+		return mp3.hasId3v2Tag() ? v2tag.getAlbum() : v1tag.getAlbum();		
+	}
+	
+	public String getYear() {		
+		return mp3.hasId3v2Tag() ? v2tag.getYear() : v1tag.getYear();		
+	}
+	
+	public int getGenre() {		
+		return mp3.hasId3v2Tag() ? v2tag.getGenre() : v1tag.getGenre();		
+	}
+	
+	public String getGenreDes() {		
+		return mp3.hasId3v2Tag() ? v2tag.getGenreDescription() : v1tag.getGenreDescription();		
+	}
+	
+	public String getComment() {		
+		return mp3.hasId3v2Tag() ? v2tag.getComment() : v1tag.getComment();		
+	}
+	
+	public String getComposer() {		
+		return mp3.hasId3v2Tag() ? v2tag.getComposer() : "";		
+	}
+	
+	public String getPublisher() {		
+		return mp3.hasId3v2Tag() ? v2tag.getPublisher() : "";		
+	}
+	
+	public String getOriginalArtist() {		
+		return mp3.hasId3v2Tag() ? v2tag.getOriginalArtist() : "";		
+	}
+	
+	public String getAlbumArtist() {		
+		return mp3.hasId3v2Tag() ? v2tag.getAlbumArtist() : "";		
+	}
+	
+	public String getCopyRight() {		
+		return mp3.hasId3v2Tag() ? v2tag.getCopyright() : "";		
+	}
+	
+	public String getURL() {		
+		return mp3.hasId3v2Tag() ? v2tag.getUrl() : "";		
+	}
+	
+	public String getEncoder() {		
+		return mp3.hasId3v2Tag() ? v2tag.getEncoder() : "";		
 	}
 	
 	private void setupTagVersion() {
 		
 		if (mp3.hasId3v1Tag()) {
-			
 			 v1tag = mp3.getId3v1Tag();
 			 
 		} else if (!mp3.hasId3v2Tag()) {
@@ -58,152 +148,36 @@ public class Song {
 			  v1tag.setComment("");
 			  
 		} else {
-			
 			v2tag = mp3.getId3v2Tag();
 			
 		}
 		
 	}
 	
-	private void buildFileHash(String path) throws IOException {
+	private void saveTagChanges() {
 		
-		FileInputStream fis = new FileInputStream(new File(path));
-		this.hash = DigestUtils.md5Hex(fis);
-		fis.close();
-		
-	}
-	
-	public void saveTagChanges() throws NotSupportedException, IOException {
-		
-		if(mp3 != null && getPath() != null) {
-			mp3.save(path);
+		try {
+
+			if (mp3 != null && getPath() != null) {
+				mp3.save(path);
+			}
+			
+		} catch (NotSupportedException|IOException e) {
+			e.printStackTrace();
+			
 		}
 		
 	}
+	
+	private void buildFileHash(String path) {
 
-	public String getPath() {
-		
-		return path;
-		
-	}
-
-	public void setPath(String path) {
-		
-		this.path = path;
-		
-	}
-	
-	public long getLengthInSeconds() {
-		
-		return mp3.getLengthInSeconds();
-		
-	}
-	
-	public int getSampleRate() {
-		
-		return mp3.getSampleRate();
-		
-	}
-	
-	public long getLastModified() {
-		
-		return mp3.getLastModified();
-		
-	}
-
-	public String getTrack() {
-		
-		return mp3.hasId3v2Tag() ? v2tag.getTrack() : v1tag.getTrack();
-		
-	}
-	
-	public String getTitle() {
-		
-		return mp3.hasId3v2Tag() ? v2tag.getTitle() : v1tag.getTitle();
-		
-	}
-	
-	public String getArtist() {
-		
-		return mp3.hasId3v2Tag() ? v2tag.getArtist() : v1tag.getArtist();
-		
-	}
-	
-	public String getAlbum() {
-		
-		return mp3.hasId3v2Tag() ? v2tag.getAlbum() : v1tag.getAlbum();
-		
-	}
-	
-	public String getYear() {
-		
-		return mp3.hasId3v2Tag() ? v2tag.getYear() : v1tag.getYear();
-		
-	}
-	
-	public int getGenre() {
-		
-		return mp3.hasId3v2Tag() ? v2tag.getGenre() : v1tag.getGenre();
-		
-	}
-	
-	public String getGenreDes() {
-		
-		return mp3.hasId3v2Tag() ? v2tag.getGenreDescription() : v1tag.getGenreDescription();
-		
-	}
-	
-	public String getComment() {
-		
-		return mp3.hasId3v2Tag() ? v2tag.getComment() : v1tag.getComment();
-		
-	}
-	
-	public String getComposer() {
-		
-		return mp3.hasId3v2Tag() ? v2tag.getComposer() : "";
-		
-	}
-	
-	public String getPublisher() {
-		
-		return mp3.hasId3v2Tag() ? v2tag.getPublisher() : "";
-		
-	}
-	
-	public String getOriginalArtist() {
-		
-		return mp3.hasId3v2Tag() ? v2tag.getOriginalArtist() : "";
-		
-	}
-	
-	public String getAlbumArtist() {
-		
-		return mp3.hasId3v2Tag() ? v2tag.getAlbumArtist() : "";
-		
-	}
-	
-	public String getCopyRight() {
-		
-		return mp3.hasId3v2Tag() ? v2tag.getCopyright() : "";
-		
-	}
-	
-	public String getURL() {
-		
-		return mp3.hasId3v2Tag() ? v2tag.getUrl() : "";
-		
-	}
-	
-	public String getEncoder() {
-		
-		return mp3.hasId3v2Tag() ? v2tag.getEncoder() : "";
-		
-	}
-	
-	public String getHash() {
-		
-		return this.hash;
+		try (FileInputStream fis = new FileInputStream(new File(path)) ){
+			hash = DigestUtils.md5Hex(fis);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+			
+		}
 		
 	}
 }

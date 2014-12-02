@@ -10,60 +10,68 @@ import com.google.gson.Gson;
 public class TrackerPeer {
 
 	// TODO: Link Port and IP to the RTP Session
-	private String userId;
-	private String userIP;
-	private String userPort;
-	private ArrayList<Song> usersFiles;
+	private String id;
+	private String ip;
+	private String port;
 	
-	public TrackerPeer(String id, ArrayList<Song> files) throws UnknownHostException {
-		setUserId(id);
-		setUserIP();
-		setUsersFiles(files);
+	private ArrayList<Song> files;
+	
+	public TrackerPeer(String id, String port, ArrayList<Song> files) {
+		
+		this.id = id;
+		this.port = port;
+		
+		this.ip = getLocalIp();
+		
+		this.files = files;
+		
 	}
 
-	public String getUserId() {
-		return userId;
-	}
-
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
-	
-	public void setUserIP() throws UnknownHostException {
-		InetAddress ip = InetAddress.getLocalHost();
-		this.userIP = ip.getHostAddress();
+	public String getId() {
+		return id;
 	}
 	
-	public String getUserIP() {
-		return this.userIP;
+	public String getIp() {
+		return ip;
 	}
 
-	public String getUserPort() {
-		return userPort;
+	public String getPort() {
+		return port;
 	}
 
-	public void setUserPort(String userPort) {
-		this.userPort = userPort;
-	}
-
-	public ArrayList<Song> getUsersFiles() {
-		return usersFiles;
-	}
-
-	public void setUsersFiles(ArrayList<Song> usersFiles) {
-		this.usersFiles = usersFiles;
+	public ArrayList<Song> getFiles() {
+		return files;
 	}
 	
 	public String toJson() {
+		
 		Gson json = new Gson();
 		json.toJson(this);
 		return json.toString();
+		
 	}
 	
-	public String userIdToJson() {
+	public String idToJson() {
+		
 		Gson json = new Gson();
-		json.toJson(getUserId());
+		json.toJson(getId());
 		return json.toString();
+		
+	}
+	
+	private String getLocalIp() {
+		
+		try {
+			InetAddress ip = InetAddress.getLocalHost();
+			return ip.getHostAddress();
+			
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+			
+		}
+		
+		return null;
+		
 	}
 
 }
