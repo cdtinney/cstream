@@ -16,18 +16,21 @@ import jlibrtp.*;
 
 public class AudioReceiver implements RTPAppIntf {
 
+	@SuppressWarnings("unused")
 	private static Logger LOGGER = Logger.getLogger(AudioReceiver.class.getName());
 	
-	RTPSession rtpSession = null;
+	private RTPSession rtpSession = null;
 	private AudioPanPosition curPosition;
-	byte[] abData = null;
-	int nBytesRead = 0;
-	int pktCount = 0;
-	int dataCount = 0;
-	int offsetCount = 0;
+	
+	private byte[] abData = null;
+	private int nBytesRead = 0;
+	private int pktCount = 0;
+	private int dataCount = 0;
+	private int offsetCount = 0;
 	private SourceDataLine auline;
 	
 	public AudioReceiver(int rtpPort, int rtcpPort)  {
+		
 		DatagramSocket rtpSocket = null;
 		DatagramSocket rtcpSocket = null;
 		
@@ -48,6 +51,7 @@ public class AudioReceiver implements RTPAppIntf {
 	}
 		
 	public void run() {
+		
 		AudioFormat.Encoding encoding =  new AudioFormat.Encoding("PCM_SIGNED");
 		AudioFormat format = new AudioFormat(encoding,((float) 8000.0), 16, 1, 2, ((float) 8000.0) ,false);
 		DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
@@ -84,6 +88,7 @@ public class AudioReceiver implements RTPAppIntf {
 			auline.drain();
 			auline.close();
 		}
+		
 	}
 	
 	
@@ -95,17 +100,20 @@ public class AudioReceiver implements RTPAppIntf {
 
 	@Override
 	public void receiveData(DataFrame frame, Participant p) {
-		if(auline != null) {
+		
+		if (auline != null) {
 			byte[] data = frame.getConcatenatedData();
 			auline.write(data, 0, data.length);
+			
 		}
+		
+		
 		pktCount++;
 	}
 
 	@Override
 	public void userEvent(int arg0, Participant[] arg1) {
 		// TODO Auto-generated method stub
-		
 	}
 
 }

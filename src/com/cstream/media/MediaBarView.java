@@ -25,6 +25,16 @@ public class MediaBarView extends HBox {
     	addStatusText();
     	
     }
+    
+    public void setStatusText(String message) {
+
+		if (status == null) {
+			return;
+		}
+		
+		status.setText("STATUS - " + (message == null? "" : message));	
+		
+	}
 
     private void addPlayButton() {
     	
@@ -69,16 +79,6 @@ public class MediaBarView extends HBox {
         getChildren().add(volumeSlider);
         
     }	
-    
-    public void setStatusText(String message) {
-
-		if (status == null) {
-			return;
-		}
-		
-		status.setText("STATUS - " + (message == null? "" : message));	
-		
-	}
 	
 	private void addStatusText() {
 		

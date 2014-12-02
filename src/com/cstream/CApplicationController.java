@@ -14,6 +14,7 @@ import com.cstream.media.MediaLibraryController;
 
 public class CApplicationController extends Controller {
 
+	@SuppressWarnings("unused")
 	private static Logger LOGGER = Logger.getLogger(CApplicationController.class.getName());
 	
 	public final static int WIDTH = 1280;
@@ -23,7 +24,7 @@ public class CApplicationController extends Controller {
 	
 	private CApplicationView view; 
 	
-	// Sub-Controller
+	// Sub-Controllers
 	private MediaBarController mediaBarController = new MediaBarController();
 	private MediaLibraryController mediaLibController = new MediaLibraryController();
 	private MediaInfoController mediaInfoController = new MediaInfoController();
@@ -50,6 +51,7 @@ public class CApplicationController extends Controller {
 		initializeSubControllers();
 		addEventHandlers();
 		addEventListeners();
+		
 	}
 	
 	public void stop() {
@@ -73,11 +75,11 @@ public class CApplicationController extends Controller {
 	}
 	
 	protected void handleQuitAppMenuItemAction(Event event) {
-		
+		// TODO
 	}
 	
 	protected void handleAboutMenuItemAction(Event event) {
-		
+		// TODO
 	}
 		
 	private void addEventHandlers() {

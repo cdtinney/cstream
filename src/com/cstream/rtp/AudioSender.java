@@ -27,63 +27,71 @@ import jlibrtp.*;
  */
 public class AudioSender implements RTPAppIntf {
 	
+	@SuppressWarnings("unused")
 	private static Logger LOGGER = Logger.getLogger(AudioSender.class.getName());
 	
 	public RTPSession rtpSession = null;
-	static int pktCount = 0;
-	static int dataCount = 0;
+	private static int pktCount = 0;
+	private static int dataCount = 0;
 
 	private final int EXTERNAL_BUFFER_SIZE = 1024;
 	
 	// Handles audio sending/receiving and mixing (the lib writes to and from it)
 	private SourceDataLine auline;
 	private AudioPanPosition curPosition;
-	boolean local;
-
+	private boolean local;
 
 	private File soundFile;
 	private AudioInputStream audioInputStream;
 
-
 	public AudioSender(boolean isLocal, int rtpPort, int rtcpPort)  {
+		
 		DatagramSocket rtpSocket = null;
 		DatagramSocket rtcpSocket = null;
 
 		try {
 			rtpSocket = new DatagramSocket(rtpPort);
 			rtcpSocket = new DatagramSocket(rtcpPort);
+			
 		} catch (Exception e) {
 			System.out.println("RTPSession failed to obtain port");
+			
 		}
 
 		// How should we handle the session? This class builds one each time its called 
 		rtpSession = new RTPSession(rtpSocket, rtcpSocket);
 		rtpSession.RTPSessionRegister(this, null, null);
+		
 		//System.out.println("CNAME: " + rtpSession.CNAME());
 		this.local = isLocal;
+		
 	}
 
-
 	private boolean setFile(String filename) {
-		this.soundFile = new File(filename);
+		
+		soundFile = new File(filename);
 		if (!soundFile.exists()) {
 			System.err.println("Wave file not found: " + filename);
 			return false;
 		}
 
 		return true;
+		
 	}
 
 	private AudioFormat encodeAudioFromFile() {
 
 		try {
-			this.audioInputStream = AudioSystem.getAudioInputStream(soundFile);
-		} catch (UnsupportedAudioFileException e1) {
-			e1.printStackTrace();
+			audioInputStream = AudioSystem.getAudioInputStream(soundFile);
+			
+		} catch (UnsupportedAudioFileException e) {
+			e.printStackTrace();
 			return null;
-		} catch (IOException e1) {
-			e1.printStackTrace();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
 			return null;
+			
 		}
 
 		//AudioFormat format = audioInputStream.getFormat();
@@ -92,24 +100,26 @@ public class AudioSender implements RTPAppIntf {
 		//System.out.println(format.toString());
 
 		return format;
+		
 	}
 
 
 	public void run(String filename) {
+		
 		/*if(RTPSession.rtpDebugLevel > 1) {
 			System.out.println("-> Run()");
 		} */
 
-		if(!setFile(filename)) {
+		if (!setFile(filename)) {
 			return;
 		}
 
 		AudioFormat format = encodeAudioFromFile();
-		if(format == null) {
+		if (format == null) {
 			return;
 		}
 
-		if(!this.local) {
+		if (!this.local) {
 			// To time the output correctly, we also play at the input:
 			auline = null;
 			DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
@@ -151,7 +161,7 @@ public class AudioSender implements RTPAppIntf {
 					pktCount++;
 				}
 
-				if(pktCount == 100) {
+				if (pktCount == 100) {
 					Enumeration<Participant> iter = this.rtpSession.getParticipants();
 					Participant p = null;
 
@@ -180,11 +190,11 @@ public class AudioSender implements RTPAppIntf {
 		
 		System.out.println("Time: " + (System.currentTimeMillis() - start)/1000 + " s");
 
-		try { Thread.sleep(200);} catch(Exception e) {}
+		sleep(200);
 
 		this.rtpSession.endSession();
-
-		try { Thread.sleep(2000);} catch(Exception e) {}
+		
+		sleep(2000);
 	}
 
 	@Override
@@ -203,6 +213,17 @@ public class AudioSender implements RTPAppIntf {
 	public void userEvent(int arg0, Participant[] arg1) {
 		// TODO Auto-generated method stub
 
+	}
+	
+	private void sleep(int ms) {
+
+		try { 
+			Thread.sleep(ms);
+			
+		} catch(Exception e) {
+			// Do nothing (?)
+		}
+		
 	}
 
 }

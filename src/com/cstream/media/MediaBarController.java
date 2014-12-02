@@ -11,14 +11,13 @@ import javafx.scene.media.MediaPlayer;
 
 public class MediaBarController extends Controller{
 
+	@SuppressWarnings("unused")
 	private static Logger LOGGER = Logger.getLogger(MediaBarController.class.getName());
 	
 	private MediaBarView view; 
 	
 	private MediaPlayer mp;
 	
-	//Networking Object
-		
 	public void initialize(MediaPlayer mp) {
 		this.mp = mp;
 		
@@ -33,9 +32,8 @@ public class MediaBarController extends Controller{
 	}
 	
 	protected void handlePlayButton(Event event) {
-		
+		// TODO
 	}
-	
 
     private void addListeners() {
     	

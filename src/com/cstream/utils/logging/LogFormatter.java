@@ -1,4 +1,4 @@
-package com.cstream.logging;
+package com.cstream.utils.logging;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

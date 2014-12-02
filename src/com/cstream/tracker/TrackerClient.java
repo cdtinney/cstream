@@ -13,9 +13,9 @@ import org.apache.http.util.EntityUtils;
 
 import com.cstream.utils.UrlBank;
 
-
 public class TrackerClient {
 
+	@SuppressWarnings("unused")
 	private static Logger LOGGER = Logger.getLogger(TrackerClient.class.getName());
 	private HttpClient client;
 	
@@ -73,6 +73,7 @@ public class TrackerClient {
 		} catch (IOException e) {
 			//TODO: Exception handling
 			e.printStackTrace();
+			
 		}
 		
 		return responseJson;
@@ -98,6 +99,7 @@ public class TrackerClient {
 		} catch (IOException e) {
 			//TODO: Exception handling
 			e.printStackTrace();
+			
 		}
 		
 		return responseJson;

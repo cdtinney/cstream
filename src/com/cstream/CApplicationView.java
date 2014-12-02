@@ -2,7 +2,6 @@ package com.cstream;
 
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -11,8 +10,6 @@ import javafx.scene.layout.BorderPane;
 import com.cstream.utils.FxUtils;
 
 public class CApplicationView extends Scene {
-	
-	private static Label status;
 	
 	private BorderPane root;
 	

@@ -20,7 +20,7 @@ public class MediaInfoView extends VBox {
 	}
 	
 	private void addFileThumbNail() {
-		
+		// TODO
 	}
 	
 	private void addDetailLabels() {

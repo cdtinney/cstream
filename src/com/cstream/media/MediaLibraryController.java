@@ -28,6 +28,7 @@ public class MediaLibraryController extends Controller {
 	
 	private void addHandlers() {
 		
+		// TODO
 		//addEventHandler(root, "quitAppMenuItem", "setOnAction", "handleQuitAppMenuItemAction");
 		//addEventHandler(root, "aboutMenuItem", "setOnAction", "handleAboutMenuItemAction");
 
@@ -38,9 +39,7 @@ public class MediaLibraryController extends Controller {
 	}
 	
 	public Node getView() {
-		
 		return view;
-		
 	}
 	
 }
