@@ -11,17 +11,25 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 
-import com.cstream.utils.URLConstants;
+import com.google.gson.Gson;
 
 public final class TrackerClient {
 
 	@SuppressWarnings("unused")
 	private static Logger LOGGER = Logger.getLogger(TrackerClient.class.getName());
 	
+	private final static String SERVER = "https://cstream-tracker-venom889.c9.io";
+	
+	private static final String LIB = SERVER;
+	private static final String JOIN = SERVER + "/join";
+	private static final String REMOVE = SERVER + "/remove";
+	
 	private static HttpClient client;
+	private static Gson json;
 	
 	private TrackerClient() {
-		client = HttpClientBuilder.create().build();		
+		client = HttpClientBuilder.create().build();	
+		json = new Gson();
 	}
 	
 	public static String getLibrary() {
@@ -29,7 +37,7 @@ public final class TrackerClient {
 		String responseJson = "";
 		
 		try {
-			HttpResponse response = getRequest(URLConstants.LIB);
+			HttpResponse response = getRequest(LIB);
 			responseJson = EntityUtils.toString(response.getEntity(), "UTF-8");
 			
 		} catch (IOException e) {
@@ -46,7 +54,7 @@ public final class TrackerClient {
 		String responseJson = "";
 		
 		try {
-			HttpResponse response = postRequest(URLConstants.JOIN, new StringEntity(peer.toJson()));
+			HttpResponse response = postRequest(JOIN, new StringEntity(getJson(peer)));
 			responseJson = EntityUtils.toString(response.getEntity(), "UTF-8");
 			
 		} catch (IOException e) {
@@ -63,7 +71,7 @@ public final class TrackerClient {
 		String responseJson = "";
 
 		try {
-			HttpResponse response = postRequest(URLConstants.JOIN, new StringEntity(peer.idToJson()));
+			HttpResponse response = postRequest(REMOVE, new StringEntity(getJson(peer.getId())));
 			responseJson = EntityUtils.toString(response.getEntity(), "UTF-8");
 			
 		} catch (IOException e) {
@@ -91,6 +99,10 @@ public final class TrackerClient {
 		HttpResponse response = client.execute(post);
 		return response;
 		
+	}
+	
+	private static String getJson(Object obj) {
+		return json.toJson(obj);
 	}
 	
 }

@@ -5,7 +5,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import com.cstream.model.Song;
-import com.google.gson.Gson;
 
 public class TrackerPeer {
 
@@ -41,22 +40,6 @@ public class TrackerPeer {
 
 	public ArrayList<Song> getFiles() {
 		return files;
-	}
-	
-	public String toJson() {
-		
-		Gson json = new Gson();
-		json.toJson(this);
-		return json.toString();
-		
-	}
-	
-	public String idToJson() {
-		
-		Gson json = new Gson();
-		json.toJson(getId());
-		return json.toString();
-		
 	}
 	
 	private String getLocalIp() {
