@@ -11,6 +11,7 @@ import com.cstream.controller.Controller;
 import com.cstream.media.MediaBarController;
 import com.cstream.media.MediaInfoController;
 import com.cstream.media.MediaLibraryController;
+import com.cstream.tracker.TrackerClient;
 
 public class CApplicationController extends Controller {
 
@@ -33,6 +34,7 @@ public class CApplicationController extends Controller {
 	private MediaPlayer mp;
 	
 	// TODO: Networking Instance
+	private TrackerClient tracker;
 	
 	public void initialize(Stage stage) {
 		this.stage = stage;
@@ -51,6 +53,8 @@ public class CApplicationController extends Controller {
 		initializeSubControllers();
 		addEventHandlers();
 		addEventListeners();
+		
+		
 		
 	}
 	
