@@ -13,20 +13,24 @@ public class FileUtils {
     	
     	List<File> results = new ArrayList<File>();    	
     	
+    	if (directoryName == null) {
+        	LOGGER.warning("No directory name provided");
+        	return results;    		
+    	}
+    	
         File directory = new File(directoryName);
         
-        File[] fList = directory.listFiles();
-        
-        if (fList == null) {
+        File[] fileList = directory.listFiles();
+        if (fileList == null) {
         	LOGGER.warning("Cannot list files of a directory which does not exit - " + directoryName);
         	return results;
         }
         
-        for (File file : fList) {
+        for (File file : fileList) {
         	
         	if (file.isDirectory()) {
         		
-        		// Resursively add files within sub-directories
+        		// Recursively add files within sub-directories
         		results.addAll(listFiles(file.getAbsolutePath(), extensions));
         		
         	} else {
