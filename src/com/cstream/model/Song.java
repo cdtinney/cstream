@@ -18,7 +18,6 @@ import com.mpatric.mp3agic.UnsupportedTagException;
 
 public class Song {
 	
-	@SuppressWarnings("unused")
 	private static Logger LOGGER = Logger.getLogger(MediaBarController.class.getName());
 	
 	// Unique identifier for the song (MD5 hash)
@@ -160,7 +159,7 @@ public class Song {
 		
 		try {
 
-			if (mp3 != null && getPath() != null) {
+			if (mp3 != null && path != null) {
 				mp3.save(path);
 			}
 			
@@ -172,6 +171,10 @@ public class Song {
 	}
 	
 	private void generateId(String path) {
+		
+		if (id != null) {
+			LOGGER.warning("Re-generating ID for file: " + id);			
+		}
 
 		try (FileInputStream fis = new FileInputStream(new File(path)) ){
 			id = DigestUtils.md5Hex(fis);

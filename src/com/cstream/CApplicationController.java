@@ -45,10 +45,8 @@ public class CApplicationController extends Controller {
 		initializeSubControllers();
 		addSubViews();
 		
-		stage.setScene(view);
-		stage.setWidth(WIDTH);
-		stage.setHeight(HEIGHT);
-		stage.centerOnScreen();
+		initializeStage();
+
 		
 		initializeSubControllers();
 		addEventHandlers();
@@ -60,6 +58,15 @@ public class CApplicationController extends Controller {
 	
 	public void stop() {
 		//TODO: Stop networking
+	}
+	
+	private void initializeStage() {
+		
+		stage.setScene(view);
+		stage.setWidth(WIDTH);
+		stage.setHeight(HEIGHT);
+		stage.centerOnScreen();
+		
 	}
 	
 	private void initializeSubControllers() {
