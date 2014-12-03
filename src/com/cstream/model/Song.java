@@ -130,6 +130,10 @@ public class Song {
 		return mp3.hasId3v2Tag() ? v2tag.getEncoder() : "";		
 	}
 	
+	public Mp3File getMp3() {
+		return this.mp3;
+	}
+	
 	private void setupTagVersion() {
 		
 		if (mp3.hasId3v1Tag()) {
