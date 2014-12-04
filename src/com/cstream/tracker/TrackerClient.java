@@ -1,9 +1,7 @@
 package com.cstream.tracker;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -44,25 +42,24 @@ public final class TrackerClient {
 	 * JSON returned.
 	 */
 	public static Map<String, Song> getLibrary() {
-		
-		Map<String, Song> library = new HashMap<String, Song>();
 
 		String response = getRequest(LIB_URL);
 		if (response == null || response.isEmpty()) {
 			LOGGER.warning("A GET library request returned a null or empty response");
-			return library;
+			return null;
 		}
 		
 		Map<String, String> jsonMap = parseJsonMap(response);
 		if (jsonMap != null && isResponseOk(jsonMap.get("status"))) {
-			library = parseJsonSongLibrary(jsonMap.get("library"));
+			return parseJsonSongLibrary(jsonMap.get("library"));
 			
 		} else {
 			LOGGER.warning("A GET library request returned a response that is not a valid JSON library");
 			
 		}
 
-		return library;
+		return null;
+		
 	}
 
 	/**
@@ -72,6 +69,8 @@ public final class TrackerClient {
 
 		try {
 			
+			// TODO - I don't think we should be JSON-ifying the entire peer object. 
+			// Use an @Expose annotation or create our own exclusion/inclusion strategy.
 			String response  = postRequest(JOIN_URL, new StringEntity(getJson(peer)));
 			if (response == null || response.isEmpty()) {
 				LOGGER.warning("Join POST request returned null or empty response");
@@ -169,13 +168,14 @@ public final class TrackerClient {
 	 */
 	private static Map<String, Song> parseJsonSongLibrary(String jString) {
 		
-		try {
+		try {			
 			Type type = new TypeToken<Map<String, Song>>(){}.getType();
 			return json.fromJson(jString, type);
 
 		} catch (JsonParseException e) {
 			LOGGER.warning("JSON parse error");
 			LOGGER.log(LogLevel.DEBUG, "Could not parse: " + jString);
+			LOGGER.log(LogLevel.DEBUG, e.getMessage());
 			
 		}
 		

@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.cstream.model.Song;
+import com.mpatric.mp3agic.ID3v1;
+import com.mpatric.mp3agic.ID3v1Tag;
+import com.mpatric.mp3agic.Mp3File;
 
 public class LibraryUtils {
 	
@@ -44,6 +47,33 @@ public class LibraryUtils {
 		}
 		
 		return results;
+		
+	}
+	
+	public static ID3v1 getTagFromMp3(Mp3File mp3) {
+		
+		if (mp3 == null) {
+			return null;
+		}
+		
+		ID3v1 tag = null;
+		if (mp3.hasId3v1Tag()) {
+			tag = mp3.getId3v1Tag();
+			 
+		} else if (mp3.hasId3v2Tag()) {
+			tag = new ID3v1Tag();
+			tag.setTrack(mp3.getId3v2Tag().getTrack());
+			tag.setTitle(mp3.getId3v2Tag().getTitle());
+			tag.setArtist(mp3.getId3v2Tag().getArtist());
+			tag.setYear(mp3.getId3v2Tag().getYear());
+			tag.setTrack(mp3.getId3v2Tag().getTrack());
+			 
+		} else if (mp3.hasCustomTag()) {
+			// TODO - Probably just ignore
+			
+		}
+		
+		return tag;
 		
 	}
 	

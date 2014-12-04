@@ -6,12 +6,11 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
+import com.cstream.utils.LibraryUtils;
 import com.mpatric.mp3agic.ID3v1;
-import com.mpatric.mp3agic.ID3v1Tag;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
@@ -23,22 +22,28 @@ public class Song {
 	// Unique identifier for the song (MD5 hash)
 	private String id;
 	
-	private SimpleStringProperty artist = new SimpleStringProperty("test");
-	private SimpleStringProperty title = new SimpleStringProperty("test");
-	private SimpleStringProperty album = new SimpleStringProperty("test");
-	private StringProperty track;
-	
-	private Mp3File mp3;
-	private ID3v1 tag;
-	
+	// The file itself, and an absolute path to the file
+	private Mp3File mp3;	
 	private String path;
 	
-	public Song(String filepath) {
-		
-		generateId(filepath);
+	// Observable properties to bind to library view
+	// TODO - setter/getter
+	private SimpleStringProperty artistProperty = new SimpleStringProperty("none");
+	private SimpleStringProperty titleProperty = new SimpleStringProperty("none");
+	private SimpleStringProperty albumProperty = new SimpleStringProperty("none");
+	private SimpleStringProperty trackProperty = new SimpleStringProperty("none");
+	
+	// Primitive string properties required for JSON parsing
+	private String artist;
+	private String album;
+	private String title;
+	private String track;
+	
+	// Default constructor
+	public Song(String path) {
 		
 		try {
-			mp3 = new Mp3File(filepath);
+			mp3 = new Mp3File(path);
 			
 		} catch (UnsupportedTagException | InvalidDataException | IOException e) {
 			e.printStackTrace();
@@ -46,54 +51,16 @@ public class Song {
 			
 		}
 		
-		setPath(filepath);
+		generateId(path);
+		
+		this.path = path;
 		
 		initializeProperties();
 		
 	}
-	
-	private void initializeProperties() {
-		
-		if (mp3 == null) {
-			return;
-		}
-		
-		initializeTag();
-		
-		this.artist = new SimpleStringProperty(tag.getArtist());
-		this.title = new SimpleStringProperty(tag.getTitle());
-		this.album = new SimpleStringProperty(tag.getAlbum());
-		
-		this.track = new SimpleStringProperty(tag.getTrack());
-		
-	}
-	
-	public SimpleStringProperty artistProperty() {
-		return artist;
-	}
-	
-	public StringProperty titleProperty() {
-		return title;
-	}
-	
-	public StringProperty albumProperty() {
-		return album;
-	}
-	
-	public String getArtist() {
-		return artist.get();
-	}
-	
-	public void setArtist(String artist) {
-		this.artist.set(artist);
-	}
 
 	public String getPath() {		
 		return path;		
-	}
-
-	public void setPath(String path) {		
-		this.path = path;		
 	}
 	
 	public String getId() {		
@@ -112,23 +79,36 @@ public class Song {
 		return mp3.getSampleRate();		
 	}
 	
-	private void initializeTag() {
+	@Override
+	public String toString() {
 		
-		if (mp3.hasId3v1Tag()) {
-			tag = mp3.getId3v1Tag();
-			 
-		} else if (mp3.hasId3v2Tag()) {
-			tag = new ID3v1Tag();
-			tag.setTrack(mp3.getId3v2Tag().getTrack());
-			tag.setTitle(mp3.getId3v2Tag().getTitle());
-			tag.setArtist(mp3.getId3v2Tag().getArtist());
-			tag.setYear(mp3.getId3v2Tag().getYear());
-			tag.setTrack(mp3.getId3v2Tag().getTrack());
-			 
-		} else if (mp3.hasCustomTag()) {
-			// TODO - Probably just ignore
-			
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append("Song[" + id + "] : ");
+		sb.append("Artist/" + (artist == null ? "?" : artist) + " - ");
+		sb.append("Title/" + (title == null ? "?" : title) + " - ");
+		sb.append("Album/" + (album == null ? "?" : album) + " - ");
+		sb.append("Track/" + (track == null ? "?" : track) + " - ");
+		sb.append("Path=" + (path == null ? "?" : path));
+		
+		return sb.toString();
+		
+	}
+	
+	private void initializeProperties() {
+		
+		if (mp3 == null) {
+			return;
 		}
+		
+		ID3v1 tag = LibraryUtils.getTagFromMp3(mp3);
+		
+		// TODO
+		
+//		this.artist = new SimpleStringProperty(tag.getArtist());
+//		this.title = new SimpleStringProperty(tag.getTitle());
+//		this.album = new SimpleStringProperty(tag.getAlbum());
+//		this.track = new SimpleStringProperty(tag.getTrack());
 		
 	}
 	

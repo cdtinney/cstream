@@ -30,12 +30,26 @@ public class CApplication extends Application {
 		
 		// TODO: Remove. Testing only.
 		Map<String, Song> lib = TrackerClient.getLibrary();
-		Song song = lib.get("1234");
+		if (lib == null) {
+			LOGGER.warning("getLibrary returned null");
+			return;
+		}
+		
+		Song song = lib.get("1");
 		if (song != null) {
-			LOGGER.info("Song path is: " + song.getPath());		
+			LOGGER.info("Retrieved: " + song);	
 			
 		} else {
-			LOGGER.warning("Song path not found for songId: 1234");
+			LOGGER.info("Did not retrieve song: 1");
+			
+		}
+		
+		Song song2 = lib.get("2");
+		if (song2 != null) {
+			LOGGER.info("Retrieved: " + song2);			
+			
+		} else {
+			LOGGER.info("Did not retrieve song: 2");
 			
 		}
 		

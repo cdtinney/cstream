@@ -23,7 +23,7 @@ public class CLogHandler extends Handler {
 		customHandler.setLevel(LogLevel.INFO);	
 		
 		// Change to DEBUG if you want to see more detailed error messages
-		parent.setLevel(LogLevel.INFO);
+		parent.setLevel(LogLevel.DEBUG);
 		parent.addHandler(customHandler);
 		
 	}
