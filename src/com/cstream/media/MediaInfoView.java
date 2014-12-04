@@ -14,13 +14,8 @@ public class MediaInfoView extends VBox {
 		setAlignment(Pos.CENTER_LEFT);
 		setPadding(new Insets(10, 10, 10, 10));
 		
-		addFileThumbNail();
 		addDetailLabels();
 		
-	}
-	
-	private void addFileThumbNail() {
-		// TODO
 	}
 	
 	private void addDetailLabels() {

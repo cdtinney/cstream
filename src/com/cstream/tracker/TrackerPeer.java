@@ -3,12 +3,18 @@ package com.cstream.tracker;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
+import java.util.logging.Logger;
 
+import com.cstream.CApplicationController;
 import com.cstream.model.Song;
+import com.cstream.utils.LibraryUtils;
 import com.cstream.utils.OSUtils;
+import com.cstream.utils.logging.LogLevel;
 
 public class TrackerPeer {
 
+	private static Logger LOGGER = Logger.getLogger(TrackerPeer.class.getName());
+	
 	// TODO: Link Port and IP to the RTP Session
 	private String id;
 	private String ip;
@@ -16,14 +22,12 @@ public class TrackerPeer {
 	
 	private Map<String, Song> files;
 	
-	public TrackerPeer(String port, Map<String, Song> files) {
+	public TrackerPeer(String pathToLib) {
 		
 		this.id = generateId();
-		this.port = port;
-		
+		this.port = "23499";		//Standard client port
 		this.ip = getLocalIp();
-		
-		this.files = files;
+		this.files = buildSongMap(pathToLib);
 		
 	}
 
@@ -41,6 +45,14 @@ public class TrackerPeer {
 
 	public Map<String, Song> getFiles() {
 		return files;
+	}
+	
+	public boolean joinTracker() {
+		return TrackerClient.join(this);
+	}
+	
+	public boolean removeTracker() {
+		return TrackerClient.remove(this);
 	}
 	
 	private String getLocalIp() {
@@ -72,6 +84,19 @@ public class TrackerPeer {
 		}
 		
 		return name + "_" + os;
+	}
+	
+	private Map<String, Song> buildSongMap(String path) {
+		
+		Map<String, Song> library = null;
+		
+		if(!path.isEmpty()) {
+			library = LibraryUtils.buildLocalLibrary(path);
+		} else {
+			LOGGER.log(LogLevel.DEBUG, "Failed to build song map because users lib path is empty");
+		}
+		
+		return library;
 	}
 
 }

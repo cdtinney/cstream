@@ -4,6 +4,7 @@ import java.util.logging.Logger;
 
 import com.cstream.controller.Controller;
 import com.cstream.utils.logging.CLogHandler;
+import com.cstream.utils.logging.LogLevel;
 
 import javafx.event.Event;
 import javafx.scene.Node;
@@ -11,7 +12,6 @@ import javafx.scene.media.MediaPlayer;
 
 public class MediaBarController extends Controller{
 
-	@SuppressWarnings("unused")
 	private static Logger LOGGER = Logger.getLogger(MediaBarController.class.getName());
 	
 	private MediaBarView view; 
@@ -33,6 +33,7 @@ public class MediaBarController extends Controller{
 	
 	protected void handlePlayButton(Event event) {
 		// TODO
+		LOGGER.log(LogLevel.DEBUG, "Play button handler invoked");
 	}
 
     private void addListeners() {
