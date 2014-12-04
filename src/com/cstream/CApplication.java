@@ -1,11 +1,13 @@
 package com.cstream;
 	
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javafx.application.Application;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+import com.cstream.model.Song;
 import com.cstream.tracker.TrackerClient;
 import com.cstream.utils.logging.CLogHandler;
 
@@ -27,8 +29,8 @@ public class CApplication extends Application {
 		primaryStage.show();
 		
 		// TODO: Remove. Testing only.
-		LOGGER.info(TrackerClient.getLibrary());
-		
+		Map<String, Song> lib = TrackerClient.getLibrary();
+		LOGGER.info("Song path is: " + lib.get("1234").getPath());		
 	}
 	
 	@Override
