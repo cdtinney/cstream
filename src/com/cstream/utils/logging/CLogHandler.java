@@ -20,9 +20,10 @@ public class CLogHandler extends Handler {
 		
 		CLogHandler customHandler = new CLogHandler();
 		customHandler.setFormatter(new LogFormatter());
-		customHandler.setLevel(LogLevel.TRACE);	
+		customHandler.setLevel(LogLevel.INFO);	
 		
-		parent.setLevel(LogLevel.DEBUG);
+		// Change to DEBUG if you want to see more detailed error messages
+		parent.setLevel(LogLevel.INFO);
 		parent.addHandler(customHandler);
 		
 	}

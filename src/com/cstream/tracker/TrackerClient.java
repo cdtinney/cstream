@@ -3,6 +3,7 @@ package com.cstream.tracker;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -15,6 +16,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 
 import com.cstream.model.Song;
+import com.cstream.utils.logging.LogLevel;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
@@ -23,41 +25,40 @@ public final class TrackerClient {
 
 	private static Logger LOGGER = Logger.getLogger(TrackerClient.class.getName());
 
-	private final static String SERVER = "https://cstream-tracker-venom889.c9.io";
+	private final static String SERVER_URL = "https://cstream-tracker-venom889.c9.io";
 
-	private static final String LIB = SERVER;
-	private static final String JOIN = SERVER + "/join";
-	private static final String REMOVE = SERVER + "/remove";
+	private static final String LIB_URL = SERVER_URL;
+	private static final String JOIN_URL = SERVER_URL + "/join";
+	private static final String REMOVE_URL = SERVER_URL + "/remove";
 
 	private static HttpClient client = HttpClientBuilder.create().build();	
+	
+	// Only one instance of a JSON parser is necessary since no state is preserved
 	private static Gson json = new Gson();
 
-	private TrackerClient() {
-		// Empty
-	}
+	// Empty private constructor so no extra instances can be created
+	private TrackerClient() { }
 
 	/**
-	 * Gets the json string from a get request for the library and checks the status before
-	 * trying to parse the song library
-	 * 
-	 * @return Map<String, Song> song library from tracker
+	 * Do a GET request for the library from the tracker. If the request returns OK, attempt to parse the
+	 * JSON returned.
 	 */
 	public static Map<String, Song> getLibrary() {
+		
+		Map<String, Song> library = new HashMap<String, Song>();
 
-		Map<String, String> jsonMap = null;
-		Map<String, Song> library = null;
-		String response = getRequest(LIB);
-
-		if(!response.isEmpty()) {
-			jsonMap = getValidJsonMap(response);
-			
+		String response = getRequest(LIB_URL);
+		if (response == null || response.isEmpty()) {
+			LOGGER.warning("A GET library request returned a null or empty response");
+			return library;
 		}
 		
-		if(jsonMap != null && isResponseOk(jsonMap.get("status"))) {
-			library = getValidJsonSongLibrary(jsonMap.get("library"));
+		Map<String, String> jsonMap = parseJsonMap(response);
+		if (jsonMap != null && isResponseOk(jsonMap.get("status"))) {
+			library = parseJsonSongLibrary(jsonMap.get("library"));
 			
 		} else {
-			LOGGER.warning("Response from Tracker was invalid");
+			LOGGER.warning("A GET library request returned a response that is not a valid JSON library");
 			
 		}
 
@@ -65,47 +66,35 @@ public final class TrackerClient {
 	}
 
 	/**
-	 * Gets the response from a join post to the tracker and checks the status
-	 * returns true if server accepted join and false if something went wrong
-	 * 
-	 * @param peer
-	 * @return
+	 * Do a POST join request to the tracker. Returns true if the request returned OK, false otherwise.
 	 */
 	public static boolean join(TrackerPeer peer) {
 
-		Map<String, String> jsonMap = null;
-		String response = "";
-
 		try {
-			response  = postRequest(JOIN, new StringEntity(getJson(peer)));
+			
+			String response  = postRequest(JOIN_URL, new StringEntity(getJson(peer)));
+			if (response == null || response.isEmpty()) {
+				LOGGER.warning("Join POST request returned null or empty response");
+				return false;
+			}
+			
+			Map<String, String> jsonMap = parseJsonMap(response);
+			if (jsonMap != null  && isResponseOk(jsonMap.get("status"))) {
+				return true;
+			}
 			
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			
 		}
-		
-		if(!response.isEmpty()) {
-			jsonMap = getValidJsonMap(response);
-			
-		}
-		
-		if(jsonMap != null && isResponseOk(jsonMap.get("status"))) {
-			return true;
-			
-		} else {
-			LOGGER.warning("Tracker didnt confirm peer join");
-			return false;
-			
-		}
 
+		LOGGER.warning("The join POST request was not successful");
+		return false;
+		
 	}
 
 	/**
-	 * Gets the response from a remove post to the tracker and checks the status
-	 * returns true if server processed the removal and false if something went wrong
-	 * 
-	 * @param peer
-	 * @return
+	 * Do a POST remove request to the tracker. Returns true if the request returned OK, false otherwise.
 	 */
 	public static boolean remove(TrackerPeer peer) {
 
@@ -113,159 +102,113 @@ public final class TrackerClient {
 		String response = "";
 
 		try {
-			response = postRequest(REMOVE, new StringEntity(getJson(peer.getId())));	
+			response = postRequest(REMOVE_URL, new StringEntity(getJson(peer.getId())));	
 			
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			
 		}
 
-		if(!response.isEmpty()) {
-			jsonMap = getValidJsonMap(response);
+		if (!response.isEmpty()) {
+			jsonMap = parseJsonMap(response);
 			
 		}
 		
-		if(jsonMap != null && isResponseOk(jsonMap.get("status"))) {
-			return true;
-			
-		} else {
-			LOGGER.warning("Tracker didnt confirm peer removal");
+		if (jsonMap == null || !isResponseOk(jsonMap.get("status"))) {
+			LOGGER.warning("The remove POST request was not successful");
 			return false;
-			
 		}
-
+		
+		return true;
+		
 	}
 
 	/**
-	 * Performs a get request to the given URL and returns the response as a string
-	 * 
-	 * @param url
-	 * @return
+	 * Performs a GET request to the given URL and returns the response as an (ideally) JSON string.
 	 */
 	private static String getRequest(String url) {
-
-		String responseJson = "";
 
 		try {
 			HttpGet get = new HttpGet(url);
 			HttpResponse response = client.execute(get);
-			responseJson = EntityUtils.toString(response.getEntity(), "UTF-8");
+			return EntityUtils.toString(response.getEntity(), "UTF-8");
 
-		} catch (IOException e) {
-			LOGGER.warning("Exception in processing get request: " + e.getLocalizedMessage());	
+		} catch (Exception e) {
 			e.printStackTrace();
 			
 		}
 
-		return responseJson;
+		return null;
 
 	}
 
 	/**
-	 * Performs a post to the tracker with the URL and params given as json in the 
-	 * body. Returns the response from the tracker as a string
-	 * 
-	 * @param url
-	 * @param params
-	 * @return
+	 * Performs a POST to the tracker with the URL and parameters given as JSON in the 
+	 * body. Returns the response from the tracker as an (ideally) JSON string.
 	 */
 	private static String postRequest(String url, StringEntity params) {
-
-		String responseJson = "";
 
 		try {
 			HttpPost post = new HttpPost(url);
 			post.setEntity(params);
 			post.setHeader("Content-Type", "application/json");
 			HttpResponse response = client.execute(post);
-			responseJson = EntityUtils.toString(response.getEntity(), "UTF-8");
+			return EntityUtils.toString(response.getEntity(), "UTF-8");
 
-		} catch (IOException e) {
-			LOGGER.warning("Exception in processing post request: " + e.getLocalizedMessage());	
+		} catch (Exception e) {
 			e.printStackTrace();
 			
 		}
 
-		return responseJson;
+		return "";
 
 	}
-	
 	/**
-	 * Checks if a given string code is an OK status from tarcker
-	 * 
-	 * @param code
-	 * @return
+	 * Tries to parse a JSON string to a map of type <SongID, Song>. Returns null if the parse
+	 * fails (i.e. if the input string is not valid JSON).
 	 */
-	private static boolean isResponseOk(String code) {
-		
-		if(code.equals("OK")) {
-			return true;
-			
-		} else {
-			return false;
-			
-		}
-		
-	}
-
-	/**
-	 * Takes the given object and returns it as a JSON string
-	 * 
-	 * @param obj
-	 * @return
-	 */
-	private static String getJson(Object obj) {
-		
-		return json.toJson(obj);
-		
-	}
-	
-	/**
-	 * Tries to parse a json string to a Song Library Map. Returns null if the parse
-	 * fails
-	 * 
-	 * @param jString
-	 * @return
-	 */
-	private static Map<String, Song> getValidJsonSongLibrary(String jString) {
-		
-		Map<String, Song> map = null;
+	private static Map<String, Song> parseJsonSongLibrary(String jString) {
 		
 		try {
 			Type type = new TypeToken<Map<String, Song>>(){}.getType();
-			map = json.fromJson(jString, type);
+			return json.fromJson(jString, type);
 
 		} catch (JsonParseException e) {
-			LOGGER.warning("Error parsing json song library: " + jString);	
-			return null;
+			LOGGER.warning("JSON parse error");
+			LOGGER.log(LogLevel.DEBUG, "Could not parse: " + jString);
 			
 		}
 		
-		return map;
+		return null;
+		
 	}
 
 	/**
-	 * Tries to parse a json string to a Map of properties. Returns null if the parse
-	 * fails
-	 * 
-	 * @param jString
-	 * @return
+	 * Tries to parse a JSON string to a map of properties. Returns null if the parse
+	 * fails (i.e. if the input string is not valid JSON).
 	 */
-	private static Map<String, String> getValidJsonMap(String jString) {
-
-		Map<String, String> map = null;
+	private static Map<String, String> parseJsonMap(String jString) {
 		
 		try {
 			Type type = new TypeToken<Map<String, String>>(){}.getType();
-			map = json.fromJson(jString, type);
+			return json.fromJson(jString, type);
 
 		} catch (JsonParseException e) {
-			LOGGER.warning("Error parsing json string: " + jString);	
-			return null;
+			LOGGER.warning("JSON parse error");
+			LOGGER.log(LogLevel.DEBUG, "Could not parse: " + jString);
 			
 		}
 
-		return map;
+		return null;
+		
+	}
+	
+	private static String getJson(Object obj) {
+		return json.toJson(obj);
+	}
+	
+	private static boolean isResponseOk(String code) {
+		return code.equals("OK");
 	}
 
 }

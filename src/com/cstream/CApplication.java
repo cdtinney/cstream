@@ -30,7 +30,15 @@ public class CApplication extends Application {
 		
 		// TODO: Remove. Testing only.
 		Map<String, Song> lib = TrackerClient.getLibrary();
-		LOGGER.info("Song path is: " + lib.get("1234").getPath());		
+		Song song = lib.get("1234");
+		if (song != null) {
+			LOGGER.info("Song path is: " + song.getPath());		
+			
+		} else {
+			LOGGER.warning("Song path not found for songId: 1234");
+			
+		}
+		
 	}
 	
 	@Override
