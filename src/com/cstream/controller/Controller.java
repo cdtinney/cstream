@@ -17,6 +17,11 @@ public abstract class Controller {
 	
 	protected void addEventHandler(Parent parent, String childId, String eventProperty, String handlerMethodName) {
 		
+		if (parent == null) {
+			LOGGER.warning("Cannot add event handler to null parent for '#" + childId + "'");
+			return;
+		}
+		
 		Object target = FxUtils.lookup(parent, childId);
 		
 		if (target == null) {

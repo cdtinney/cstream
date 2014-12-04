@@ -1,7 +1,6 @@
 package com.cstream.media;
 
 import java.util.Collection;
-import java.util.List;
 
 import javafx.event.Event;
 import javafx.scene.Node;

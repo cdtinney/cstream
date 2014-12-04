@@ -1,58 +1,55 @@
 package com.cstream.media;
 
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
-import javafx.scene.text.Font;
+import javafx.scene.layout.VBox;
+
+import com.cstream.utils.FxUtils;
 
 public class MediaBarView extends HBox {
-
-	private Label status;
 	
     public void initialize() {    	
+    	
+    	// Configure the parent HBox
     	setSpacing(5);
-    	setPrefHeight(150);
+    	setPrefHeight(125);
     	setAlignment(Pos.CENTER);
+    	setPadding(new Insets(5, 5, 5, 5));
     	getStyleClass().add("mediabar");
     	
-    	// TODO: Find icon pack for controls
-    	addPlayButton();
-    	addTimeSlider();
+    	// Add the UI elements
+    	addControlButtons();
+    	addSeekBar();
     	addVolumeSlider();
-    	addStatusText();
+    	addNowPlayingInfo();
     	
     }
     
-    public void setStatusText(String message) {
-
-		if (status == null) {
-			return;
-		}
-		
-		status.setText("STATUS - " + (message == null? "" : message));	
-		
-	}
-
-    private void addPlayButton() {
+    private void addControlButtons() {
     	
-    	Button playButton = new Button("Play"); 	
-    	playButton.setId("playButton");
-    	getStyleClass().add("playbutton");
-    	playButton.getStyleClass().addAll("nofocus");
-    	playButton.setPrefWidth(100);
-    	playButton.setPrefHeight(100);
-    	playButton.setDisable(true);
-		getChildren().add(playButton);
-		
+    	Button playButton = FxUtils.buildButton("Play", "playButton", 60, 35, false);
+    	Button pauseButton = FxUtils.buildButton("Pause", "pauseButton", 60, 35, false);
+    	Button stopButton = FxUtils.buildButton("Stop", "stopButton", 60, 35, false);
+    	
+    	getChildren().addAll(playButton, pauseButton, stopButton);
+    	
     }
     
-    private void addTimeSlider() {
+    private void addSeekBar() {
     	
-    	Label timeLabel = new Label("Time: ");
-    	getChildren().add(timeLabel);
+    	HBox seekBox = new HBox();
+    	seekBox.setSpacing(10);
+    	seekBox.setAlignment(Pos.CENTER);
+    	
+    	// Insets: top, right, bottom, left
+    	seekBox.setPadding(new Insets(15, 25, 15, 25));
+    	
+    	Label currentTimeLabel = new Label("0:00");
     	
     	Slider timeSlider = new Slider();
     	timeSlider.setId("timeSlider");
@@ -60,35 +57,51 @@ public class MediaBarView extends HBox {
     	timeSlider.setPrefWidth(400);
     	timeSlider.setMaxWidth(Double.MAX_VALUE);
     	timeSlider.setDisable(true);
-    	getChildren().add(timeSlider);
     	
+    	Label remainingTimeLabel = new Label("5:00");
     	
-    	Label playTime = new Label();
-    	playTime.setPrefWidth(130);
-    	playTime.setMinWidth(50);
-    	getChildren().add(playTime);
+    	seekBox.getChildren().addAll(currentTimeLabel, timeSlider, remainingTimeLabel);
+    	getChildren().add(seekBox);
     	
     }
     
     private void addVolumeSlider() {
     	
+    	HBox volumeBox = new HBox();
+    	volumeBox.setSpacing(10);
+    	volumeBox.setAlignment(Pos.CENTER);
+    	
+    	// Insets: top, right, bottom, left
+    	volumeBox.setPadding(new Insets(15, 25, 15, 25));
+    	
     	Slider volumeSlider = new Slider();
     	volumeSlider.setPrefWidth(100);
         volumeSlider.setMaxWidth(Region.USE_PREF_SIZE);
         volumeSlider.setMinWidth(30);
-        getChildren().add(volumeSlider);
+        
+        volumeBox.getChildren().addAll(new Label("-"), volumeSlider, new Label("+"));
+        
+        getChildren().add(volumeBox);
         
     }	
-	
-	private void addStatusText() {
+    
+    private void addNowPlayingInfo() {
+
+    	VBox nowPlayingVBox = new VBox();
+    	nowPlayingVBox.getStyleClass().add("nowPlaying");
+    	nowPlayingVBox.setPrefWidth(350);
+    	nowPlayingVBox.setSpacing(5);
+    	nowPlayingVBox.setAlignment(Pos.CENTER);
+    	nowPlayingVBox.setPadding(new Insets(10, 0, 10, 10));
 		
-		status = new Label("STATUS - ");
-		status.setFont(new Font("Lucida Console", 12));
-		status.getStyleClass().add("statusText");
-		status.setPrefWidth(200);
+    	Label title = FxUtils.buildLabel("title", "titleLabel", 300, 50, 20, Pos.CENTER);
+    	Label artist = FxUtils.buildLabel("artistLabel", "artistLabel", 300, 50, 16, Pos.CENTER);
+    	Label album = FxUtils.buildLabel("albumLabel", "albumLabel", 300, 50, 16, Pos.CENTER);
 		
-		getChildren().add(status);
-		
+    	nowPlayingVBox.getChildren().addAll(title, artist, album);
+    	
+    	getChildren().add(nowPlayingVBox);
+    	
 	}
 	
 }

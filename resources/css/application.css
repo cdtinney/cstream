@@ -25,3 +25,9 @@
    	-fx-background-repeat: repeat;
 }
 
+.nowPlaying {
+	-fx-border-color: black;
+	-fx-border-width: 2px;
+	
+}
+

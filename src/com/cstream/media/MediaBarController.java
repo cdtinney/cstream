@@ -2,20 +2,20 @@ package com.cstream.media;
 
 import java.util.logging.Logger;
 
-import com.cstream.controller.Controller;
-import com.cstream.utils.logging.CLogHandler;
-
 import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.media.MediaPlayer;
 
+import com.cstream.controller.Controller;
+
 public class MediaBarController extends Controller{
 
-	@SuppressWarnings("unused")
 	private static Logger LOGGER = Logger.getLogger(MediaBarController.class.getName());
 	
+	// View
 	private MediaBarView view; 
 	
+	// Model
 	private MediaPlayer mp;
 	
 	public void initialize(MediaPlayer mp) {
@@ -24,36 +24,47 @@ public class MediaBarController extends Controller{
 		view = new MediaBarView();
 		view.initialize();
 		
-		CLogHandler.setView(view);
-		
 		addHandlers();
 		addListeners();
 		
 	}
 	
-	protected void handlePlayButton(Event event) {
+	public Node getView() {
+		return view;
+	}
+	
+	@SuppressWarnings("unused")
+	private void handlePlayButton(Event event) {
+		LOGGER.info("Play button pressed");
+		// TODO
+	}
+	
+	@SuppressWarnings("unused")
+	private void handlePauseButton(Event event) {
+		LOGGER.info("Pause button pressed");
+		// TODO
+	}
+	
+	@SuppressWarnings("unused")
+	private void handleStopbutton(Event event) {
+		LOGGER.info("Stop button pressed");
 		// TODO
 	}
 
     private void addListeners() {
     	
-    	// TODO: Volume listener, time listener
-    	
+    	// TODO - Listen to model changes
     	//PropertyChangeDispatcher.getInstance().addListener(PhaseManager.class, "currentPhase", this, "onPhaseChanged");
-    	
-    	// TODO: Add Media Control listeners
     	
     }
 	
 	private void addHandlers() {
 		
 		addEventHandler(view, "playButton", "setOnAction", "handlePlayButton");
-		//addEventHandler(view, "", "set")
+		addEventHandler(view, "pauseButton", "setOnAction", "handlePauseButton");
+		addEventHandler(view, "stopButton", "setOnAction", "handleStopbutton");
+		// Event handler arguments =  parentNode, childId, action, functionHandler
 		
-	}
-	
-	public Node getView() {
-		return view;
 	}
 	
 }

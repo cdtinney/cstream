@@ -1,13 +1,41 @@
 package com.cstream.utils;
 
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.text.Font;
 
 public class FxUtils {
+	
+	public static Label buildLabel(String text, String id, int prefWidth, int minWidth, int fontSize, Pos alignment) {
+	
+		Label label = new Label(text);
+		label.setId(id);
+		label.setAlignment(alignment);
+		label.setFont(new Font("Arial", fontSize));
+		label.setPrefWidth(prefWidth);
+		label.setMinWidth(minWidth);
+		return label;
+		
+	}
+    
+	public static Button buildButton(String text, String id, int width, int height, boolean disable) {
+    	
+    	Button button = new Button(text); 	
+    	button.setId(id);
+    	button.getStyleClass().addAll("nofocus");
+    	button.setPrefWidth(width);
+    	button.setPrefHeight(height);
+    	button.setDisable(disable);
+    	return button;
+    	
+    }
 	
 	public static void addStyleSheet(Class<?> clazz, Scene scene, String resourceName) {
 		
@@ -34,6 +62,10 @@ public class FxUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T lookup(Parent parent, String id) {
+		
+		if (parent == null) {
+			return null;
+		}
 		
 		String nodeId;
 		

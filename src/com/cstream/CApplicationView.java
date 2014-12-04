@@ -66,4 +66,5 @@ public class CApplicationView extends Scene {
 		root.setTop(menuBar);
 		
 	}
+	
 }

@@ -13,7 +13,6 @@ import javafx.stage.Stage;
 import com.cstream.controller.Controller;
 import com.cstream.media.LibraryController;
 import com.cstream.media.MediaBarController;
-import com.cstream.media.MediaInfoController;
 import com.cstream.model.Song;
 import com.cstream.tracker.TrackerPeer;
 import com.cstream.utils.LibraryUtils;
@@ -34,8 +33,6 @@ public class CApplicationController extends Controller {
 	
 	// Sub-Controllers
 	private MediaBarController mediaBarController = new MediaBarController();
-	private MediaInfoController mediaInfoController = new MediaInfoController();
-	
 	private LibraryController libraryController = new LibraryController();
 	
 	// TODO: MediaPlayer needs a source of Media to be initialized
@@ -57,7 +54,6 @@ public class CApplicationController extends Controller {
 		
 		initializeStage();
 
-		initializeSubControllers();
 		addEventHandlers();
 		addEventListeners();
 		
@@ -108,20 +104,19 @@ public class CApplicationController extends Controller {
 	}
 	
 	private void initializeSubControllers() {
-		
-		// NOTE: Pass networking to each controller
-		mediaBarController.initialize(mp);
+
+		// TODO - Pass networking to controllers (if necessary...)
 		libraryController.initialize();
+		mediaBarController.initialize(mp);
+		
 		
 	}
 	
 	private void addSubViews() {
-		
-		view.addToBorderPane(mediaBarController.getView(), "bottom");
-		view.addToBorderPane(libraryController.getView(), "center");
-		
-		//view.addToBorderPane(mediaInfoController.getView(), "right");
 
+		view.addToBorderPane(libraryController.getView(), "center");
+		view.addToBorderPane(mediaBarController.getView(), "bottom");
+		
 	}
 		
 	private void addEventHandlers() {
@@ -135,6 +130,7 @@ public class CApplicationController extends Controller {
 	
 	private void addEventListeners() {
 		
+		// TODO - Listen for changes to model classes
 		//PropertyChangeDispatcher.getInstance().addListener(GameClient.class, "connected", this, "onConnectionChange");
 		
 	}

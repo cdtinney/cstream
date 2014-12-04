@@ -15,9 +15,12 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import com.cstream.enums.AudioPanPosition;
+import jlibrtp.DataFrame;
+import jlibrtp.Participant;
+import jlibrtp.RTPAppIntf;
+import jlibrtp.RTPSession;
 
-import jlibrtp.*;
+import com.cstream.enums.AudioPanPosition;
 
 /**
  * Sample code for audio sender. TODO: Needs a clean up
