@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
-import com.cstream.media.MediaBarController;
 import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.ID3v1Tag;
 import com.mpatric.mp3agic.ID3v2;
@@ -18,7 +17,7 @@ import com.mpatric.mp3agic.UnsupportedTagException;
 
 public class Song {
 	
-	private static Logger LOGGER = Logger.getLogger(MediaBarController.class.getName());
+	private static Logger LOGGER = Logger.getLogger(Song.class.getName());
 	
 	// Unique identifier for the song (MD5 hash)
 	private String id;
@@ -43,6 +42,8 @@ public class Song {
 		
 		setupTagVersion();
 		saveTagChanges();
+		
+		setPath(filepath);
 		
 	}
 

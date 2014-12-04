@@ -4,13 +4,13 @@ import javafx.event.Event;
 import javafx.scene.Node;
 import com.cstream.controller.Controller;
 
-public class MediaLibraryController extends Controller {
+public class LibraryController extends Controller {
 
-	private MediaLibraryView view;
+	private LibraryView view;
 	
 	public void initialize() {
 		
-		view = new MediaLibraryView();
+		view = new LibraryView();
 		view.initialize();
 		
 		addHandlers();

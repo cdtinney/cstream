@@ -22,7 +22,7 @@ public class FileUtils {
         
         File[] fileList = directory.listFiles();
         if (fileList == null) {
-        	LOGGER.warning("Cannot list files of a directory which does not exit - " + directoryName);
+        	LOGGER.warning("Cannot list files of a directory which does not exist - " + directoryName);
         	return results;
         }
         

@@ -9,7 +9,7 @@ import java.util.logging.LogRecord;
 
 public class LogFormatter extends Formatter{
 
-	private final DateFormat df = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss.SSS");
+	private final DateFormat df = new SimpleDateFormat("hh:mm:ss.SSS");
 	
 	@Override
 	public String format(LogRecord record) {
@@ -20,7 +20,6 @@ public class LogFormatter extends Formatter{
         builder.append(record.getSourceMethodName()).append("] - ");
         builder.append("[").append(record.getLevel()).append("] - ");
         builder.append(formatMessage(record));
-        builder.append("\n");
         return builder.toString();
         
 	}

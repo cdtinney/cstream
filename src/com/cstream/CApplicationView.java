@@ -51,24 +51,17 @@ public class CApplicationView extends Scene {
 		MenuBar menuBar = new MenuBar();
 		menuBar.setPrefWidth(getWidth());
 		
-		// Game menu
-		Menu gameMenu = new Menu("cStream");
-		
-		MenuItem quitAppItem = new MenuItem("Quit");
-		quitAppItem.setId("quitAppMenuItem");
-		
-		gameMenu.getItems().addAll(quitAppItem);
-		
-		// Help menu
-		Menu helpMenu = new Menu("Help");
+		Menu fileMenu = new Menu("File");
 		
 		MenuItem aboutItem = new MenuItem("About");
 		aboutItem.setId("aboutMenuItem");
 		
-		helpMenu.getItems().addAll(aboutItem);
+		MenuItem quitAppItem = new MenuItem("Quit");
+		quitAppItem.setId("quitMenuItem");
 		
-		// Add all menus to bar
-		menuBar.getMenus().addAll(gameMenu, helpMenu);
+		fileMenu.getItems().addAll(aboutItem, quitAppItem);
+		
+		menuBar.getMenus().addAll(fileMenu);
 		
 		root.setTop(menuBar);
 		
