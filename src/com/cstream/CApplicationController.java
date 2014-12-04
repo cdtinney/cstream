@@ -1,5 +1,6 @@
 package com.cstream;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -13,7 +14,9 @@ import com.cstream.controller.Controller;
 import com.cstream.media.LibraryController;
 import com.cstream.media.MediaBarController;
 import com.cstream.media.MediaInfoController;
+import com.cstream.model.Song;
 import com.cstream.tracker.TrackerPeer;
+import com.cstream.utils.LibraryUtils;
 import com.cstream.utils.OSUtils;
 
 public class CApplicationController extends Controller {
@@ -31,8 +34,9 @@ public class CApplicationController extends Controller {
 	
 	// Sub-Controllers
 	private MediaBarController mediaBarController = new MediaBarController();
-	private LibraryController mediaLibController = new LibraryController();
 	private MediaInfoController mediaInfoController = new MediaInfoController();
+	
+	private LibraryController libraryController = new LibraryController();
 	
 	// TODO: MediaPlayer needs a source of Media to be initialized
 	private MediaPlayer mp;
@@ -57,11 +61,11 @@ public class CApplicationController extends Controller {
 		addEventHandlers();
 		addEventListeners();
 		
-//		String libDir = showPathDialog();
-//		if (!libDir.isEmpty()) {
-//			Map<String, Song> library = LibraryUtils.buildLocalLibrary(libDir);
-//			
-//		}
+		String libDir = showPathDialog();
+		if (!libDir.isEmpty()) {
+			Map<String, Song> library = LibraryUtils.buildLocalLibrary(libDir);
+			libraryController.addData(library.values());
+		}
 		
 	}
 	
@@ -107,14 +111,14 @@ public class CApplicationController extends Controller {
 		
 		// NOTE: Pass networking to each controller
 		mediaBarController.initialize(mp);
-		mediaLibController.initialize();
+		libraryController.initialize();
 		
 	}
 	
 	private void addSubViews() {
 		
 		view.addToBorderPane(mediaBarController.getView(), "bottom");
-		view.addToBorderPane(mediaLibController.getView(), "center");
+		view.addToBorderPane(libraryController.getView(), "center");
 		
 		//view.addToBorderPane(mediaInfoController.getView(), "right");
 

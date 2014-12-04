@@ -1,8 +1,13 @@
 package com.cstream.media;
 
+import java.util.Collection;
+import java.util.List;
+
 import javafx.event.Event;
 import javafx.scene.Node;
+
 import com.cstream.controller.Controller;
+import com.cstream.model.Song;
 
 public class LibraryController extends Controller {
 
@@ -16,6 +21,10 @@ public class LibraryController extends Controller {
 		addHandlers();
 		addListeners();
 		
+	}
+	
+	public void addData(Collection<Song> songs) {
+		view.addData(songs);
 	}
 	
 	protected void handleArtistItemAction(Event e) {
