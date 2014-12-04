@@ -17,9 +17,7 @@ import com.cstream.controller.Controller;
 import com.cstream.media.LibraryController;
 import com.cstream.media.MediaBarController;
 import com.cstream.model.Song;
-import com.cstream.tracker.TrackerClient;
 import com.cstream.tracker.TrackerPeer;
-import com.cstream.utils.LibraryUtils;
 import com.cstream.utils.OSUtils;
 
 public class CApplicationController extends Controller {
@@ -66,15 +64,17 @@ public class CApplicationController extends Controller {
 	}
 	
 	public void stop() {
+		
 		LOGGER.info("Stop");
 		//TODO: Close all open streams and connections
 		
-		//Send a remove request to tracker and wait for response before exiting
-		if(!peer.removeTracker()) {
+		// Send a remove request to tracker and wait for response before exiting
+		if (!peer.removeTracker()) {
 			LOGGER.warning("Tracker failed to approve disconnect");
 		}
 		
 		Platform.exit();
+		
 	}
 	
 	private String showPathDialog() {

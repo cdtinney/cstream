@@ -31,7 +31,6 @@ public class Song {
 	private SimpleStringProperty artistProperty = new SimpleStringProperty("none");
 	private SimpleStringProperty titleProperty = new SimpleStringProperty("none");
 	private SimpleStringProperty albumProperty = new SimpleStringProperty("none");
-	private SimpleStringProperty trackProperty = new SimpleStringProperty("none");
 	
 	// Primitive string properties required for JSON parsing
 	private String artist;
@@ -65,6 +64,18 @@ public class Song {
 	
 	public String getId() {		
 		return id;		
+	}
+	
+	public SimpleStringProperty artistProperty() {
+		return artistProperty;
+	}
+	
+	public SimpleStringProperty titleProperty() {
+		return titleProperty;
+	}
+	
+	public SimpleStringProperty albumProperty() {
+		return albumProperty;
 	}
 	
 	public Mp3File getMp3() {
@@ -103,12 +114,10 @@ public class Song {
 		
 		ID3v1 tag = LibraryUtils.getTagFromMp3(mp3);
 		
-		// TODO
-		
-//		this.artist = new SimpleStringProperty(tag.getArtist());
-//		this.title = new SimpleStringProperty(tag.getTitle());
-//		this.album = new SimpleStringProperty(tag.getAlbum());
-//		this.track = new SimpleStringProperty(tag.getTrack());
+		// TODO - Add more properties
+		this.artistProperty = new SimpleStringProperty(tag.getArtist());
+		this.titleProperty = new SimpleStringProperty(tag.getTitle());
+		this.albumProperty = new SimpleStringProperty(tag.getAlbum());
 		
 	}
 	
