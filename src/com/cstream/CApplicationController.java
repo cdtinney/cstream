@@ -4,8 +4,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
@@ -14,6 +17,7 @@ import com.cstream.controller.Controller;
 import com.cstream.media.LibraryController;
 import com.cstream.media.MediaBarController;
 import com.cstream.model.Song;
+import com.cstream.tracker.TrackerClient;
 import com.cstream.tracker.TrackerPeer;
 import com.cstream.utils.LibraryUtils;
 import com.cstream.utils.OSUtils;
@@ -57,16 +61,20 @@ public class CApplicationController extends Controller {
 		addEventHandlers();
 		addEventListeners();
 		
-		String libDir = showPathDialog();
-		if (!libDir.isEmpty()) {
-			Map<String, Song> library = LibraryUtils.buildLocalLibrary(libDir);
-			libraryController.addData(library.values());
-		}
-		
+		initializePeerLib();
+	
 	}
 	
 	public void stop() {
 		LOGGER.info("Stop");
+		//TODO: Close all open streams and connections
+		
+		//Send a remove request to tracker and wait for response before exiting
+		if(!peer.removeTracker()) {
+			LOGGER.warning("Tracker failed to approve disconnect");
+		}
+		
+		Platform.exit();
 	}
 	
 	private String showPathDialog() {
@@ -94,6 +102,15 @@ public class CApplicationController extends Controller {
 		
 	}
 	
+	private void showAboutDialog() {
+		
+		Alert alert = new Alert(AlertType.INFORMATION);
+		alert.setTitle("About cStream");
+		alert.setContentText("cStream is a P2P Audio Streaming Application by Benjamin Sweett & Colin Tinney.");
+		alert.showAndWait();
+		
+	}
+	
 	private void initializeStage() {
 		
 		stage.setScene(view);
@@ -109,6 +126,18 @@ public class CApplicationController extends Controller {
 		libraryController.initialize();
 		mediaBarController.initialize(mp);
 		
+		
+	}
+	
+	private void initializePeerLib() {
+		
+		String libDir = showPathDialog();
+		peer = new TrackerPeer(libDir);
+		
+		Map<String, Song> library = peer.getFiles();
+		if(library != null) {
+			libraryController.addData(library.values());
+		}
 		
 	}
 	
@@ -138,13 +167,13 @@ public class CApplicationController extends Controller {
 	@SuppressWarnings("unused")
 	private void handleQuitAction(Event event) {
 		LOGGER.info("Quit");
-		// TODO 
+		stop();
 	}
 	
 	@SuppressWarnings("unused")
 	private void handleAboutAction(Event event) {
 		LOGGER.info("About");
-		// TODO
+		showAboutDialog();
 	}
 	
 }
