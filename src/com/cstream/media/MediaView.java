@@ -8,8 +8,6 @@ import javafx.scene.control.Slider;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import com.cstream.notifier.Notifier;
-import com.cstream.tracker.TrackerClient;
 import com.cstream.util.FxUtils;
 
 public class MediaView extends HBox {
