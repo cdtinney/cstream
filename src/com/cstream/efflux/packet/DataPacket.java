@@ -77,6 +77,7 @@ public class DataPacket {
     }
 
     public static DataPacket decode(ChannelBuffer buffer) throws IndexOutOfBoundsException {
+    	
         if (buffer.readableBytes() < 12) {
             throw new IllegalArgumentException("A RTP packet must be at least 12 octets long");
         }
@@ -133,6 +134,7 @@ public class DataPacket {
     }
 
     public static ChannelBuffer encode(int fixedBlockSize, DataPacket packet) {
+    	
         int size = 12; // Fixed width
         if (packet.hasExtension()) {
             size += 4 + packet.getExtensionDataSize();

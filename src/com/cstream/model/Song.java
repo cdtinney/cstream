@@ -14,6 +14,7 @@ import com.mpatric.mp3agic.UnsupportedTagException;
 
 public class Song implements Comparable<Song> {
 	
+	@SuppressWarnings("unused")
 	private transient static Logger LOGGER = Logger.getLogger(Song.class.getName());
 	
 	// Unique identifier for the song (MD5 hash)
@@ -114,24 +115,19 @@ public class Song implements Comparable<Song> {
 	@Override
 	public int compareTo(Song s) {
 		
-		int i;
-		if(s.getArtist() != null && artist != null) {
-			i = artist.compareToIgnoreCase(s.getArtist());
-			if (i != 0) {
-				return i;
-			}
-		}
-		
-		i = title.compareToIgnoreCase(s.getTitle());
+		int i = artist == null ? -1 : artist.compareToIgnoreCase(s.getArtist() == null ? "" : s.getArtist());
 		if (i != 0) {
 			return i;
 		}
-		
-		if(s.getAlbum() != null && album != null) {
-			i = album.compareToIgnoreCase(s.getAlbum());
-			if (i != 0) {
-				return i;
-			}
+
+		i = title == null ? -1 : title.compareToIgnoreCase(s.getTitle() == null ? "" : s.getTitle());
+		if (i != 0) {
+			return i;
+		}
+
+		i = album == null ? -1 : album.compareToIgnoreCase(s.getAlbum() == null ? "" : s.getAlbum());
+		if (i != 0) {
+			return i;
 		}
 		
 		return id.compareTo(s.getId());
