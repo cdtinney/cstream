@@ -2,6 +2,7 @@ package com.cstream.media;
 
 import java.beans.PropertyChangeEvent;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -52,6 +53,8 @@ public class LibraryView extends HBox {
 	
 	@SuppressWarnings({ "unchecked", "unused" })
 	private void onLibraryChanged(PropertyChangeEvent evt) {
+		
+		Song selectedSong = libTableView.getSelectionModel().getSelectedItem();
 
 		LOGGER.log(LogLevel.DEBUG, "On library changed event");
 				
@@ -63,7 +66,29 @@ public class LibraryView extends HBox {
 		
 		// Add all of the updated songs
 		data.addAll(newLib.values());		
+		
+		// Try to re-select the previous song
+		selectSong(selectedSong);
+		
+		// Sort the songs
+	    FXCollections.sort(libTableView.getItems());
 
+	}
+	
+	private void selectSong(Song song) {
+		
+		if (song == null) {
+			return;
+		}
+		
+		for (Song s : data) {
+			
+			if (s.getId().equals(song.getId())) {
+				libTableView.getSelectionModel().select(s);
+			}
+			
+		}
+		
 	}
 	
 	private void addListeners() {

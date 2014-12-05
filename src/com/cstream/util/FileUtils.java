@@ -1,13 +1,31 @@
 package com.cstream.util;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.commons.codec.digest.DigestUtils;
+
 public class FileUtils {
 	
 	private static Logger LOGGER = Logger.getLogger(FileUtils.class.getName());
+	
+	public static String generateMd5(String pathToFile) {
+		
+		try (FileInputStream fis = new FileInputStream(new File(pathToFile)) ){
+			return DigestUtils.md5Hex(fis);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+			
+		}
+		
+		return null;
+		
+	}
 	
     public static List<File> listFiles(String directoryName, String[] extensions) {
     	

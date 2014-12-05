@@ -1,21 +1,18 @@
 package com.cstream.model;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.logging.Logger;
 
 import javafx.beans.property.SimpleStringProperty;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
+import com.cstream.util.FileUtils;
 import com.cstream.util.LibraryUtils;
 import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
 
-public class Song {
+public class Song implements Comparable<Song> {
 	
 	private transient static Logger LOGGER = Logger.getLogger(Song.class.getName());
 	
@@ -47,11 +44,18 @@ public class Song {
 			
 		}
 		
-		generateId(path);
-		
+		this.id = FileUtils.generateMd5(path);		
 		this.path = path;
 		
-		initializeProperties();
+		if (mp3 != null) {
+			
+			ID3v1 tag = LibraryUtils.getTagFromMp3(mp3);
+			
+			this.artist = tag.getArtist();
+			this.title = tag.getTitle();
+			this.album = tag.getAlbum();
+			
+		}
 		
 	}
 
@@ -63,16 +67,20 @@ public class Song {
 		return id;		
 	}
 	
+	public String getArtist() {
+		return artist;
+	}
+	
+	public String getAlbum() {
+		return album;
+	}
+	
+	public String getTitle() {
+		return title;
+	}
+	
 	public Mp3File getMp3() {
 		return this.mp3;
-	}
-	
-	public long getLengthInSeconds() {		
-		return mp3.getLengthInSeconds();		
-	}
-	
-	public int getSampleRate() {		
-		return mp3.getSampleRate();		
 	}
 	
 	public SimpleStringProperty artistProperty() {
@@ -102,34 +110,27 @@ public class Song {
 		return sb.toString();
 		
 	}
-	
-	private void initializeProperties() {
-		
-		if (mp3 == null) {
-			return;
-		}
-		
-		ID3v1 tag = LibraryUtils.getTagFromMp3(mp3);
-		
-		this.artist = tag.getArtist();
-		this.title = tag.getTitle();
-		this.album = tag.getAlbum();
-		
-	}
-	
-	private void generateId(String path) {
-		
-		if (id != null) {
-			LOGGER.warning("Re-generating ID for file: " + id);			
-		}
 
-		try (FileInputStream fis = new FileInputStream(new File(path)) ){
-			id = DigestUtils.md5Hex(fis);
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-			
+	@Override
+	public int compareTo(Song s) {
+		
+		int i = artist.compareToIgnoreCase(s.getArtist());
+		if (i != 0) {
+			return i;
 		}
 		
+		i = title.compareToIgnoreCase(s.getTitle());
+		if (i != 0) {
+			return i;
+		}
+		
+		i = album.compareToIgnoreCase(s.getAlbum());
+		if (i != 0) {
+			return i;
+		}
+		
+		return id.compareTo(s.getId());
+		
 	}
+	
 }
