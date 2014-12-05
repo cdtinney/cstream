@@ -84,6 +84,14 @@ public class Song implements Comparable<Song> {
 		return this.mp3;
 	}
 	
+	public String[] getPeers() {
+		return peers;
+	}
+
+	public void setPeers(String[] peers) {
+		this.peers = peers;
+	}
+	
 	public SimpleStringProperty artistProperty() {
 		return new SimpleStringProperty(artist);
 	}
@@ -132,6 +140,17 @@ public class Song implements Comparable<Song> {
 		
 		return id.compareTo(s.getId());
 		
+	}
+	
+	public boolean isLocal(String id) {
+		
+		for(int i = 0; i < peers.length; i++) {
+			if(peers[i].equals(id)) {
+				return true;
+			}
+		}
+		
+		return true;
 	}
 	
 }

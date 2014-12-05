@@ -89,8 +89,8 @@ public class CApplicationController extends Controller {
 
 	private void initializeControllers() {
 
-		libraryController.initialize();
-		mediaController.initialize();
+		libraryController.initialize(client);
+		mediaController.initialize(libraryController);
 
 	}
 
