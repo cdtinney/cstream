@@ -89,15 +89,15 @@ public class CApplicationController extends Controller {
 
 	private void initializeControllers() {
 
-		libraryController.initialize(client);
-		mediaController.initialize(libraryController);
+		libraryController.initialize();
+		mediaController.initialize(libraryController, client);
 
 	}
 
 	private void initLocalLibrary() {
 		
 		String directory = showPathDialog();
-		Map<String, Song> files = LibraryUtils.buildLocalLibrary(directory);
+		Map<String, Song> files = LibraryUtils.buildLocalLibrary(directory, client.getPeer().getId());
 		
 		client.getPeer().setFiles(files);
 		

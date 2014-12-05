@@ -11,7 +11,7 @@ import com.cstream.model.Song;
 import com.cstream.notifier.Notifier;
 import com.cstream.tracker.TrackerClient;
 
-public class MediaController extends Controller{
+public class MediaController extends Controller {
 
 	private static Logger LOGGER = Logger.getLogger(MediaController.class.getName());
 

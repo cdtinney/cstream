@@ -1,8 +1,11 @@
 package com.cstream.model;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
 import com.cstream.util.FileUtils;
@@ -24,8 +27,8 @@ public class Song implements Comparable<Song> {
 	private transient Mp3File mp3;	
 	private String path;
 	
-	// List of peer IDs that are sharing this song
-	private String[] peers;
+	// Set of peer IDs that are sharing this song
+	private Set<String> peers;
 	
 	// Primitive string properties required for JSON parsing
 	private String artist;
@@ -33,7 +36,7 @@ public class Song implements Comparable<Song> {
 	private String title;
 	private String track;
 	
-	// Default constructor
+	// Constructor
 	public Song(String path) {
 		
 		try {
@@ -47,6 +50,7 @@ public class Song implements Comparable<Song> {
 		
 		this.id = FileUtils.generateMd5(path);		
 		this.path = path;
+		this.peers = new HashSet<String>();
 		
 		if (mp3 != null) {
 			
@@ -84,12 +88,12 @@ public class Song implements Comparable<Song> {
 		return this.mp3;
 	}
 	
-	public String[] getPeers() {
-		return peers;
-	}
-
-	public void setPeers(String[] peers) {
+	public void setPeers(Set<String> peers) {
 		this.peers = peers;
+	}
+	
+	public Set<String> getPeers() {
+		return peers;
 	}
 	
 	public SimpleStringProperty artistProperty() {
@@ -102,6 +106,10 @@ public class Song implements Comparable<Song> {
 	
 	public SimpleStringProperty albumProperty() {
 		return new SimpleStringProperty(album);
+	}
+	
+	public SimpleIntegerProperty peersProperty() {
+		return new SimpleIntegerProperty(peers == null ? 0 : peers.size());
 	}
 	
 	@Override
@@ -144,8 +152,8 @@ public class Song implements Comparable<Song> {
 	
 	public boolean isLocal(String id) {
 		
-		for(int i = 0; i < peers.length; i++) {
-			if(peers[i].equals(id)) {
+		for(int i = 0; i < peers.size(); i++) {
+			if(peers.contains(id)) {
 				return true;
 			}
 		}

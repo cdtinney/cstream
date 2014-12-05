@@ -22,7 +22,7 @@ public class LibraryUtils {
 	 * Builds a map of songs, where the key is the song ID, from a specific directory and
 	 * all its sub directories.
 	 */
-	public static Map<String, Song> buildLocalLibrary(String directoryName) {
+	public static Map<String, Song> buildLocalLibrary(String directoryName, String peerId) {
 		
 		if (directoryName == null || directoryName.isEmpty()) {
 			LOGGER.warning("Cannot build library from null or empty directory path");
@@ -38,6 +38,7 @@ public class LibraryUtils {
 		for (int i = 0; i < fileList.size(); i++) {
 			
 			Song song = new Song(fileList.get(i).getAbsolutePath());
+			song.getPeers().add(peerId);
 			
 			if (song.getMp3() != null && song.getId() != null) {
 				results.put(song.getId(), song);

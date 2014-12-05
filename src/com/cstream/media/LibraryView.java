@@ -35,10 +35,9 @@ public class LibraryView extends HBox {
 
 		libTableView.setPrefWidth(TABLE_WIDTH);
 		getChildren().add(libTableView);
+		libTableView.setItems(data);
 		
 		addListeners();
-
-		libTableView.setItems(data);
 		
 	}
 	
@@ -52,10 +51,10 @@ public class LibraryView extends HBox {
 	
 	@SuppressWarnings({ "unchecked", "unused" })
 	private void onLibraryChanged(PropertyChangeEvent evt) {
+
+		LOGGER.log(LogLevel.DEBUG, "Updating library view");
 		
 		Song selectedSong = libTableView.getSelectionModel().getSelectedItem();
-
-		LOGGER.log(LogLevel.DEBUG, "On library changed event");
 				
 		Map<String, Song> oldLib = (Map<String, Song>) evt.getOldValue();
 		Map<String, Song> newLib = (Map<String, Song>) evt.getNewValue();
@@ -64,7 +63,7 @@ public class LibraryView extends HBox {
 		data.clear();
 		
 		// Add all of the updated songs
-		data.addAll(newLib.values());		
+		addData(newLib.values());		
 		
 		// Try to re-select the previous song
 		selectSong(selectedSong);
@@ -108,11 +107,15 @@ public class LibraryView extends HBox {
         TableColumn<Song, String> albumCol = new TableColumn<Song, String>("Album");
         albumCol.setCellValueFactory(new PropertyValueFactory<Song, String>("album"));
         
-        artistCol.prefWidthProperty().bind(libTableView.widthProperty().divide(3));
-        titleCol.prefWidthProperty().bind(libTableView.widthProperty().divide(3));
-        albumCol.prefWidthProperty().bind(libTableView.widthProperty().divide(3));
+        TableColumn<Song, Integer> peersCol = new TableColumn<Song, Integer>("Peers");
+        peersCol.setCellValueFactory(new PropertyValueFactory<Song, Integer>("peers"));
         
-        libTableView.getColumns().addAll(artistCol, titleCol, albumCol);
+        artistCol.prefWidthProperty().bind(libTableView.widthProperty().divide(4));
+        titleCol.prefWidthProperty().bind(libTableView.widthProperty().divide(4));
+        albumCol.prefWidthProperty().bind(libTableView.widthProperty().divide(4));
+        peersCol.prefWidthProperty().bind(libTableView.widthProperty().divide(4));
+        
+        libTableView.getColumns().addAll(artistCol, titleCol, albumCol, peersCol);
 		
 	}
 
