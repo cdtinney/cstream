@@ -25,31 +25,6 @@ public class CApplication extends Application {
 		
 		primaryStage.show();
 		
-		// TODO: Remove. Testing only.
-//		Map<String, Song> lib = TrackerClient.getLibrary();
-//		if (lib == null) {
-//			LOGGER.warning("getLibrary returned null");
-//			return;
-//		}
-//		
-//		Song song = lib.get("1");
-//		if (song != null) {
-//			LOGGER.info("Retrieved: " + song);	
-//			
-//		} else {
-//			LOGGER.info("Did not retrieve song: 1");
-//			
-//		}
-//		
-//		Song song2 = lib.get("2");
-//		if (song2 != null) {
-//			LOGGER.info("Retrieved: " + song2);			
-//			
-//		} else {
-//			LOGGER.info("Did not retrieve song: 2");
-//			
-//		}
-		
 	}
 	
 	@Override
