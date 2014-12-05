@@ -5,7 +5,6 @@ import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.cstream.CApplicationController;
 import com.cstream.model.Song;
 import com.cstream.utils.LibraryUtils;
 import com.cstream.utils.OSUtils;
