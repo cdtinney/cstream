@@ -206,9 +206,11 @@ public final class TrackerClient {
 	}
 	
 	private static String getBasicJson(String property, String value) {
+		
 		JsonObject object = new JsonObject();
 		object.add(property, new JsonPrimitive(value));
 		return object.toString();
+		
 	}
 	
 	private static String getJson(Object obj) {

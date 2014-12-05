@@ -73,10 +73,13 @@ public class CApplicationController extends Controller {
 		
 		//TODO: Close all open streams and connections
 		
-		// Send a remove request to tracker and wait for response before exiting
 		if (!peer.removeTracker()) {
 			LOGGER.warning("Request to remove peer from tracker was not successful");
+			return;
+			
 		}
+		
+		LOGGER.info("Reqeust to remove peer from tracker was successful");
 		
 	}
 

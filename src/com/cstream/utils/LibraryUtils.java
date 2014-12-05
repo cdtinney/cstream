@@ -29,15 +29,19 @@ public class LibraryUtils {
 			return null;
 		}
 		
+		LOGGER.info("Building local library from: " + directoryName);
+		
 		Map<String, Song> results = new HashMap<String, Song>();
 		List<File> fileList = FileUtils.listFiles(directoryName, extensions);
 		
+		int count = 0;
 		for (int i = 0; i < fileList.size(); i++) {
 			
 			Song song = new Song(fileList.get(i).getAbsolutePath());
 			
 			if (song.getMp3() != null && song.getId() != null) {
 				results.put(song.getId(), song);
+				count++;
 				
 			} else {
 				LOGGER.warning("Mp3 Object or Song Id were not created correctly");
@@ -45,6 +49,8 @@ public class LibraryUtils {
 			}
 			
 		}
+		
+		LOGGER.info("Added " + count + " songs");
 		
 		return results;
 		
