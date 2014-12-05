@@ -39,6 +39,7 @@ public class LibraryUtils {
 			
 			Song song = new Song(fileList.get(i).getAbsolutePath());
 			song.getPeers().add(peerId);
+			song.setLocal(true);
 			
 			if (song.getMp3() != null && song.getId() != null) {
 				results.put(song.getId(), song);

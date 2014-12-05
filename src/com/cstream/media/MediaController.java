@@ -5,7 +5,6 @@ import java.util.logging.Logger;
 import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.control.TableRow;
-import javafx.scene.media.MediaPlayer;
 
 import com.cstream.controller.Controller;
 import com.cstream.model.Song;
@@ -24,8 +23,6 @@ public class MediaController extends Controller {
 	
 	// Sub-controllers
 	private LibraryController libraryController;
-	
-	private MediaPlayer mp;
 
 	public void initialize(LibraryController libraryController, TrackerClient client) {
 
