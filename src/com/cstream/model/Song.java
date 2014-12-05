@@ -17,20 +17,20 @@ import com.mpatric.mp3agic.UnsupportedTagException;
 
 public class Song {
 	
-	private static Logger LOGGER = Logger.getLogger(Song.class.getName());
+	private transient static Logger LOGGER = Logger.getLogger(Song.class.getName());
 	
 	// Unique identifier for the song (MD5 hash)
 	private String id;
 	
 	// The file itself, and an absolute path to the file
-	private Mp3File mp3;	
+	private transient Mp3File mp3;	
 	private String path;
 	
 	// Observable properties to bind to library view
 	// TODO - setter/getter
-	private SimpleStringProperty artistProperty = new SimpleStringProperty("none");
-	private SimpleStringProperty titleProperty = new SimpleStringProperty("none");
-	private SimpleStringProperty albumProperty = new SimpleStringProperty("none");
+	private transient SimpleStringProperty artistProperty = new SimpleStringProperty("none");
+	private transient SimpleStringProperty titleProperty = new SimpleStringProperty("none");
+	private transient SimpleStringProperty albumProperty = new SimpleStringProperty("none");
 	
 	// Primitive string properties required for JSON parsing
 	private String artist;
@@ -66,18 +66,6 @@ public class Song {
 		return id;		
 	}
 	
-	public SimpleStringProperty artistProperty() {
-		return artistProperty;
-	}
-	
-	public SimpleStringProperty titleProperty() {
-		return titleProperty;
-	}
-	
-	public SimpleStringProperty albumProperty() {
-		return albumProperty;
-	}
-	
 	public Mp3File getMp3() {
 		return this.mp3;
 	}
@@ -90,12 +78,24 @@ public class Song {
 		return mp3.getSampleRate();		
 	}
 	
+	public SimpleStringProperty artistProperty() {
+		return artistProperty;
+	}
+	
+	public SimpleStringProperty titleProperty() {
+		return titleProperty;
+	}
+	
+	public SimpleStringProperty albumProperty() {
+		return albumProperty;
+	}
+	
 	@Override
 	public String toString() {
 		
 		StringBuilder sb = new StringBuilder();
 		
-		sb.append("Song[" + id + "] : ");
+		sb.append("[Song] ");
 		sb.append("Artist/" + (artist == null ? "?" : artist) + " - ");
 		sb.append("Title/" + (title == null ? "?" : title) + " - ");
 		sb.append("Album/" + (album == null ? "?" : album) + " - ");
@@ -118,6 +118,10 @@ public class Song {
 		this.artistProperty = new SimpleStringProperty(tag.getArtist());
 		this.titleProperty = new SimpleStringProperty(tag.getTitle());
 		this.albumProperty = new SimpleStringProperty(tag.getAlbum());
+		
+		this.artist = artistProperty.get();
+		this.title = titleProperty.get();
+		this.album = albumProperty.get();
 		
 	}
 	
