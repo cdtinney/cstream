@@ -102,8 +102,9 @@ public class CApplicationController extends Controller {
 	private void showAboutDialog() {
 
 		Alert alert = new Alert(AlertType.INFORMATION);
+		alert.setHeaderText("About cStream");
 		alert.setTitle("About cStream");
-		alert.setContentText("cStream is a P2P Audio Streaming Application by Benjamin Sweett & Colin Tinney.");
+		alert.setContentText("cStream is a peer-to-peer audio streaming application by Benjamin Sweett & Colin Tinney.");
 		alert.showAndWait();
 
 	}
@@ -142,7 +143,7 @@ public class CApplicationController extends Controller {
 		peer = new TrackerPeer(libDir);
 
 		Map<String, Song> library = peer.getFiles();
-		if(library != null) {
+		if (library != null) {
 			libraryController.addData(library.values());
 		}
 
@@ -150,7 +151,7 @@ public class CApplicationController extends Controller {
 
 	private void connectToTracker() {
 
-		if(!peer.joinTracker()) {
+		if (!peer.joinTracker()) {
 			LOGGER.warning("Failed to join tracking service");
 			//TODO: Display this dialog like the path one after the full view has opened ?
 			//showWarningDialog("Network Warning","Failed to join tracking service. You are viewing your local offline library.");

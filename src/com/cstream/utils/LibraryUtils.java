@@ -74,6 +74,23 @@ public class LibraryUtils {
 			
 		}
 		
+		// If none of {album, title, artist} are set, default the title to the filename
+		if ((tag.getArtist() == null || tag.getArtist().isEmpty()) && (tag.getAlbum() == null || tag.getAlbum().isEmpty()) &&
+				(tag.getTitle() == null || tag.getTitle().isEmpty())) { 
+			
+			String fileName = mp3.getFilename();
+			
+			// Strip directories from the file path
+			int index = fileName.lastIndexOf(File.separatorChar);
+			fileName = fileName.substring(index+1);
+			
+			// Strip the extension
+			fileName = fileName.substring(0, fileName.lastIndexOf('.'));
+
+			tag.setTitle(fileName);
+			
+		}
+		
 		return tag;
 		
 	}
