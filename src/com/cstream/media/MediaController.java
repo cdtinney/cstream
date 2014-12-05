@@ -50,6 +50,7 @@ public class MediaController extends Controller {
 		Song selected = subController.getSongSelected();
 		this.playingSong = subController.getSongToPlay();
 
+		/*
 		// TODO: selected song is not playing .. play it
 		if(selected.compareTo(playingSong) != 0) {
 
@@ -61,7 +62,7 @@ public class MediaController extends Controller {
 
 			}
 
-		}
+		}*/
 	}
 
 	@SuppressWarnings("unused")
