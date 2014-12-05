@@ -33,15 +33,6 @@ public class OSUtils {
 
 		String name = System.getProperty("user.name");
 
-//		String os = "unknown";
-//		if (isMac()) {
-//			os = "mac";
-//		} else if (isWindows()) {
-//			os = "windows";
-//		} else if (isUnix()) {
-//			os = "unix";
-//		}
-//		
 		return name + "_" + OS;
 		
 	}

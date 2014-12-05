@@ -12,6 +12,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+import com.biasedbit.efflux.participant.RtpParticipant;
 import com.cstream.controller.Controller;
 import com.cstream.media.LibraryController;
 import com.cstream.media.MediaBarController;
@@ -64,7 +65,7 @@ public class CApplicationController extends Controller {
 
 		addEventHandlers();
 		addEventListeners();
-
+		
 	}
 
 	public void stop() {
