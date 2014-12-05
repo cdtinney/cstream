@@ -8,7 +8,7 @@ import javafx.scene.media.MediaPlayer;
 
 import com.cstream.controller.Controller;
 
-public class MediaController extends Controller{
+public class MediaController extends Controller {
 
 	private static Logger LOGGER = Logger.getLogger(MediaController.class.getName());
 	

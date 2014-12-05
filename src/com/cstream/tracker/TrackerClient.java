@@ -51,7 +51,9 @@ public final class TrackerClient {
 
 	// Empty private constructor so no instances can be created without a peer
 	@SuppressWarnings("unused")
-	private TrackerClient() { }
+	private TrackerClient() { 
+		
+	}
 	
 	public TrackerClient(TrackerPeer peer) {
 		this.peer = peer;
