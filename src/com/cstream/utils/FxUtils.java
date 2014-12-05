@@ -16,7 +16,7 @@ import javafx.scene.text.Font;
 public class FxUtils {
 
 	@SuppressWarnings("unused")
-	private void showDialog(AlertType type, String title, String header, String message) {
+	public static void showDialog(AlertType type, String title, String header, String message) {
 		
 		Alert alert = new Alert(type);
 		alert.setHeaderText(header);

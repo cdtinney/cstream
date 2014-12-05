@@ -19,6 +19,7 @@ import com.cstream.media.LibraryController;
 import com.cstream.media.MediaBarController;
 import com.cstream.model.Song;
 import com.cstream.tracker.TrackerPeer;
+import com.cstream.utils.FxUtils;
 import com.cstream.utils.OSUtils;
 
 public class CApplicationController extends Controller {
@@ -104,26 +105,6 @@ public class CApplicationController extends Controller {
 
 	}
 
-	private void showAboutDialog() {
-
-		Alert alert = new Alert(AlertType.INFORMATION);
-		alert.setHeaderText("About cStream");
-		alert.setTitle("About cStream");
-		alert.setContentText("cStream is a peer-to-peer audio streaming application by Benjamin Sweett & Colin Tinney.");
-		alert.showAndWait();
-
-	}
-
-	@SuppressWarnings("unused")
-	private void showWarningDialog(String title, String message) {
-
-		Alert alert = new Alert(AlertType.WARNING);
-		alert.setTitle(title);
-		alert.setContentText(message);
-		alert.showAndWait();
-
-	}
-
 	private void initializeStage() {
 
 		stage.setScene(view);
@@ -177,13 +158,6 @@ public class CApplicationController extends Controller {
 
 		addEventHandler(root, "quitMenuItem", "setOnAction", "handleQuitAction");
 		addEventHandler(root, "aboutMenuItem", "setOnAction", "handleAboutAction");
-		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-			
-			public void handle(WindowEvent we) {
-				stop();
-			}
-			
-		}); 
 
 	}
 
@@ -196,14 +170,12 @@ public class CApplicationController extends Controller {
 
 	@SuppressWarnings("unused")
 	private void handleQuitAction(Event event) {
-		LOGGER.info("Quit");
 		stage.fireEvent( new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST) );
 	}
 
 	@SuppressWarnings("unused")
 	private void handleAboutAction(Event event) {
-		LOGGER.info("About");
-		showAboutDialog();
+		FxUtils.showDialog(AlertType.INFORMATION, "About", "cStream", "cStream is a peer-to-peer audo streaming application by Benjamin Sweett & Colin Tinney");
 	}
 
 }
