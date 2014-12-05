@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
@@ -56,11 +55,12 @@ public class CApplicationController extends Controller {
 		
 		initializeStage();
 
+		initializePeerLib(); // Should be done before they can use the UI
+		connectToTracker();
+		
 		addEventHandlers();
 		addEventListeners();
 		
-		initializePeerLib();
-	
 	}
 	
 	public void stop() {
@@ -73,10 +73,11 @@ public class CApplicationController extends Controller {
 			LOGGER.warning("Tracker failed to approve disconnect");
 		}
 		
-		Platform.exit();
-		
+		stage.close();
+
 	}
 	
+	//TODO: Display this after the view has been displayed
 	private String showPathDialog() {
 		
 		String defaultDir = DEFAULT_BASE_DIR;
@@ -111,6 +112,16 @@ public class CApplicationController extends Controller {
 		
 	}
 	
+	@SuppressWarnings("unused")
+	private void showWarningDialog(String title, String message) {
+		
+		Alert alert = new Alert(AlertType.WARNING);
+		alert.setTitle(title);
+		alert.setContentText(message);
+		alert.showAndWait();
+		
+	}
+	
 	private void initializeStage() {
 		
 		stage.setScene(view);
@@ -137,6 +148,16 @@ public class CApplicationController extends Controller {
 		Map<String, Song> library = peer.getFiles();
 		if(library != null) {
 			libraryController.addData(library.values());
+		}
+		
+	}
+	
+	private void connectToTracker() {
+		
+		if(!peer.joinTracker()) {
+			LOGGER.warning("Failed to join tracking service");
+			//TODO: Display this dialog like the path one after the full view has opened ?
+			//showWarningDialog("Network Warning","Failed to join tracking service. You are viewing your local offline library.");
 		}
 		
 	}
