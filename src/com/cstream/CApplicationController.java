@@ -16,6 +16,7 @@ import com.cstream.controller.Controller;
 import com.cstream.media.LibraryController;
 import com.cstream.media.MediaBarController;
 import com.cstream.model.Song;
+import com.cstream.tracker.TrackerClient;
 import com.cstream.tracker.TrackerPeer;
 import com.cstream.utils.FxUtils;
 import com.cstream.utils.OSUtils;
@@ -125,7 +126,12 @@ public class CApplicationController extends Controller {
 			LOGGER.warning("Failed to join tracking service");
 			//TODO: Display this dialog like the path one after the full view has opened ?
 			//showWarningDialog("Network Warning","Failed to join tracking service. You are viewing your local offline library.");
+			return;
 		}
+		
+		TrackerClient.initializeSocket();
+		
+		
 
 	}
 

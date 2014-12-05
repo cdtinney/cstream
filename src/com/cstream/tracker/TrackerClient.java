@@ -1,5 +1,6 @@
 package com.cstream.tracker;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -12,8 +13,11 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
 
 import com.cstream.model.Song;
+import com.cstream.socket.io.IOSocket;
+import com.cstream.socket.io.MessageCallback;
 import com.cstream.utils.logging.LogLevel;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -38,6 +42,46 @@ public final class TrackerClient {
 
 	// Empty private constructor so no extra instances can be created
 	private TrackerClient() { }
+	
+	public static void initializeSocket() {
+		
+		IOSocket socket = new IOSocket(SERVER_URL.replace("https", "ws"), new MessageCallback() {
+
+			@Override
+			public void on(String event, JSONObject... data) {
+				// TODO
+			}
+
+			@Override
+			public void onMessage(String message) {
+				// TODO
+			}
+
+			@Override
+			public void onMessage(JSONObject json) {
+				// TODO
+			}
+
+			@Override
+			public void onConnect() {
+				LOGGER.info("Connected to socket server");
+			}
+
+			@Override
+			public void onDisconnect() {
+				LOGGER.info("Disconnected from socket server");
+			}
+			
+		});
+		
+		try {
+			socket.connect();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
 
 	/**
 	 * Do a GET request for the library from the tracker. If the request returns OK, attempt to parse the
