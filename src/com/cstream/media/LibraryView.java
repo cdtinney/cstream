@@ -7,10 +7,12 @@ import java.util.logging.Logger;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 
 import com.cstream.logging.LogLevel;
 import com.cstream.model.Song;
@@ -109,6 +111,36 @@ public class LibraryView extends HBox {
         
         TableColumn<Song, Integer> peersCol = new TableColumn<Song, Integer>("Peers");
         peersCol.setCellValueFactory(new PropertyValueFactory<Song, Integer>("peers"));
+        peersCol.setCellFactory(column -> {
+        	
+        	return new TableCell<Song, Integer>() {
+        		
+                @Override
+                public void updateItem(Integer item, boolean empty) {
+                	super.updateItem(item, empty);
+                	
+                	if (item == null || empty) {
+                		setText(null);
+                		setStyle("");
+                		return;
+                	}
+                	
+                	Song song = (Song) this.getTableRow().getItem();
+                	if (song != null && song.isLocal()) {
+                		setTextFill(Color.GREEN);
+                		
+                	} else {
+                		setTextFill(Color.RED);
+                		
+                	}
+                	
+                	setText(item.toString());
+                	
+                }
+                
+            };
+        	
+        });
         
         artistCol.prefWidthProperty().bind(libTableView.widthProperty().divide(4));
         titleCol.prefWidthProperty().bind(libTableView.widthProperty().divide(4));
