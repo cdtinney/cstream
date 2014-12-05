@@ -49,15 +49,18 @@ public class CApplicationController extends Controller {
 		view = new CApplicationView(WIDTH, HEIGHT);
 		view.initialize();
 
-		initializeControllers();
-		addViews();
-
 		stage.setScene(view);
 		stage.setWidth(WIDTH);
 		stage.setHeight(HEIGHT);
 		stage.centerOnScreen();
-		
+
 		client = new TrackerClient(new TrackerPeer());
+
+		libraryController.initialize();
+		mediaController.initialize(libraryController, client);
+		
+		addViews();
+		
 		initLocalLibrary(); 
 		client.start();
 
@@ -84,13 +87,6 @@ public class CApplicationController extends Controller {
 
 		Optional<String> result = dialog.showAndWait();
 		return result.isPresent() ? result.get() : "";
-
-	}
-
-	private void initializeControllers() {
-
-		libraryController.initialize();
-		mediaController.initialize(libraryController, client);
 
 	}
 
