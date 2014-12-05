@@ -54,5 +54,11 @@ public class TrackerPeer {
 	public boolean removeTracker() {
 		return TrackerClient.remove(this);
 	}
+	
+	public boolean getLibraryFromTracker() {
+		files = TrackerClient.getLibrary();
+		
+		return files == null ? false : true;
+	}
 
 }
