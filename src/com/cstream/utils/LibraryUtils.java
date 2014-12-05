@@ -29,15 +29,19 @@ public class LibraryUtils {
 			return null;
 		}
 		
+		LOGGER.info("Building local library from: " + directoryName);
+		
 		Map<String, Song> results = new HashMap<String, Song>();
 		List<File> fileList = FileUtils.listFiles(directoryName, extensions);
 		
+		int count = 0;
 		for (int i = 0; i < fileList.size(); i++) {
 			
 			Song song = new Song(fileList.get(i).getAbsolutePath());
 			
 			if (song.getMp3() != null && song.getId() != null) {
 				results.put(song.getId(), song);
+				count++;
 				
 			} else {
 				LOGGER.warning("Mp3 Object or Song Id were not created correctly");
@@ -45,6 +49,8 @@ public class LibraryUtils {
 			}
 			
 		}
+		
+		LOGGER.info("Added " + count + " songs");
 		
 		return results;
 		
@@ -56,7 +62,7 @@ public class LibraryUtils {
 			return null;
 		}
 		
-		ID3v1 tag = null;
+		ID3v1 tag = new ID3v1Tag();
 		if (mp3.hasId3v1Tag()) {
 			tag = mp3.getId3v1Tag();
 			 
@@ -70,7 +76,7 @@ public class LibraryUtils {
 			tag.setTrack(mp3.getId3v2Tag().getTrack());
 			 
 		} else if (mp3.hasCustomTag()) {
-			// TODO - Probably just ignore
+			// Ignore custom tags for now
 			
 		}
 		

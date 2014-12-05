@@ -27,7 +27,6 @@ public class Song {
 	private String path;
 	
 	// Observable properties to bind to library view
-	// TODO - setter/getter
 	private transient SimpleStringProperty artistProperty = new SimpleStringProperty("none");
 	private transient SimpleStringProperty titleProperty = new SimpleStringProperty("none");
 	private transient SimpleStringProperty albumProperty = new SimpleStringProperty("none");
@@ -114,7 +113,7 @@ public class Song {
 		
 		ID3v1 tag = LibraryUtils.getTagFromMp3(mp3);
 		
-		// TODO - Add more properties
+		// TODO - Add more properties - year, track... ?
 		this.artistProperty = new SimpleStringProperty(tag.getArtist());
 		this.titleProperty = new SimpleStringProperty(tag.getTitle());
 		this.albumProperty = new SimpleStringProperty(tag.getAlbum());

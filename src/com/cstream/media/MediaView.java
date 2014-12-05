@@ -10,7 +10,7 @@ import javafx.scene.layout.VBox;
 
 import com.cstream.utils.FxUtils;
 
-public class MediaBarView extends HBox {
+public class MediaView extends HBox {
 	
     public void initialize() {    	
     	

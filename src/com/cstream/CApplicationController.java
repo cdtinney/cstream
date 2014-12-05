@@ -15,8 +15,9 @@ import javafx.stage.WindowEvent;
 import com.biasedbit.efflux.participant.RtpParticipant;
 import com.cstream.controller.Controller;
 import com.cstream.media.LibraryController;
-import com.cstream.media.MediaBarController;
+import com.cstream.media.MediaController;
 import com.cstream.model.Song;
+import com.cstream.tracker.TrackerClient;
 import com.cstream.tracker.TrackerPeer;
 import com.cstream.utils.FxUtils;
 import com.cstream.utils.OSUtils;
@@ -30,18 +31,15 @@ public class CApplicationController extends Controller {
 
 	private final static String DEFAULT_BASE_DIR = System.getProperty("user.home");
 
+	// Primary stage
 	private Stage stage;
-
+	
+	// View
 	private CApplicationView view; 
 
 	// Sub-Controllers
-	private MediaBarController mediaBarController = new MediaBarController();
+	private MediaController mediaController = new MediaController();
 	private LibraryController libraryController = new LibraryController();
-
-	// TODO: MediaPlayer needs a source of Media to be initialized
-	private MediaPlayer mp;
-
-	// TODO: RTP Instance
 
 	// Model
 	private TrackerPeer peer;
@@ -60,28 +58,30 @@ public class CApplicationController extends Controller {
 		stage.setHeight(HEIGHT);
 		stage.centerOnScreen();
 
-		initializePeerLib(); // Should be done before they can use the UI
+		initializePeerLib(); 
 		connectToTracker();
 
 		addEventHandlers();
-		addEventListeners();
-		
 	}
 
 	public void stop() {
 
 		LOGGER.info("Attempting to stop the application...");
 		
-		//TODO: Close all open streams and connections
-		
-		// Send a remove request to tracker and wait for response before exiting
 		if (!peer.removeTracker()) {
 			LOGGER.warning("Request to remove peer from tracker was not successful");
+			
+		} else {
+			LOGGER.info("Reqeust to remove peer from tracker was successful");
+			
 		}
+		
+		// TODO - Place elsewhere - It would be ideal if classes can simply subscribe to a quit event
+		TrackerClient.closeSocket();
 		
 	}
 
-	//TODO: Display this after the view has been displayed
+	// TODO: Display this after the view has been displayed
 	private String showPathDialog() {
 
 		String defaultDir = DEFAULT_BASE_DIR;
@@ -91,7 +91,6 @@ public class CApplicationController extends Controller {
 		dialog.setTitle("Music Library Path");
 		dialog.setHeaderText("Please enter the directory path you would like to share (default: " + defaultDir + ")");
 
-		// Traditional way to get the response value.
 		Optional<String> result = dialog.showAndWait();
 		return result.isPresent() ? result.get() : "";
 
@@ -99,9 +98,8 @@ public class CApplicationController extends Controller {
 
 	private void initializeControllers() {
 
-		// TODO - Pass networking to controllers (if necessary...)
 		libraryController.initialize();
-		mediaBarController.initialize(mp);
+		mediaController.initialize();
 
 	}
 
@@ -121,16 +119,20 @@ public class CApplicationController extends Controller {
 
 		if (!peer.joinTracker()) {
 			LOGGER.warning("Failed to join tracking service");
+			return;
+			
 			//TODO: Display this dialog like the path one after the full view has opened ?
 			//showWarningDialog("Network Warning","Failed to join tracking service. You are viewing your local offline library.");
 		}
-
+		
+		TrackerClient.initializeSocket();
+		
 	}
 
 	private void addViews() {
 
 		view.addToBorderPane(libraryController.getView(), "center");
-		view.addToBorderPane(mediaBarController.getView(), "bottom");
+		view.addToBorderPane(mediaController.getView(), "bottom");
 
 	}
 
@@ -140,13 +142,6 @@ public class CApplicationController extends Controller {
 
 		addEventHandler(root, "quitMenuItem", "setOnAction", "handleQuitAction");
 		addEventHandler(root, "aboutMenuItem", "setOnAction", "handleAboutAction");
-
-	}
-
-	private void addEventListeners() {
-
-		// TODO - Listen for changes to model classes
-		//PropertyChangeDispatcher.getInstance().addListener(GameClient.class, "connected", this, "onConnectionChange");
 
 	}
 

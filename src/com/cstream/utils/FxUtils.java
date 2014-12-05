@@ -5,17 +5,16 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.text.Font;
 
 public class FxUtils {
 
-	@SuppressWarnings("unused")
 	public static void showDialog(AlertType type, String title, String header, String message) {
 		
 		Alert alert = new Alert(type);
@@ -53,7 +52,6 @@ public class FxUtils {
 	public static void addStyleSheet(Class<?> clazz, Scene scene, String resourceName) {
 		
 		if (clazz == null || scene == null || resourceName == null || resourceName.isEmpty()) {
-			// TODO - Proper logging
 			return;
 		}
 		
