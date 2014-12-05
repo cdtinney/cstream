@@ -121,7 +121,7 @@ public class CApplicationController extends Controller {
 			LOGGER.warning("Failed to join tracking service");
 			return;
 			
-			//TODO: Display this dialog like the path one after the full view has opened ?
+			// TODO: Display error dialog after the view has opened only
 			//showWarningDialog("Network Warning","Failed to join tracking service. You are viewing your local offline library.");
 		}
 		
