@@ -5,9 +5,7 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.media.MediaPlayer;

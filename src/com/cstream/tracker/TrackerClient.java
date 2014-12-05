@@ -16,7 +16,9 @@ import org.apache.http.util.EntityUtils;
 import com.cstream.model.Song;
 import com.cstream.utils.logging.LogLevel;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.reflect.TypeToken;
 
 public final class TrackerClient {
@@ -101,7 +103,7 @@ public final class TrackerClient {
 		String response = "";
 		
 		try {
-			response = postRequest(REMOVE_URL, new StringEntity(getJson(peer.getId())));	
+			response = postRequest(REMOVE_URL, new StringEntity(getBasicJson("id", peer.getId())));	
 			
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -201,6 +203,12 @@ public final class TrackerClient {
 
 		return null;
 		
+	}
+	
+	private static String getBasicJson(String property, String value) {
+		JsonObject object = new JsonObject();
+		object.add(property, new JsonPrimitive(value));
+		return object.toString();
 	}
 	
 	private static String getJson(Object obj) {
