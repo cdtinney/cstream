@@ -114,9 +114,12 @@ public class Song implements Comparable<Song> {
 	@Override
 	public int compareTo(Song s) {
 		
-		int i = artist.compareToIgnoreCase(s.getArtist());
-		if (i != 0) {
-			return i;
+		int i;
+		if(s.getArtist() != null && artist != null) {
+			i = artist.compareToIgnoreCase(s.getArtist());
+			if (i != 0) {
+				return i;
+			}
 		}
 		
 		i = title.compareToIgnoreCase(s.getTitle());
@@ -124,9 +127,11 @@ public class Song implements Comparable<Song> {
 			return i;
 		}
 		
-		i = album.compareToIgnoreCase(s.getAlbum());
-		if (i != 0) {
-			return i;
+		if(s.getAlbum() != null && album != null) {
+			i = album.compareToIgnoreCase(s.getAlbum());
+			if (i != 0) {
+				return i;
+			}
 		}
 		
 		return id.compareTo(s.getId());
