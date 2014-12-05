@@ -52,10 +52,10 @@ public class LibraryView extends HBox {
 	
 	@SuppressWarnings({ "unchecked", "unused" })
 	private void onLibraryChanged(PropertyChangeEvent evt) {
+
+		LOGGER.log(LogLevel.DEBUG, "Updating library view");
 		
 		Song selectedSong = libTableView.getSelectionModel().getSelectedItem();
-
-		LOGGER.log(LogLevel.DEBUG, "On library changed event");
 				
 		Map<String, Song> oldLib = (Map<String, Song>) evt.getOldValue();
 		Map<String, Song> newLib = (Map<String, Song>) evt.getNewValue();
