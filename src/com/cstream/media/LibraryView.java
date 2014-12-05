@@ -45,21 +45,15 @@ public class LibraryView extends HBox {
 	private void addColumns() {
 		 
         TableColumn<Song, String> artistCol = new TableColumn<Song, String>("Artist");
-//        artistCol.setCellValueFactory(new PropertyValueFactory<Song, String>("artist"));
-//        artistCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Song, String>,
-//                ObservableValue<String>>() {
-//        		public ObservableValue<String> call(TableColumn.CellDataFeatures<Song, String> t) {
-//            // t.getValue() returns the Test instance for a particular TableView row
-//            return t.getValue().artistProperty();
-//        }
-//        });
-//        artistCol.setCellValueFactory(cellData -> cellData.getValue().artistProperty());
+        artistCol.setCellValueFactory(new PropertyValueFactory<Song, String>("artist"));
         
         TableColumn<Song, String> titleCol = new TableColumn<Song, String>("Title");
         titleCol.setCellValueFactory(new PropertyValueFactory<Song, String>("title"));
         
         TableColumn<Song, String> albumCol = new TableColumn<Song, String>("Album");
         albumCol.setCellValueFactory(new PropertyValueFactory<Song, String>("album"));
+        
+        // TODO - More columns
         
         artistCol.prefWidthProperty().bind(libTableView.widthProperty().divide(3));
         titleCol.prefWidthProperty().bind(libTableView.widthProperty().divide(3));

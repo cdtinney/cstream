@@ -6,7 +6,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 import com.cstream.utils.FxUtils;
@@ -25,7 +24,6 @@ public class MediaBarView extends HBox {
     	// Add the UI elements
     	addControlButtons();
     	addSeekBar();
-    	addVolumeSlider();
     	addNowPlayingInfo();
     	
     }
@@ -64,26 +62,6 @@ public class MediaBarView extends HBox {
     	getChildren().add(seekBox);
     	
     }
-    
-    private void addVolumeSlider() {
-    	
-    	HBox volumeBox = new HBox();
-    	volumeBox.setSpacing(10);
-    	volumeBox.setAlignment(Pos.CENTER);
-    	
-    	// Insets: top, right, bottom, left
-    	volumeBox.setPadding(new Insets(15, 25, 15, 25));
-    	
-    	Slider volumeSlider = new Slider();
-    	volumeSlider.setPrefWidth(100);
-        volumeSlider.setMaxWidth(Region.USE_PREF_SIZE);
-        volumeSlider.setMinWidth(30);
-        
-        volumeBox.getChildren().addAll(new Label("-"), volumeSlider, new Label("+"));
-        
-        getChildren().add(volumeBox);
-        
-    }	
     
     private void addNowPlayingInfo() {
 

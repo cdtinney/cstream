@@ -64,15 +64,17 @@ public class CApplicationController extends Controller {
 	}
 	
 	public void stop() {
+		
 		LOGGER.info("Stop");
 		//TODO: Close all open streams and connections
 		
-		//Send a remove request to tracker and wait for response before exiting
-		if(!peer.removeTracker()) {
+		// Send a remove request to tracker and wait for response before exiting
+		if (!peer.removeTracker()) {
 			LOGGER.warning("Tracker failed to approve disconnect");
 		}
 		
 		stage.close();
+
 	}
 	
 	//TODO: Display this after the view has been displayed
