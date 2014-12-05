@@ -5,9 +5,7 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.media.MediaPlayer;
@@ -53,10 +51,13 @@ public class CApplicationController extends Controller {
 		view = new CApplicationView(WIDTH, HEIGHT);
 		view.initialize();
 
-		initializeSubControllers();
-		addSubViews();
+		initializeControllers();
+		addViews();
 
-		initializeStage();
+		stage.setScene(view);
+		stage.setWidth(WIDTH);
+		stage.setHeight(HEIGHT);
+		stage.centerOnScreen();
 
 		initializePeerLib(); // Should be done before they can use the UI
 		connectToTracker();
@@ -68,13 +69,13 @@ public class CApplicationController extends Controller {
 
 	public void stop() {
 
-		LOGGER.info("Stop");
+		LOGGER.info("Attempting to stop the application...");
 		
 		//TODO: Close all open streams and connections
 		
 		// Send a remove request to tracker and wait for response before exiting
 		if (!peer.removeTracker()) {
-			LOGGER.warning("Tracker failed to approve disconnect");
+			LOGGER.warning("Request to remove peer from tracker was not successful");
 		}
 		
 	}
@@ -83,13 +84,7 @@ public class CApplicationController extends Controller {
 	private String showPathDialog() {
 
 		String defaultDir = DEFAULT_BASE_DIR;
-		if (OSUtils.isWindows()) {
-			defaultDir += "\\cstream";
-
-		} else {
-			defaultDir += "/cstream";
-
-		}
+		defaultDir += OSUtils.isWindows() ? "\\cstream" : "/cstream";
 
 		TextInputDialog dialog = new TextInputDialog(defaultDir);
 		dialog.setTitle("Music Library Path");
@@ -97,29 +92,15 @@ public class CApplicationController extends Controller {
 
 		// Traditional way to get the response value.
 		Optional<String> result = dialog.showAndWait();
-		if (result.isPresent()){
-			return result.get();
-		}
-
-		return "";
+		return result.isPresent() ? result.get() : "";
 
 	}
 
-	private void initializeStage() {
-
-		stage.setScene(view);
-		stage.setWidth(WIDTH);
-		stage.setHeight(HEIGHT);
-		stage.centerOnScreen();
-
-	}
-
-	private void initializeSubControllers() {
+	private void initializeControllers() {
 
 		// TODO - Pass networking to controllers (if necessary...)
 		libraryController.initialize();
 		mediaBarController.initialize(mp);
-
 
 	}
 
@@ -145,7 +126,7 @@ public class CApplicationController extends Controller {
 
 	}
 
-	private void addSubViews() {
+	private void addViews() {
 
 		view.addToBorderPane(libraryController.getView(), "center");
 		view.addToBorderPane(mediaBarController.getView(), "bottom");
