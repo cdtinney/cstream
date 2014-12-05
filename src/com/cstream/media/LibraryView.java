@@ -2,7 +2,6 @@ package com.cstream.media;
 
 import java.beans.PropertyChangeEvent;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Map;
 import java.util.logging.Logger;
 
