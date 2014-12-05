@@ -57,8 +57,6 @@ public class LibraryView extends HBox {
         TableColumn<Song, String> albumCol = new TableColumn<Song, String>("Album");
         albumCol.setCellValueFactory(new PropertyValueFactory<Song, String>("album"));
         
-        // TODO - More columns
-        
         artistCol.prefWidthProperty().bind(libTableView.widthProperty().divide(3));
         titleCol.prefWidthProperty().bind(libTableView.widthProperty().divide(3));
         albumCol.prefWidthProperty().bind(libTableView.widthProperty().divide(3));

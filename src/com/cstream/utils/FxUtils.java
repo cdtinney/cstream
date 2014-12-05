@@ -52,7 +52,6 @@ public class FxUtils {
 	public static void addStyleSheet(Class<?> clazz, Scene scene, String resourceName) {
 		
 		if (clazz == null || scene == null || resourceName == null || resourceName.isEmpty()) {
-			// TODO - Proper logging
 			return;
 		}
 		

@@ -13,6 +13,7 @@ public class LibraryController extends Controller {
 
 	private static Logger LOGGER = Logger.getLogger(LibraryController.class.getName());
 
+	// View
 	private LibraryView view;
 	
 	public void initialize() {
@@ -21,7 +22,6 @@ public class LibraryController extends Controller {
 		view.initialize();
 		
 		addHandlers();
-		addListeners();
 		
 	}
 	
@@ -52,10 +52,6 @@ public class LibraryController extends Controller {
 		    
 		});
 		
-	}
-	
-	private void addListeners() {
-		// TODO 
 	}
 	
 	public Node getView() {

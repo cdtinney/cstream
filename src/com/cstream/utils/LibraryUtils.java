@@ -62,7 +62,7 @@ public class LibraryUtils {
 			return null;
 		}
 		
-		ID3v1 tag = null;
+		ID3v1 tag = new ID3v1Tag();
 		if (mp3.hasId3v1Tag()) {
 			tag = mp3.getId3v1Tag();
 			 
@@ -76,7 +76,7 @@ public class LibraryUtils {
 			tag.setTrack(mp3.getId3v2Tag().getTrack());
 			 
 		} else if (mp3.hasCustomTag()) {
-			// TODO - Probably just ignore
+			// Ignore custom tags for now
 			
 		}
 		

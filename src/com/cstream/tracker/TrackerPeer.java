@@ -14,7 +14,6 @@ public class TrackerPeer {
 	
 	private final String DEFAULT_PORT = "9000";
 	
-	// TODO: Link Port and IP to the RTP Session
 	private String id;
 	private String ip;
 	private String port;

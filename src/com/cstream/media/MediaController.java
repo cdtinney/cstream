@@ -8,20 +8,20 @@ import javafx.scene.media.MediaPlayer;
 
 import com.cstream.controller.Controller;
 
-public class MediaBarController extends Controller{
+public class MediaController extends Controller{
 
-	private static Logger LOGGER = Logger.getLogger(MediaBarController.class.getName());
+	private static Logger LOGGER = Logger.getLogger(MediaController.class.getName());
 	
 	// View
-	private MediaBarView view; 
+	private MediaView view; 
 	
 	// Model
+	// TODO: MediaPlayer needs a source of Media to be initialized
 	private MediaPlayer mp;
 	
-	public void initialize(MediaPlayer mp) {
-		this.mp = mp;
+	public void initialize() {
 		
-		view = new MediaBarView();
+		view = new MediaView();
 		view.initialize();
 		
 		addHandlers();
@@ -36,19 +36,19 @@ public class MediaBarController extends Controller{
 	@SuppressWarnings("unused")
 	private void handlePlayButton(Event event) {
 		LOGGER.info("Play button pressed");
-		// TODO
+		// TODO - Handle play button
 	}
 	
 	@SuppressWarnings("unused")
 	private void handlePauseButton(Event event) {
 		LOGGER.info("Pause button pressed");
-		// TODO
+		// TODO - Handle pause button
 	}
 	
 	@SuppressWarnings("unused")
 	private void handleStopbutton(Event event) {
 		LOGGER.info("Stop button pressed");
-		// TODO
+		// TODO - Handle stop button
 	}
 
     private void addListeners() {
@@ -63,7 +63,6 @@ public class MediaBarController extends Controller{
 		addEventHandler(view, "playButton", "setOnAction", "handlePlayButton");
 		addEventHandler(view, "pauseButton", "setOnAction", "handlePauseButton");
 		addEventHandler(view, "stopButton", "setOnAction", "handleStopbutton");
-		// Event handler arguments =  parentNode, childId, action, functionHandler
 		
 	}
 	

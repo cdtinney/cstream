@@ -31,7 +31,8 @@ public class IOSocket {
 	}
 	
 	public void connect() throws IOException {
-		// check for socket.io namespace
+		
+		// Check for socket.io name space
 		String namespace = "";
 		int i = webSocketAddress.lastIndexOf("/");
 		if (webSocketAddress.charAt(i-1) != '/') {
@@ -39,17 +40,18 @@ public class IOSocket {
 			webSocketAddress = webSocketAddress.substring(0, i);
 		}
 
-		// perform handshake
-		String url = webSocketAddress.replace("ws://", "http://");
+		// Perform handshake
+		String url = webSocketAddress.replace("ws://", "https://");
 		URL connection = new URL(url+"/socket.io/1/"); //handshake url
 		InputStream stream = connection.openStream();
 		Scanner in = new Scanner(stream);
 		String response = in.nextLine(); //pull the response
 		System.out.println(response);
+		in.close();
 		
 		// process handshake response
 		// example: 4d4f185e96a7b:15:10:websocket,xhr-polling
-		if(response.contains(":")) {
+		if (response.contains(":")) {
 			String[] data = response.split(":");
 			setSessionID(data[0]);
 			setHeartTimeOut(Integer.parseInt(data[1]));
@@ -58,26 +60,31 @@ public class IOSocket {
 		}
 		
 		connecting = true;
-		webSocket = new IOWebSocket(URI.create(webSocketAddress+"/socket.io/1/websocket/"+sessionID), this, callback);
+		webSocket = new IOWebSocket(URI.create(webSocketAddress + "/socket.io/1/websocket/"+ sessionID), this, callback);
 		webSocket.setNamespace(namespace);
 		webSocket.connect();
 	}
 	
 	public void emit(String event, JSONObject... message) throws IOException, InterruptedException {
+		
 		try {
 			JSONObject data = new JSONObject();
 			JSONArray args = new JSONArray();
+			
 			for (JSONObject arg : message) {
 				args.put(arg);
 			}
+			
 			data.put("name", event);
 			data.put("args", args);
 			IOMessage packet = new IOMessage(IOMessage.EVENT, webSocket.getNamespace(), data.toString());
 			webSocket.sendMessage(packet);
+			
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			
 		}
+		
 	}
 	
 
@@ -92,20 +99,25 @@ public class IOSocket {
 	}
 	
 	public synchronized void disconnect() {
+		
 		if (connected) {
+			
 			try {
+				
 				if (open) {
 					webSocket.sendMessage(new IOMessage(IOMessage.DISCONNECT, webSocket.getNamespace(), ""));
 				}
+				
 			} catch (IOException e) {
 				e.printStackTrace();
+				
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
 			onDisconnect();
 		}	
+		
 	}
 
 	synchronized void onOpen() {
@@ -126,25 +138,28 @@ public class IOSocket {
 	}
 	
 	synchronized void onDisconnect() {
+		
 		boolean wasConnected = connected;
 		
 		connected = false;
 		connecting = false;
 		
 		if (open) {
+			
 			try {
 				webSocket.close();
+				
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
+				
 			}
 			
 		}
 		
 		if (wasConnected) {
 			callback.onDisconnect();
+			// TODO: Attempt to reconnect for a specified duration
 			
-			//TODO: reconnect
 		}
 	}
 

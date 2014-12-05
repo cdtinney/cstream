@@ -1,6 +1,5 @@
 package com.cstream.tracker;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -36,6 +35,7 @@ public final class TrackerClient {
 	private static final String REMOVE_URL = SERVER_URL + "/remove";
 
 	private static HttpClient client = HttpClientBuilder.create().build();	
+	private static IOSocket socket;
 	
 	// Only one instance of a JSON parser is necessary since no state is preserved
 	private static Gson json = new Gson();
@@ -43,23 +43,33 @@ public final class TrackerClient {
 	// Empty private constructor so no extra instances can be created
 	private TrackerClient() { }
 	
+	public static void closeSocket() {
+		
+		if (socket == null) {
+			return;
+		}
+		
+		socket.disconnect();
+		
+	}
+	
 	public static void initializeSocket() {
 		
-		IOSocket socket = new IOSocket(SERVER_URL.replace("https", "ws"), new MessageCallback() {
+		socket = new IOSocket(SERVER_URL.replace("https", "ws"), new MessageCallback() {
 
 			@Override
 			public void on(String event, JSONObject... data) {
-				// TODO
+				// TODO - Client Socket - Handle JSON event
 			}
 
 			@Override
 			public void onMessage(String message) {
-				// TODO
+				// TODO - Client Socket - Handle message
 			}
 
 			@Override
 			public void onMessage(JSONObject json) {
-				// TODO
+				// TODO - Client Socket - Handle JSON message
 			}
 
 			@Override
@@ -115,8 +125,6 @@ public final class TrackerClient {
 
 		try {
 			
-			// TODO - I don't think we should be JSON-ifying the entire peer object. 
-			// Use an @Expose annotation or create our own exclusion/inclusion strategy.
 			String response  = postRequest(JOIN_URL, new StringEntity(getJson(peer)));
 			if (response == null || response.isEmpty()) {
 				LOGGER.warning("Join POST request returned null or empty response");
