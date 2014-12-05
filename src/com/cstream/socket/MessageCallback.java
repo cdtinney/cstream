@@ -1,4 +1,4 @@
-package com.cstream.socket.io;
+package com.cstream.socket;
 
 import org.json.JSONObject;
 

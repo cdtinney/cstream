@@ -16,8 +16,8 @@ import org.json.JSONObject;
 
 import com.cstream.logging.LogLevel;
 import com.cstream.model.Song;
-import com.cstream.socket.io.IOSocket;
-import com.cstream.socket.io.MessageCallback;
+import com.cstream.socket.IOSocket;
+import com.cstream.socket.MessageCallback;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;

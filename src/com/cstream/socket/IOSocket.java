@@ -1,4 +1,4 @@
-package com.cstream.socket.io;
+package com.cstream.socket;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,11 +63,13 @@ public class IOSocket {
 		webSocket = new IOWebSocket(URI.create(webSocketAddress + "/socket.io/1/websocket/"+ sessionID), this, callback);
 		webSocket.setNamespace(namespace);
 		webSocket.connect();
+		
 	}
 	
 	public void emit(String event, JSONObject... message) throws IOException, InterruptedException {
 		
 		try {
+			
 			JSONObject data = new JSONObject();
 			JSONArray args = new JSONArray();
 			
@@ -89,13 +91,17 @@ public class IOSocket {
 	
 
 	public void send(String endpoint, JSONObject message) throws IOException, InterruptedException {
+		
 		IOMessage packet = new IOMessage(IOMessage.JSONMSG, webSocket.getNamespace(), message.toString());
 		webSocket.sendMessage(packet);
+		
 	}
 	
 	public void send(String message) throws IOException, InterruptedException {
+		
 		IOMessage packet = new IOMessage(IOMessage.MESSAGE, webSocket.getNamespace(), message);
 		webSocket.sendMessage(packet);
+		
 	}
 	
 	public synchronized void disconnect() {
@@ -129,12 +135,14 @@ public class IOSocket {
 	}
 	
 	synchronized void onConnect() {
+		
 		if (!connected) {
 			connected = true;
 			connecting = false;
 			
 			callback.onConnect();
 		}
+		
 	}
 	
 	synchronized void onDisconnect() {

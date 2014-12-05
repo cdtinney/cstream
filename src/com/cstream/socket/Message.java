@@ -1,4 +1,4 @@
-package com.cstream.socket.io;
+package com.cstream.socket;
 
 public class Message extends IOMessage{
 	
