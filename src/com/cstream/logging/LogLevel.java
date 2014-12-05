@@ -1,4 +1,4 @@
-package com.cstream.utils.logging;
+package com.cstream.logging;
 
 import java.util.logging.Level;
 

@@ -12,12 +12,12 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import com.biasedbit.efflux.packet.DataPacket;
-import com.biasedbit.efflux.participant.RtpParticipant;
-import com.biasedbit.efflux.participant.RtpParticipantInfo;
-import com.biasedbit.efflux.session.MultiParticipantSession;
-import com.biasedbit.efflux.session.RtpSession;
-import com.biasedbit.efflux.session.RtpSessionDataListener;
+import com.cstream.efflux.packet.DataPacket;
+import com.cstream.efflux.participant.RtpParticipant;
+import com.cstream.efflux.participant.RtpParticipantInfo;
+import com.cstream.efflux.session.MultiParticipantSession;
+import com.cstream.efflux.session.RtpSession;
+import com.cstream.efflux.session.RtpSessionDataListener;
 
 /**
  * Sample code for audio sender.
@@ -25,9 +25,9 @@ import com.biasedbit.efflux.session.RtpSessionDataListener;
  * @author bensweett
  *
  */
-public class RTPManger {
+public class RTPManager {
 	
-	private static Logger LOGGER = Logger.getLogger(RTPManger.class.getName());
+	private static Logger LOGGER = Logger.getLogger(RTPManager.class.getName());
 	
 	private final int BUFFER_SIZE = 4096;
 	
@@ -38,8 +38,8 @@ public class RTPManger {
 	private SourceDataLine inLine;
 
 	// Recommended ports: 6001, 6002
-	//TODO: These values might need to be changed based on the peer
-	public RTPManger(String host, int rtpPort, int rtcpPort)  {
+	// TODO: These values might need to be changed based on the peer
+	public RTPManager(String host, int rtpPort, int rtcpPort)  {
 		
 		this.participant = RtpParticipant.createReceiver(host, rtpPort, rtcpPort);
 		participant.getInfo().setSsrc(6969);
@@ -50,16 +50,19 @@ public class RTPManger {
 		
 	}
 	
-	//TODO: Proper Encoding for Playback? needs the base format with the decoded format?
+	// TODO: Proper Encoding for Playback? needs the base format with the decoded format?
 	public void playDataFromStream() {
 		
 		AudioFormat format = null;
 		
 		try {
 			rawplay(format);
+			
 		} catch (IOException | LineUnavailableException e) {
 			LOGGER.warning("IOException or Line Unavailable while playing from stream");
+			
 		}
+		
 	}
 	
 	public void sendFile(String path) {
@@ -80,7 +83,7 @@ public class RTPManger {
 			
 			while (nBytesRead != -1) {
 					
-					nBytesRead = toSend.read(abData, 0, abData.length);
+				nBytesRead = toSend.read(abData, 0, abData.length);
 				
 				if (nBytesRead >= 0) {
 					session.sendData(abData, System.currentTimeMillis(), false); // last value? is boolean called Marked? 
@@ -107,10 +110,12 @@ public class RTPManger {
 					
 			@Override
 			public void dataPacketReceived(RtpSession rtp, RtpParticipantInfo info, DataPacket packet) {
-				if(inLine != null) {
+				
+				if (inLine != null) {
 					byte[] data = packet.getDataAsArray();
 					inLine.write(data, 0, data.length);
 				}
+				
 			}
 			
 		});
@@ -148,6 +153,7 @@ public class RTPManger {
 	}
 
 	private void rawplay(AudioFormat targetFormat) throws IOException, LineUnavailableException {
+		
 		byte[] data = new byte[BUFFER_SIZE];
 		
 		DataLine.Info info = new DataLine.Info(SourceDataLine.class, targetFormat);
@@ -161,9 +167,12 @@ public class RTPManger {
 			int nBytesRead = 0, nBytesWritten = 0;
 			while (nBytesRead != -1) {
 				
+				// TODO - Read the file and cache it. Then, we need to add ourselves as a peer!
+				
 				// TODO: Need a way of stopping the stream once its complete
 				// NOTE: Reading is done in the packet listener
 				
+				// 1s timeout - if no data is received, close
 				try { Thread.sleep(1000); } catch(Exception e) { }
 				//nBytesRead = inLine.read(data, 0, data.length);
 				

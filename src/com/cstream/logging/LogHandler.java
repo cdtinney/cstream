@@ -1,10 +1,10 @@
-package com.cstream.utils.logging;
+package com.cstream.logging;
 
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-public class CLogHandler extends Handler {
+public class LogHandler extends Handler {
 	
 	public static void setHandler(Logger logger) {
 	
@@ -14,7 +14,7 @@ public class CLogHandler extends Handler {
 			parent.removeHandler(handler);
 		}
 		
-		CLogHandler customHandler = new CLogHandler();
+		LogHandler customHandler = new LogHandler();
 		customHandler.setFormatter(new LogFormatter());
 		customHandler.setLevel(LogLevel.INFO);	
 		

@@ -2,9 +2,9 @@ package com.cstream.rtp;
 
 import java.util.logging.Logger;
 
-import com.biasedbit.efflux.participant.RtpParticipant;
-import com.biasedbit.efflux.session.RtpSession;
-import com.biasedbit.efflux.session.RtpSessionEventListener;
+import com.cstream.efflux.participant.RtpParticipant;
+import com.cstream.efflux.session.RtpSession;
+import com.cstream.efflux.session.RtpSessionEventListener;
 
 public class RTPEventListener implements RtpSessionEventListener {
 

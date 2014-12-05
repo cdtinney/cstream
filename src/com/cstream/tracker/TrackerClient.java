@@ -14,10 +14,10 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
+import com.cstream.logging.LogLevel;
 import com.cstream.model.Song;
 import com.cstream.socket.io.IOSocket;
 import com.cstream.socket.io.MessageCallback;
-import com.cstream.utils.logging.LogLevel;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;

@@ -11,7 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.cstream.utils.logging.LogLevel;
+import com.cstream.logging.LogLevel;
 
 public class IOWebSocket extends WebSocketClient {
 

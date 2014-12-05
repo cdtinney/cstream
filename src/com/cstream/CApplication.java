@@ -6,7 +6,7 @@ import javafx.application.Application;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
-import com.cstream.utils.logging.CLogHandler;
+import com.cstream.logging.LogHandler;
 
 public class CApplication extends Application {
 		
@@ -37,7 +37,7 @@ public class CApplication extends Application {
 	
 	public static void main(String[] args) {
 		
-		CLogHandler.setHandler(LOGGER);
+		LogHandler.setHandler(LOGGER);
 		launch(args);
 		
 	}
