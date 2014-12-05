@@ -28,17 +28,17 @@ public final class TrackerClient {
 
 	private static Logger LOGGER = Logger.getLogger(TrackerClient.class.getName());
 
+	// Server URL constants
 	private final static String SERVER_URL = "https://cstream-tracker-venom889.c9.io";
-
 	private static final String LIB_URL = SERVER_URL;
 	private static final String JOIN_URL = SERVER_URL + "/join";
 	private static final String REMOVE_URL = SERVER_URL + "/remove";
+	
+	private static final Gson json = new Gson();
 
+	// Networking objects
 	private static HttpClient client = HttpClientBuilder.create().build();	
 	private static IOSocket socket;
-	
-	// Only one instance of a JSON parser is necessary since no state is preserved
-	private static Gson json = new Gson();
 
 	// Empty private constructor so no extra instances can be created
 	private TrackerClient() { }

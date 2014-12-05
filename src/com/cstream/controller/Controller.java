@@ -9,7 +9,7 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Parent;
 
-import com.cstream.utils.FxUtils;
+import com.cstream.util.FxUtils;
 
 public abstract class Controller {
 	

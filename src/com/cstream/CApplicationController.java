@@ -17,8 +17,8 @@ import com.cstream.media.MediaController;
 import com.cstream.model.Song;
 import com.cstream.tracker.TrackerClient;
 import com.cstream.tracker.TrackerPeer;
-import com.cstream.utils.FxUtils;
-import com.cstream.utils.OSUtils;
+import com.cstream.util.FxUtils;
+import com.cstream.util.OSUtils;
 
 public class CApplicationController extends Controller {
 

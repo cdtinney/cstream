@@ -9,7 +9,7 @@ import javafx.beans.property.SimpleStringProperty;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
-import com.cstream.utils.LibraryUtils;
+import com.cstream.util.LibraryUtils;
 import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;

@@ -7,7 +7,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
 
-import com.cstream.utils.FxUtils;
+import com.cstream.util.FxUtils;
 
 public class CApplicationView extends Scene {
 	

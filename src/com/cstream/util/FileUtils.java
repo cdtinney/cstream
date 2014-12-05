@@ -1,4 +1,4 @@
-package com.cstream.utils;
+package com.cstream.util;
 
 import java.io.File;
 import java.util.ArrayList;

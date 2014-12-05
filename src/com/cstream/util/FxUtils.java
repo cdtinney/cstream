@@ -1,4 +1,4 @@
-package com.cstream.utils;
+package com.cstream.util;
 
 import javafx.geometry.Pos;
 import javafx.scene.Node;

@@ -1,4 +1,4 @@
-package com.cstream.utils;
+package com.cstream.util;
 
 public class EnumUtils {
 	

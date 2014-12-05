@@ -4,8 +4,8 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.cstream.model.Song;
-import com.cstream.utils.LibraryUtils;
-import com.cstream.utils.OSUtils;
+import com.cstream.util.LibraryUtils;
+import com.cstream.util.OSUtils;
 
 public class TrackerPeer {
 
