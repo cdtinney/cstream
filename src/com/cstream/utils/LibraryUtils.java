@@ -65,6 +65,7 @@ public class LibraryUtils {
 			tag.setTrack(mp3.getId3v2Tag().getTrack());
 			tag.setTitle(mp3.getId3v2Tag().getTitle());
 			tag.setArtist(mp3.getId3v2Tag().getArtist());
+			tag.setAlbum(mp3.getId3v2Tag().getAlbum());
 			tag.setYear(mp3.getId3v2Tag().getYear());
 			tag.setTrack(mp3.getId3v2Tag().getTrack());
 			 
