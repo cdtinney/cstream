@@ -68,9 +68,14 @@ public class CApplicationController extends Controller {
 	public void stop() {
 
 		LOGGER.info("Stop");
+		
 		//TODO: Close all open streams and connections
-		stage.close();
-
+		
+		// Send a remove request to tracker and wait for response before exiting
+		if (!peer.removeTracker()) {
+			LOGGER.warning("Tracker failed to approve disconnect");
+		}
+		
 	}
 
 	//TODO: Display this after the view has been displayed
@@ -175,13 +180,7 @@ public class CApplicationController extends Controller {
 		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			
 			public void handle(WindowEvent we) {
-				// TODO: Close all streams here
-				
-				// Send a remove request to tracker and wait for response before exiting
-				if (!peer.removeTracker()) {
-					LOGGER.warning("Tracker failed to approve disconnect");
-				}
-				
+				stop();
 			}
 			
 		}); 
@@ -198,7 +197,7 @@ public class CApplicationController extends Controller {
 	@SuppressWarnings("unused")
 	private void handleQuitAction(Event event) {
 		LOGGER.info("Quit");
-		stop();
+		stage.fireEvent( new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST) );
 	}
 
 	@SuppressWarnings("unused")
