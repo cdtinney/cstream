@@ -44,6 +44,7 @@ public class CApplicationView extends Scene {
 			root.setRight(node);
 			
 		}
+		
 	}
 	
 	private void addMenuBar() {

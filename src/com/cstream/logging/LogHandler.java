@@ -6,6 +6,8 @@ import java.util.logging.Logger;
 
 public class LogHandler extends Handler {
 	
+	public static boolean DEBUG = false;
+	
 	public static void setHandler(Logger logger) {
 	
 		Logger parent = logger.getParent();
@@ -18,8 +20,7 @@ public class LogHandler extends Handler {
 		customHandler.setFormatter(new LogFormatter());
 		customHandler.setLevel(LogLevel.INFO);	
 		
-		// Change to DEBUG if you want to see more detailed error messages
-		parent.setLevel(LogLevel.DEBUG);
+		parent.setLevel(DEBUG == true ? LogLevel.DEBUG : LogLevel.FINE);
 		parent.addHandler(customHandler);
 		
 	}

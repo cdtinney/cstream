@@ -18,6 +18,7 @@ import com.cstream.model.Song;
 import com.cstream.tracker.TrackerClient;
 import com.cstream.tracker.TrackerPeer;
 import com.cstream.util.FxUtils;
+import com.cstream.util.LibraryUtils;
 import com.cstream.util.OSUtils;
 
 public class CApplicationController extends Controller {
@@ -40,7 +41,7 @@ public class CApplicationController extends Controller {
 	private LibraryController libraryController = new LibraryController();
 
 	// Model
-	private TrackerPeer peer;
+	private TrackerClient client;
 
 	public void initialize(Stage stage) {
 		this.stage = stage;
@@ -55,31 +56,23 @@ public class CApplicationController extends Controller {
 		stage.setWidth(WIDTH);
 		stage.setHeight(HEIGHT);
 		stage.centerOnScreen();
-
-		initializePeerLib(); 
-		connectToTracker();
+		
+		client = new TrackerClient(new TrackerPeer());
+		initLocalLibrary(); 
+		client.start();
 
 		addEventHandlers();
+		
 	}
 
 	public void stop() {
 
 		LOGGER.info("Attempting to stop the application...");
 		
-		if (!peer.removeTracker()) {
-			LOGGER.warning("Request to remove peer from tracker was not successful");
-			
-		} else {
-			LOGGER.info("Reqeust to remove peer from tracker was successful");
-			
-		}
-		
-		// TODO - Place elsewhere - It would be ideal if classes can simply subscribe to a quit event
-		TrackerClient.closeSocket();
+		client.stop();
 		
 	}
 
-	// TODO: Display this after the view has been displayed
 	private String showPathDialog() {
 
 		String defaultDir = DEFAULT_BASE_DIR;
@@ -101,30 +94,17 @@ public class CApplicationController extends Controller {
 
 	}
 
-	private void initializePeerLib() {
-
-		String libDir = showPathDialog();
-		peer = new TrackerPeer(libDir);
-
-		Map<String, Song> library = peer.getFiles();
-		if (library != null) {
-			libraryController.addData(library.values());
+	private void initLocalLibrary() {
+		
+		String directory = showPathDialog();
+		Map<String, Song> files = LibraryUtils.buildLocalLibrary(directory);
+		
+		client.getPeer().setFiles(files);
+		
+		if (files != null) {
+			libraryController.addData(files.values());
 		}
 
-	}
-
-	private void connectToTracker() {
-
-		if (!peer.joinTracker()) {
-			LOGGER.warning("Failed to join tracking service");
-			return;
-			
-			// TODO: Display error dialog after the view has opened only
-			//showWarningDialog("Network Warning","Failed to join tracking service. You are viewing your local offline library.");
-		}
-		
-		TrackerClient.initializeSocket();
-		
 	}
 
 	private void addViews() {

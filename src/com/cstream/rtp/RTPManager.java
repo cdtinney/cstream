@@ -178,8 +178,9 @@ public class RTPManager {
 				
 			}
 			
-			// Stop
+			// Clear all queued data from the line (note: this is a blocking method!)
 			inLine.drain();
+			
 			inLine.stop();
 			inLine.close();
 			

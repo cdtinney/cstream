@@ -1,6 +1,9 @@
 package com.cstream.media;
 
+import java.beans.PropertyChangeEvent;
 import java.util.Collection;
+import java.util.Map;
+import java.util.logging.Logger;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -9,9 +12,14 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 
+import com.cstream.logging.LogLevel;
 import com.cstream.model.Song;
+import com.cstream.notifier.Notifier;
+import com.cstream.tracker.TrackerClient;
 
 public class LibraryView extends HBox {
+
+	private static Logger LOGGER = Logger.getLogger(LibraryView.class.getName());
 	
 	private final int TABLE_WIDTH = 1280;
 	
@@ -24,25 +32,44 @@ public class LibraryView extends HBox {
 	public void initialize() {
 
 		addColumns();
-		
+
+		libTableView.setPrefWidth(TABLE_WIDTH);
 		getChildren().add(libTableView);
 		
-		libTableView.setPrefWidth(TABLE_WIDTH);
+		addListeners();
+
+		libTableView.setItems(data);
 		
 	}
 	
 	public void addData(Collection<Song> songs) {
-
-		libTableView.setItems(data);
-		
-		for (Song s: songs) {
-			data.add(s);
-		}
-		
+		data.addAll(songs);
 	}
 	
 	public TableView<Song> getTable() {
 		return libTableView;
+	}
+	
+	@SuppressWarnings({ "unchecked", "unused" })
+	private void onLibraryChanged(PropertyChangeEvent evt) {
+
+		LOGGER.log(LogLevel.DEBUG, "On library changed event");
+				
+		Map<String, Song> oldLib = (Map<String, Song>) evt.getOldValue();
+		Map<String, Song> newLib = (Map<String, Song>) evt.getNewValue();
+		
+		// Clear the saved library, and create a new list
+		data.clear();
+		
+		// Add all of the updated songs
+		data.addAll(newLib.values());		
+
+	}
+	
+	private void addListeners() {
+		
+		Notifier.getInstance().addListener(TrackerClient.class, "sharedLibrary", this, "onLibraryChanged", true);
+		
 	}
 	
 	@SuppressWarnings("unchecked")

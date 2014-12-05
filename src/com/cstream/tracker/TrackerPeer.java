@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.cstream.model.Song;
-import com.cstream.util.LibraryUtils;
 import com.cstream.util.OSUtils;
 
 public class TrackerPeer {
@@ -20,14 +19,17 @@ public class TrackerPeer {
 	
 	private Map<String, Song> files;
 	
-	public TrackerPeer(String libraryPath) {
+	public TrackerPeer() {
 		
 		this.id = OSUtils.generateUserId();
 		this.ip = OSUtils.getLocalIp();
 		
 		this.port = DEFAULT_PORT;		
 		
-		this.files = LibraryUtils.buildLocalLibrary(libraryPath);
+	}
+	
+	public TrackerPeer(Map<String, Song> files) {
+		this();
 		
 	}
 
@@ -47,18 +49,8 @@ public class TrackerPeer {
 		return files;
 	}
 	
-	public boolean joinTracker() {
-		return TrackerClient.join(this);
-	}
-	
-	public boolean removeTracker() {
-		return TrackerClient.remove(this);
-	}
-	
-	public boolean getLibraryFromTracker() {
-		files = TrackerClient.getLibrary();
-		
-		return files == null ? false : true;
+	public void setFiles(Map<String, Song> files) {
+		this.files = files;
 	}
 
 }

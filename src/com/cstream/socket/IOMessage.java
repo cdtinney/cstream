@@ -1,6 +1,7 @@
 package com.cstream.socket;
 
 public class IOMessage {
+	
 	public static final int DISCONNECT = 0;
 	public static final int CONNECT = 1;
 	public static final int HEARTBEAT = 2;
@@ -32,85 +33,84 @@ public class IOMessage {
 		
 	}
 	
-	
-	public static IOMessage parseMsg(String message){
+	public static IOMessage parseMsg(String message) {
+		
 		String[] content = message.split(":", 4);
 		IOMessage msg = new IOMessage();
 		msg.setType(Integer.parseInt(content[0]));
 		
-		if(message.endsWith("::")){
+		if (message.endsWith("::")){
 			msg.setId(-1);
 			msg.setMessageData("");
 			msg.setEndpoint("");
 			return msg;
 		}
+		
 		System.out.println(content[1]);
-		if(!content[1].equals("")){
+		if (!content[1].equals("")){
 			msg.setId(Integer.parseInt(content[1]));
 		}
-		if(!content[2].equals("")){
+		
+		if (!content[2].equals("")){
 			msg.setEndpoint(content[2]);
 		}
-		if(content.length > 3 && !content[3].equals("")){
+		
+		if (content.length > 3 && !content[3].equals("")){
 			msg.setMessageData(content[3]);
 		}
+		
 		return msg;
+		
 	}
 	
 	public String toString(){
-		if(id == -1 && endpoint.equals("") && messageData.equals("")){
+		
+		if (id == -1 && endpoint.equals("") && messageData.equals("")){
 			return type+"::";
-		}
-		else if(id == -1 && endpoint.equals("")){
+			
+		} else if (id == -1 && endpoint.equals("")){
 			return type+":::"+messageData;
-		}
-		else if(id > -1){
+			
+		} else if (id > -1){
 			return type+":"+id+":"+endpoint+":"+messageData;
-		}
-		else{
+			
+		} else {
 			return type+"::"+endpoint+":"+messageData;
+			
 		}
+		
 	}
-
 
 	public void setType(int type) {
 		this.type = type;
 	}
 
-
 	public int getType() {
 		return type;
 	}
-
 
 	public void setId(int id) {
 		this.id = id;
 	}
 
-
 	public int getId() {
 		return id;
 	}
-
 
 	public void setEndpoint(String endpoint) {
 		this.endpoint = endpoint;
 	}
 
-
 	public String getEndpoint() {
 		return endpoint;
 	}
-
 
 	public void setMessageData(String messageData) {
 		this.messageData = messageData;
 	}
 
-
 	public String getMessageData() {
 		return messageData;
-	}
-	
+	}	
 
 }

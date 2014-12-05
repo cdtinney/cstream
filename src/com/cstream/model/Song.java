@@ -26,10 +26,8 @@ public class Song {
 	private transient Mp3File mp3;	
 	private String path;
 	
-	// Observable properties to bind to library view
-	private transient SimpleStringProperty artistProperty = new SimpleStringProperty("none");
-	private transient SimpleStringProperty titleProperty = new SimpleStringProperty("none");
-	private transient SimpleStringProperty albumProperty = new SimpleStringProperty("none");
+	// List of peer IDs that are sharing this song
+	private String[] peers;
 	
 	// Primitive string properties required for JSON parsing
 	private String artist;
@@ -78,15 +76,15 @@ public class Song {
 	}
 	
 	public SimpleStringProperty artistProperty() {
-		return artistProperty;
+		return new SimpleStringProperty(artist);
 	}
 	
 	public SimpleStringProperty titleProperty() {
-		return titleProperty;
+		return new SimpleStringProperty(title);
 	}
 	
 	public SimpleStringProperty albumProperty() {
-		return albumProperty;
+		return new SimpleStringProperty(album);
 	}
 	
 	@Override
@@ -113,14 +111,9 @@ public class Song {
 		
 		ID3v1 tag = LibraryUtils.getTagFromMp3(mp3);
 		
-		// TODO - Add more properties - year, track... ?
-		this.artistProperty = new SimpleStringProperty(tag.getArtist());
-		this.titleProperty = new SimpleStringProperty(tag.getTitle());
-		this.albumProperty = new SimpleStringProperty(tag.getAlbum());
-		
-		this.artist = artistProperty.get();
-		this.title = titleProperty.get();
-		this.album = albumProperty.get();
+		this.artist = tag.getArtist();
+		this.title = tag.getTitle();
+		this.album = tag.getAlbum();
 		
 	}
 	

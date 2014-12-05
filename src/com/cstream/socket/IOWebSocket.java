@@ -19,11 +19,10 @@ public class IOWebSocket extends WebSocketClient {
 	
 	private MessageCallback callback;
 	private IOSocket ioSocket;
-	private static int currentID = 0;
 	private String namespace;
 
-	public IOWebSocket(URI arg0, IOSocket ioSocket, MessageCallback callback) {
-		super(arg0);
+	public IOWebSocket(URI uri, IOSocket ioSocket, MessageCallback callback) {
+		super(uri);
 		this.callback = callback;
 		this.ioSocket = ioSocket;
 	}
@@ -34,16 +33,17 @@ public class IOWebSocket extends WebSocketClient {
 	}
 
 	@Override
-	public void onMessage(String arg0) {
+	public void onMessage(String msg) {
 		
-		LOGGER.info("Message received: " + arg0);
-		IOMessage message = IOMessage.parseMsg(arg0);
+		LOGGER.info("Message received: " + msg);
+		IOMessage message = IOMessage.parseMsg(msg);
 		
 		switch (message.getType()) {	
 		
 			case IOMessage.HEARTBEAT:
 				
 				try {
+					LOGGER.log(LogLevel.DEBUG, "Sending: 2::");
 					send("2::");
 					LOGGER.log(LogLevel.DEBUG, "HeartBeat written to server");
 					
@@ -99,14 +99,17 @@ public class IOWebSocket extends WebSocketClient {
 				
 			case IOMessage.ACK:
 				// TODO - Socket - Handle ACK messages
+				LOGGER.info("ACK message received");
 				break;
 				
 			case IOMessage.ERROR:
 				// TODO - Socket - Handle ERROR messages
+				LOGGER.info("ERROR message received");
 				break;
 				
 			case IOMessage.DISCONNECT:
 				// TODO - Socket - Handle DISCONNECT messages
+				LOGGER.info("DISCONNECT message received");
 				break;
 			
 		}
@@ -155,12 +158,6 @@ public class IOWebSocket extends WebSocketClient {
 	
 	public void sendMessage(String message) throws IOException, InterruptedException {
 		send(new Message(message).toString());
-	}
-	
-	public static int genID(){
-		currentID++;
-		return currentID;
-		
 	}
 
 	public void setNamespace(String ns) {

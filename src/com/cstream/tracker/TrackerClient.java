@@ -1,8 +1,11 @@
 package com.cstream.tracker;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.apache.http.HttpResponse;
@@ -16,13 +19,10 @@ import org.json.JSONObject;
 
 import com.cstream.logging.LogLevel;
 import com.cstream.model.Song;
+import com.cstream.notifier.Notifier;
 import com.cstream.socket.IOSocket;
 import com.cstream.socket.MessageCallback;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.reflect.TypeToken;
+import com.cstream.util.JsonUtils;
 
 public final class TrackerClient {
 
@@ -34,16 +34,69 @@ public final class TrackerClient {
 	private static final String JOIN_URL = SERVER_URL + "/join";
 	private static final String REMOVE_URL = SERVER_URL + "/remove";
 	
-	private static final Gson json = new Gson();
+	// Socket event types
+	private static final String PEER_CONNECT = "PEER_CONNECT";
+	private static final String PEER_DISCONNECT = "PEER_DISCONNECT";
+	
+	// Keep alive message interval (in seconds)
+	private static final int KEEP_ALIVE = 10;
 
 	// Networking objects
-	private static HttpClient client = HttpClientBuilder.create().build();	
-	private static IOSocket socket;
+	private HttpClient client = HttpClientBuilder.create().build();	
+	private IOSocket socket;
+	
+	// Model classes
+	private TrackerPeer peer;
+	private Map<String, Song> sharedLibrary;
 
-	// Empty private constructor so no extra instances can be created
+	// Empty private constructor so no instances can be created without a peer
+	@SuppressWarnings("unused")
 	private TrackerClient() { }
 	
-	public static void closeSocket() {
+	public TrackerClient(TrackerPeer peer) {
+		this.peer = peer;
+	}
+	
+	public TrackerPeer getPeer() {
+		return peer;
+	}
+	
+	public boolean start() {
+		
+		boolean joined = join(peer);
+		if (!joined) {
+			LOGGER.warning("Failed to join tracker");
+			return false;
+		}
+		
+		LOGGER.info("Joined tracker successfully");
+		initializeSocket();
+		return true;
+		
+	}
+	
+	public boolean stop() {
+			
+		boolean removed = remove(peer);
+		if (!removed) {
+			LOGGER.warning("Request to remove peer from tracker was not successful");
+			return false;
+		}
+
+		LOGGER.info("Reqeust to remove peer from tracker was successful");		
+		closeSocket();
+		return true;
+		
+	}
+	
+	private void updateLibrary() {
+
+		Map<String, Song> updatedLibrary = getLibrary();
+		Notifier.getInstance().notify(this, "sharedLibrary", sharedLibrary, sharedLibrary = updatedLibrary);
+		
+	}
+	
+	private void closeSocket() {
 		
 		if (socket == null) {
 			return;
@@ -53,28 +106,47 @@ public final class TrackerClient {
 		
 	}
 	
-	public static void initializeSocket() {
+	private void initializeSocket() {
 		
 		socket = new IOSocket(SERVER_URL.replace("https", "ws"), new MessageCallback() {
 
 			@Override
 			public void on(String event, JSONObject... data) {
-				// TODO - Client Socket - Handle JSON event
+				
+				switch(event) {
+				
+					case PEER_CONNECT:
+						LOGGER.info("PEER_CONNECT event received: " + data);
+						updateLibrary();
+						break;
+					
+					case PEER_DISCONNECT:
+						LOGGER.info("PEER_DISCONNECT event received: " + data);
+						updateLibrary();
+						break;
+						
+					default:
+						LOGGER.info("Socket event received - " + event + " - " + data);						
+					
+				}
+				
 			}
 
 			@Override
 			public void onMessage(String message) {
-				// TODO - Client Socket - Handle message
+				LOGGER.info("Message received: " + message);
 			}
 
 			@Override
 			public void onMessage(JSONObject json) {
-				// TODO - Client Socket - Handle JSON message
+				LOGGER.info("JSON message received: " + json);
 			}
 
 			@Override
 			public void onConnect() {
 				LOGGER.info("Connected to socket server");
+				startKeepAlive();
+				
 			}
 
 			@Override
@@ -97,7 +169,7 @@ public final class TrackerClient {
 	 * Do a GET request for the library from the tracker. If the request returns OK, attempt to parse the
 	 * JSON returned.
 	 */
-	public static Map<String, Song> getLibrary() {
+	private Map<String, Song> getLibrary() {
 
 		String response = getRequest(LIB_URL);
 		if (response == null || response.isEmpty()) {
@@ -105,9 +177,9 @@ public final class TrackerClient {
 			return null;
 		}
 		
-		Map<String, String> jsonMap = parseJsonMap(response);
+		Map<String, String> jsonMap = JsonUtils.parseJsonStringMap(response);
 		if (jsonMap != null && isResponseOk(jsonMap.get("status"))) {
-			return parseJsonSongLibrary(jsonMap.get("library"));
+			return JsonUtils.parseJsonSongMap(jsonMap.get("library"));
 			
 		} else {
 			LOGGER.warning("A GET library request returned a response that is not a valid JSON library");
@@ -121,17 +193,17 @@ public final class TrackerClient {
 	/**
 	 * Do a POST join request to the tracker. Returns true if the request returned OK, false otherwise.
 	 */
-	public static boolean join(TrackerPeer peer) {
+	private boolean join(TrackerPeer peer) {
 
 		try {
 			
-			String response  = postRequest(JOIN_URL, new StringEntity(getJson(peer)));
+			String response  = postRequest(JOIN_URL, new StringEntity(JsonUtils.getJson(peer)));
 			if (response == null || response.isEmpty()) {
 				LOGGER.warning("Join POST request returned null or empty response");
 				return false;
 			}
 			
-			Map<String, String> jsonMap = parseJsonMap(response);
+			Map<String, String> jsonMap = JsonUtils.parseJsonStringMap(response);
 			if (jsonMap != null  && isResponseOk(jsonMap.get("status"))) {
 				return true;
 			}
@@ -149,13 +221,13 @@ public final class TrackerClient {
 	/**
 	 * Do a POST remove request to the tracker. Returns true if the request returned OK, false otherwise.
 	 */
-	public static boolean remove(TrackerPeer peer) {
+	private boolean remove(TrackerPeer peer) {
 
 		Map<String, String> jsonMap = null;
 		String response = "";
 		
 		try {
-			response = postRequest(REMOVE_URL, new StringEntity(getBasicJson("id", peer.getId())));	
+			response = postRequest(REMOVE_URL, new StringEntity(JsonUtils.toJson("id", peer.getId())));	
 			
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -163,7 +235,7 @@ public final class TrackerClient {
 		}
 
 		if (!response.isEmpty()) {
-			jsonMap = parseJsonMap(response);
+			jsonMap = JsonUtils.parseJsonStringMap(response);
 			
 		}
 		
@@ -179,7 +251,7 @@ public final class TrackerClient {
 	/**
 	 * Performs a GET request to the given URL and returns the response as an (ideally) JSON string.
 	 */
-	private static String getRequest(String url) {
+	private String getRequest(String url) {
 
 		try {
 			HttpGet get = new HttpGet(url);
@@ -199,7 +271,7 @@ public final class TrackerClient {
 	 * Performs a POST to the tracker with the URL and parameters given as JSON in the 
 	 * body. Returns the response from the tracker as an (ideally) JSON string.
 	 */
-	private static String postRequest(String url, StringEntity params) {
+	private String postRequest(String url, StringEntity params) {
 
 		try {
 			HttpPost post = new HttpPost(url);
@@ -216,61 +288,42 @@ public final class TrackerClient {
 		return "";
 
 	}
+	
 	/**
 	 * Tries to parse a JSON string to a map of type <SongID, Song>. Returns null if the parse
 	 * fails (i.e. if the input string is not valid JSON).
 	 */
-	private static Map<String, Song> parseJsonSongLibrary(String jString) {
-		
-		try {			
-			Type type = new TypeToken<Map<String, Song>>(){}.getType();
-			return json.fromJson(jString, type);
-
-		} catch (JsonParseException e) {
-			LOGGER.warning("JSON parse error");
-			LOGGER.log(LogLevel.DEBUG, "Could not parse: " + jString);
-			LOGGER.log(LogLevel.DEBUG, e.getMessage());
-			
-		}
-		
-		return null;
-		
-	}
-
-	/**
-	 * Tries to parse a JSON string to a map of properties. Returns null if the parse
-	 * fails (i.e. if the input string is not valid JSON).
-	 */
-	private static Map<String, String> parseJsonMap(String jString) {
-		
-		try {
-			Type type = new TypeToken<Map<String, String>>(){}.getType();
-			return json.fromJson(jString, type);
-
-		} catch (JsonParseException e) {
-			LOGGER.warning("JSON parse error");
-			LOGGER.log(LogLevel.DEBUG, "Could not parse: " + jString);
-			
-		}
-
-		return null;
-		
-	}
-	
-	private static String getBasicJson(String property, String value) {
-		
-		JsonObject object = new JsonObject();
-		object.add(property, new JsonPrimitive(value));
-		return object.toString();
-		
-	}
-	
-	private static String getJson(Object obj) {
-		return json.toJson(obj);
-	}
 	
 	private static boolean isResponseOk(String code) {
 		return code.equals("OK");
+	}
+	
+	/*
+	 * Schedules a task that sends a KEEP_ALIVE message to the  socket server once every 10 seconds.
+	 * If the server doesn't receive the message, it will kill the socket and remove the peer from the tracker.
+	 */
+	private void startKeepAlive() {
+		
+		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+		Runnable task = new Runnable() {
+
+			@Override
+			public void run() {
+				
+				try {
+					LOGGER.log(LogLevel.DEBUG, "Sending KEEP_ALIVE from ID = " + peer.getId());
+					socket.sendKeepAlive(peer.getId());
+					
+				} catch (IOException | InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+			}
+			
+		};
+		
+		executor.scheduleAtFixedRate(task, 0, KEEP_ALIVE, TimeUnit.SECONDS);
+		
 	}
 
 }
