@@ -4,14 +4,27 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.text.Font;
 
 public class FxUtils {
+
+	@SuppressWarnings("unused")
+	private void showDialog(AlertType type, String title, String header, String message) {
+		
+		Alert alert = new Alert(type);
+		alert.setHeaderText(header);
+		alert.setTitle(title);
+		alert.setContentText(message);
+		alert.showAndWait();
+		
+	}
 	
 	public static Label buildLabel(String text, String id, int prefWidth, int minWidth, int fontSize, Pos alignment) {
 	
