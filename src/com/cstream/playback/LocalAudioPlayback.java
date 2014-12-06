@@ -3,10 +3,10 @@ package com.cstream.playback;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
-import com.xuggle.xuggler.Global;
 import com.xuggle.xuggler.IAudioSamples;
 import com.xuggle.xuggler.ICodec;
 import com.xuggle.xuggler.IContainer;
@@ -14,7 +14,7 @@ import com.xuggle.xuggler.IPacket;
 import com.xuggle.xuggler.IStream;
 import com.xuggle.xuggler.IStreamCoder;
 
-public class LocalAudioPlayBack {
+public class LocalAudioPlayback {
 
 	/**
 	 * The audio line we'll output sound to; it'll be the default audio device on your system if available
@@ -22,6 +22,10 @@ public class LocalAudioPlayBack {
 	private SourceDataLine mLine;
 	private boolean isClosed;
 	private boolean isPaused = false;
+	
+	public boolean isPaused() {
+		return isPaused;
+	}
 
 	/**
 	 * Takes a media container (file) as the first argument, opens it,
@@ -29,7 +33,7 @@ public class LocalAudioPlayBack {
 	 *  
 	 * @param path Must contain one string which represents a filename
 	 */
-	public void play(String path) {
+	public void play(String path, LineListener listener) {
 
 		String filename = path;
 
@@ -78,7 +82,7 @@ public class LocalAudioPlayBack {
 		/*
 		 * And once we have that, we ask the Java Sound System to get itself ready.
 		 */
-		openJavaSound(audioCoder);
+		openJavaSound(audioCoder, listener);
 
 		/*
 		 * Now, we start walking through the container looking at each packet.
@@ -162,7 +166,7 @@ public class LocalAudioPlayBack {
 
 	}
 
-	private void openJavaSound(IStreamCoder aAudioCoder) {
+	private void openJavaSound(IStreamCoder aAudioCoder, LineListener listener) {
 
 		AudioFormat audioFormat = new AudioFormat(aAudioCoder.getSampleRate(),
 				(int)IAudioSamples.findSampleBitDepth(aAudioCoder.getSampleFormat()),
@@ -173,6 +177,7 @@ public class LocalAudioPlayBack {
 
 		try {
 			mLine = (SourceDataLine) AudioSystem.getLine(info);
+			mLine.addLineListener(listener);
 			/**
 			 * if that succeeded, try opening the line.
 			 */
@@ -209,15 +214,12 @@ public class LocalAudioPlayBack {
 		}
 	}
 	
-	public void pause() {
-		isPaused = true;
-	}
-
-	public void unpause() {
-		isPaused = false;
+	public void togglePause() {
+		isPaused = !isPaused;
 	}
 
 	public void stopPlayback() {
 		isClosed = true;
+		isPaused = false;
 	}
 }

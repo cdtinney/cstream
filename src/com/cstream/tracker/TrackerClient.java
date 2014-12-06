@@ -93,7 +93,19 @@ public final class TrackerClient {
 	
 	private void updateLibrary() {
 
+		// Fetch the library from the tracker
 		Map<String, Song> updatedLibrary = getLibrary();
+		
+		// Set necessary songs to local
+		for (Song s : updatedLibrary.values()) {
+			
+			if (s.sharedByPeer(peer.getId())) {
+				s.setLocal(true);
+			}
+			
+		}
+		
+		// Notify any listeners that the library has been updated
 		Notifier.getInstance().notify(this, "sharedLibrary", sharedLibrary, sharedLibrary = updatedLibrary);
 		
 	}

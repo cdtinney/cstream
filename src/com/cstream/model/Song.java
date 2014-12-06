@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
@@ -36,6 +35,7 @@ public class Song implements Comparable<Song> {
 	private String album;
 	private String title;
 	private String track;
+	private int length = 0;
 	
 	// Indicates whether this song is stored locally or not
 	private transient boolean local = false;
@@ -63,6 +63,7 @@ public class Song implements Comparable<Song> {
 			this.artist = tag.getArtist();
 			this.title = tag.getTitle();
 			this.album = tag.getAlbum();
+			this.length = (int) mp3.getLengthInSeconds();
 			
 		}
 		
@@ -86,6 +87,10 @@ public class Song implements Comparable<Song> {
 	
 	public String getTitle() {
 		return title;
+	}
+	
+	public int getLength() {
+		return length;
 	}
 	
 	public Mp3File getMp3() {

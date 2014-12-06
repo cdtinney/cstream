@@ -8,9 +8,15 @@ import javafx.scene.control.Slider;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+import com.cstream.model.Song;
 import com.cstream.util.FxUtils;
 
 public class MediaView extends HBox {
+	
+	private Label title;
+	private Label artist;
+	private Label album;
+	private Label remainingTimeLabel;
 	
     public void initialize() {    	
     	
@@ -28,13 +34,33 @@ public class MediaView extends HBox {
     	
     }
     
+    public void updateNowPlaying(Song song) {
+    	
+    	if (song == null) {
+    		title.setText(null);
+    		album.setText(null);
+    		artist.setText(null);
+    		return;
+    	}
+    	
+    	title.setText(song.getTitle());
+    	album.setText(song.getAlbum());
+    	artist.setText(song.getArtist());
+    	
+    	remainingTimeLabel.setText(String.format("%2d:%02d", (song.getLength()%3600)/60, (song.getLength()%60)));
+    	
+    }
+    
+    public Button getButton(String id) {
+    	return FxUtils.lookup(this, id);
+    }
+    
     private void addControlButtons() {
     	
     	Button playButton = FxUtils.buildButton("Play", "playButton", 60, 35, false);
-    	Button pauseButton = FxUtils.buildButton("Pause", "pauseButton", 60, 35, false);
-    	Button stopButton = FxUtils.buildButton("Stop", "stopButton", 60, 35, false);
+    	Button stopButton = FxUtils.buildButton("Stop", "stopButton", 60, 35, true);
     	
-    	getChildren().addAll(playButton, pauseButton, stopButton);
+    	getChildren().addAll(playButton, stopButton);
     	
     }
     
@@ -56,7 +82,7 @@ public class MediaView extends HBox {
     	timeSlider.setMaxWidth(Double.MAX_VALUE);
     	timeSlider.setDisable(true);
     	
-    	Label remainingTimeLabel = new Label("5:00");
+    	remainingTimeLabel = new Label("5:00");
     	
     	seekBox.getChildren().addAll(currentTimeLabel, timeSlider, remainingTimeLabel);
     	getChildren().add(seekBox);
@@ -67,14 +93,14 @@ public class MediaView extends HBox {
 
     	VBox nowPlayingVBox = new VBox();
     	nowPlayingVBox.getStyleClass().add("nowPlaying");
-    	nowPlayingVBox.setPrefWidth(350);
+    	nowPlayingVBox.setPrefWidth(400);
     	nowPlayingVBox.setSpacing(5);
     	nowPlayingVBox.setAlignment(Pos.CENTER);
     	nowPlayingVBox.setPadding(new Insets(10, 0, 10, 10));
 		
-    	Label title = FxUtils.buildLabel("title", "titleLabel", 300, 50, 20, Pos.CENTER);
-    	Label artist = FxUtils.buildLabel("artistLabel", "artistLabel", 300, 50, 16, Pos.CENTER);
-    	Label album = FxUtils.buildLabel("albumLabel", "albumLabel", 300, 50, 16, Pos.CENTER);
+    	title = FxUtils.buildLabel("title", "", 390, 50, 20, Pos.CENTER);
+    	artist = FxUtils.buildLabel("artistLabel", "", 390, 50, 16, Pos.CENTER);
+    	album = FxUtils.buildLabel("albumLabel", "", 390, 50, 16, Pos.CENTER);
 		
     	nowPlayingVBox.getChildren().addAll(title, artist, album);
     	
