@@ -1,6 +1,5 @@
 package com.cstream.server;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -15,27 +14,21 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.server.handler.ContextHandler;
 
+import com.cstream.torrent.TorrentManager;
 import com.cstream.tracker.TrackerClient;
-import com.cstream.util.OSUtils;
 
 public class HttpServer {
 
 	private static Logger LOGGER = Logger.getLogger(HttpServer.class.getName());
-
-	private final static String DEFAULT_BASE_DIR = System.getProperty("user.home");
 	
 	private static final int BUFFER_SIZE = 65536;
 	private static final int PORT = 8080;
-	
-	private static String TORRENT_DIR = "";
 	
 	private Server server;
 	
 	private TrackerClient client;
 	
 	public HttpServer() {
-		
-		TORRENT_DIR = DEFAULT_BASE_DIR + (OSUtils.isWindows() ? "\\cstream\\torrent\\" : "/cstream/torrent/");
 		
 		server = new Server(PORT);
  
@@ -114,7 +107,7 @@ public class HttpServer {
 			response.setBufferSize(BUFFER_SIZE);
 	        OutputStream outStream = response.getOutputStream();
 
-	        try (FileInputStream stream = new FileInputStream(new File(TORRENT_DIR + fileName + ".torrent"))) {
+	        try (FileInputStream stream = new FileInputStream(TorrentManager.createTorrentFile(fileName))) {
 	        	
 	            int bytesRead;
 	            byte[] buffer = new byte[BUFFER_SIZE];

@@ -1,15 +1,11 @@
 package com.cstream;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Map;
-import java.util.Optional;
 import java.util.logging.Logger;
 
 import javafx.event.Event;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.TextInputDialog;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -18,11 +14,11 @@ import com.cstream.media.LibraryController;
 import com.cstream.media.MediaController;
 import com.cstream.model.Song;
 import com.cstream.server.HttpServer;
+import com.cstream.torrent.TorrentManager;
 import com.cstream.tracker.TrackerClient;
 import com.cstream.tracker.TrackerPeer;
 import com.cstream.util.FxUtils;
 import com.cstream.util.LibraryUtils;
-import com.cstream.util.OSUtils;
 
 public class CApplicationController extends Controller {
 
@@ -30,9 +26,6 @@ public class CApplicationController extends Controller {
 
 	public final static int WIDTH = 1280;
 	public final static int HEIGHT = 720;
-
-	private final static String DEFAULT_BASE_DIR = System.getProperty("user.home");
-	private static String TORRENT_DIR = "";
 
 	// Primary stage
 	private Stage stage;
@@ -52,8 +45,6 @@ public class CApplicationController extends Controller {
 
 	public void initialize(Stage stage) {
 		
-		TORRENT_DIR = DEFAULT_BASE_DIR + (OSUtils.isWindows() ? "\\cstream\\torrent\\" : "/cstream/torrent/");
-		
 		this.stage = stage;
 
 		view = new CApplicationView(WIDTH, HEIGHT);
@@ -63,22 +54,7 @@ public class CApplicationController extends Controller {
 		stage.setWidth(WIDTH);
 		stage.setHeight(HEIGHT);
 		stage.centerOnScreen();
-				
-//		try {
-//			
-//			Torrent t = Torrent.create(new File("C:\\test.mp3"), new URI(""), "colin");
-//			OutputStream output = new FileOutputStream(new File(TORRENT_DIR + "test" + ".torrent"));
-//			t.save(output);
-//			
-//			SharedTorrent st = new SharedTorrent(t, new File(TORRENT_DIR));
-//			Client client = new Client(InetAddress.getLocalHost(), st);
-//			client.share();
-//			
-//		} catch (InterruptedException | IOException | URISyntaxException e) {
-//			e.printStackTrace();
-//			
-//		}
-//		
+		
 
 		client = new TrackerClient(new TrackerPeer());
 		server = new HttpServer(client);
@@ -102,24 +78,10 @@ public class CApplicationController extends Controller {
 		
 	}
 
-	private String showPathDialog() {
-
-		String defaultDir = DEFAULT_BASE_DIR;
-		defaultDir += OSUtils.isWindows() ? "\\cstream" : "/cstream";
-
-		TextInputDialog dialog = new TextInputDialog(defaultDir);
-		dialog.setTitle("Music Library Path");
-		dialog.setHeaderText("Please enter the directory path you would like to share (default: " + defaultDir + ")");
-
-		Optional<String> result = dialog.showAndWait();
-		return result.isPresent() ? result.get() : "";
-
-	}
-
 	private void initLocalLibrary() {
 		
-		String directory = showPathDialog();
-		Map<String, Song> files = LibraryUtils.buildLocalLibrary(directory, client.getPeer().getId(), TORRENT_DIR);
+		Map<String, Song> files = LibraryUtils.buildLocalLibrary(TorrentManager.FILE_DIR, client.getPeer().getId());
+		TorrentManager.buildTorrentsFromLibrary(files, client.getPeer().getId());
 		
 		client.setFiles(files);
 		

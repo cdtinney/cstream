@@ -2,7 +2,6 @@ package com.cstream.client;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -14,23 +13,15 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 
-import com.cstream.tracker.TrackerPeer;
-import com.cstream.util.OSUtils;
+import com.cstream.torrent.TorrentManager;
 
 public class HttpTransferClient {
 
 	private static Logger LOGGER = Logger.getLogger(HttpTransferClient.class.getName());
-
-	private final static String DEFAULT_BASE_DIR = System.getProperty("user.home");
-	
-	private static String TORRENT_DIR = "";
 	
 	private static HttpClient client = HttpClientBuilder.create().build();	
 	
-	public HttpTransferClient() {
-		
-		TORRENT_DIR = DEFAULT_BASE_DIR + (OSUtils.isWindows() ? "\\cstream\\torrent\\" : "/cstream/torrent/");
-		
+	public HttpTransferClient() {		
 	}
 	
 	public static void requestTorrent(String ip, String port, String songId) {
@@ -55,7 +46,7 @@ public class HttpTransferClient {
 			String fileName = header.getValue();
 			
 			BufferedInputStream input = new BufferedInputStream(response.getEntity().getContent());
-			BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(new File(TORRENT_DIR + fileName + ".torrent")));
+			BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(TorrentManager.createTorrentFile(fileName)));
 			
 			int inByte;
 			while ((inByte = input.read()) != -1) { 

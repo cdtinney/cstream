@@ -7,6 +7,7 @@ import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
+import com.cstream.torrent.TorrentManager;
 import com.xuggle.xuggler.IAudioSamples;
 import com.xuggle.xuggler.ICodec;
 import com.xuggle.xuggler.IContainer;
@@ -47,7 +48,9 @@ public class LocalAudioPlayback {
 		
 	}
 	
-	public void playFromPath(String path, LineListener listener) {
+	public void playFile(String fileName, LineListener listener) {
+		
+		String path = TorrentManager.FILE_DIR + fileName;
 		
 		new Thread(() -> {
 			play(path, listener);

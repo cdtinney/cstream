@@ -12,12 +12,10 @@ import javafx.scene.control.TableRow;
 import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineListener;
 
-import com.cstream.client.HttpTransferClient;
 import com.cstream.controller.Controller;
 import com.cstream.model.Song;
 import com.cstream.playback.LocalAudioPlayback;
 import com.cstream.tracker.TrackerClient;
-import com.cstream.tracker.TrackerPeer;
 
 public class MediaController extends Controller {
 
@@ -78,14 +76,10 @@ public class MediaController extends Controller {
 		boolean isLocal = song.sharedByPeer(client.getPeer().getId());
 		if (isLocal) {
 			LOGGER.info("Play song locally: " + song);	
-			//audioPlayback.playFromPath(activeSong.getPath(), new SongListener());
-			String id = "af1c984572c1ccfa572fbb871d0c019e";
-			HttpTransferClient.requestTorrent("192.168.1.109", "8080", id);
+			audioPlayback.playFile(activeSong.getPath(), new SongListener());
 			
 		} else {
 			LOGGER.info("Play song stream: " + song);
-			String id = "af1c984572c1ccfa572fbb871d0c019e";
-			HttpTransferClient.requestTorrent("192.168.1.109", "8080", id);
 		}
 		
 	}

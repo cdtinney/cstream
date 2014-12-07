@@ -5,17 +5,14 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Logger;
 
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
-
 
 import com.cstream.logging.LogLevel;
 import com.cstream.model.Song;
