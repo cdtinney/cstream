@@ -76,7 +76,7 @@ public class MediaController extends Controller {
 		boolean isLocal = song.sharedByPeer(client.getPeer().getId());
 		if (isLocal) {
 			LOGGER.info("Play song locally: " + song);	
-			audioPlayback.playFromPath(activeSong.getPath(), new AudioListener());
+			audioPlayback.playFromPath(activeSong.getPath(), new SongListener());
 			
 		} else {
 			LOGGER.info("Play song stream: " + song);
@@ -159,7 +159,7 @@ public class MediaController extends Controller {
 		
 	}
 	
-	private class AudioListener implements LineListener {
+	private class SongListener implements LineListener {
 		
 		private Timer timer;
 
@@ -169,7 +169,7 @@ public class MediaController extends Controller {
 	        LineEvent.Type type = event.getType();
 	        
 	        if (type == LineEvent.Type.START) {
-	             handleStartEvent();
+	        	handleStartEvent();
 	             
 	        } else if (type == LineEvent.Type.STOP) {
 	            handleStopEvent();

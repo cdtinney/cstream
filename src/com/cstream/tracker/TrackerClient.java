@@ -202,5 +202,16 @@ public final class TrackerClient {
 	private static boolean isResponseOk(String code) {
 		return code.equals("OK");
 	}
+
+	public String findSongPathById(String songId) {
+		
+		Song song = sharedLibrary.get(songId);
+		if (song == null) {
+			return null;
+		}
+		
+		return song.getPath();	
+		
+	}
 	
 }

@@ -41,7 +41,7 @@ public class Song implements Comparable<Song> {
 	private transient boolean local = false;
 	
 	// Constructor
-	public Song(String path) {
+	public Song(String fileName, String path) {
 		
 		try {
 			mp3 = new Mp3File(path);
@@ -52,8 +52,8 @@ public class Song implements Comparable<Song> {
 			
 		}
 		
-		this.id = FileUtils.generateMd5(path);		
-		this.path = path;
+		this.id = FileUtils.generateMd5(path);	
+		this.path = fileName;
 		this.peers = new HashSet<String>();
 		
 		if (mp3 != null) {

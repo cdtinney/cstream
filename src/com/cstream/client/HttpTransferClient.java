@@ -13,26 +13,44 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 
+import com.cstream.tracker.TrackerPeer;
+import com.cstream.util.OSUtils;
+
 public class HttpTransferClient {
+
+	private final static String DEFAULT_BASE_DIR = System.getProperty("user.home");
+	
+	private static String TORRENT_DIR = "";
 	
 	private HttpClient client = HttpClientBuilder.create().build();	
 	
-	public void requestDownload(String ip, String port, String songId, String filePath, int startRange, int endRange) {
+	public HttpTransferClient() {
 		
-		String url = ip + ":" + port + "/" + songId;
-		Header header = new BasicHeader("User-Agent", "cstream/1.0");
-		
-		HttpResponse response = get(url, header);
-		parseResponse(response, filePath);		
+		TORRENT_DIR = DEFAULT_BASE_DIR + (OSUtils.isWindows() ? "\\cstream\\torrent\\" : "/cstream/torrent/");
 		
 	}
 	
-	private void parseResponse(HttpResponse response, String filePath) {
+	public void requestTorrent(TrackerPeer peer, String songId) {
+		
+		String ip = peer.getIp();
+		String httpPort = peer.getHttpPort();
+		
+		String url = ip + ":" + httpPort + "/" + songId;
+		
+		HttpResponse response = get(url, new BasicHeader("User-Agent", "cstream/1.0"), new BasicHeader("songId", songId));
+		parseResponse(response);		
+		
+	}
+	
+	private void parseResponse(HttpResponse response) {
 				
 		try {
 			
+			Header header = response.getFirstHeader("filename");
+			String fileName = header.getValue();
+			
 			BufferedInputStream input = new BufferedInputStream(response.getEntity().getContent());
-			BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(new File(filePath)));
+			BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(new File(TORRENT_DIR + fileName + ".torrent")));
 			
 			int inByte;
 			while ((inByte = input.read()) != -1) { 
@@ -50,10 +68,16 @@ public class HttpTransferClient {
 		
 	}
 	
-	private HttpResponse get(String url, Header header) {
+	private HttpResponse get(String url, Header... headers) {
 
 		try {
+			
 			HttpGet get = new HttpGet(url);
+			
+			for (Header h : headers) {
+				get.addHeader(h);
+			}
+			
 			HttpResponse response = client.execute(get);
 			return response;
 

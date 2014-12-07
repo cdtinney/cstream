@@ -16,6 +16,8 @@ import com.xuggle.xuggler.IStreamCoder;
 
 public class LocalAudioPlayback {
 	
+	private String directory;
+	
 	private SourceDataLine mLine;
 	private boolean isClosed;
 	private boolean isPaused = false;

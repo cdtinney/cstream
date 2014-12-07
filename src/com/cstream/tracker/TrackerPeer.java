@@ -11,11 +11,14 @@ public class TrackerPeer {
 	@SuppressWarnings("unused")
 	private static Logger LOGGER = Logger.getLogger(TrackerPeer.class.getName());
 	
-	private final String DEFAULT_PORT = "9000";
+	private final String HTTP_PORT = "8080";
+	private final String TCP_PORT = "9000";
 	
 	private String id;
 	private String ip;
-	private String port;
+	
+	private String httpPort;
+	private String tcpPort;
 	
 	private Map<String, Song> files;
 	
@@ -24,7 +27,8 @@ public class TrackerPeer {
 		this.id = OSUtils.generateUserId();
 		this.ip = OSUtils.getLocalIp();
 		
-		this.port = DEFAULT_PORT;		
+		this.httpPort = HTTP_PORT;
+		this.tcpPort = TCP_PORT;
 		
 	}
 	
@@ -40,9 +44,13 @@ public class TrackerPeer {
 	public String getIp() {
 		return ip;
 	}
+	
+	public String getTcpPort() {
+		return tcpPort;
+	}
 
-	public String getPort() {
-		return port;
+	public String getHttpPort() {
+		return httpPort;
 	}
 
 	public Map<String, Song> getFiles() {
