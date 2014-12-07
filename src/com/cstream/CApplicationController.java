@@ -63,7 +63,7 @@ public class CApplicationController extends Controller {
 		stage.setWidth(WIDTH);
 		stage.setHeight(HEIGHT);
 		stage.centerOnScreen();
-		
+				
 //		try {
 //			
 //			Torrent t = Torrent.create(new File("C:\\test.mp3"), new URI(""), "colin");
@@ -78,7 +78,7 @@ public class CApplicationController extends Controller {
 //			e.printStackTrace();
 //			
 //		}
-		
+//		
 
 		client = new TrackerClient(new TrackerPeer());
 		server = new HttpServer(client);
