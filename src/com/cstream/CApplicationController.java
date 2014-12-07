@@ -72,21 +72,22 @@ public class CApplicationController extends Controller {
 		stage.setHeight(HEIGHT);
 		stage.centerOnScreen();
 		
-		try {
-			
-			Torrent t = Torrent.create(new File("C:\\test.mp3"), new URI(""), "colin");
-			OutputStream output = new FileOutputStream(new File(TORRENT_DIR + "test" + ".torrent"));
-			t.save(output);
-			
-			SharedTorrent st = new SharedTorrent(t, new File(TORRENT_DIR));
-			Client client = new Client(InetAddress.getLocalHost(), st);
-			client.share();
-			
-		} catch (InterruptedException | IOException | URISyntaxException e) {
-			e.printStackTrace();
-			
-		}
 		
+//		try {
+//			
+//			Torrent t = Torrent.create(new File("C:\\test.mp3"), new URI(""), "colin");
+//			OutputStream output = new FileOutputStream(new File(TORRENT_DIR + "test" + ".torrent"));
+//			t.save(output);
+//			
+//			SharedTorrent st = new SharedTorrent(t, new File(TORRENT_DIR));
+//			Client client = new Client(InetAddress.getLocalHost(), st);
+//			client.share();
+//			
+//		} catch (InterruptedException | IOException | URISyntaxException e) {
+//			e.printStackTrace();
+//			
+//		}
+//		
 
 		client = new TrackerClient(new TrackerPeer());
 		server = new HttpServer();

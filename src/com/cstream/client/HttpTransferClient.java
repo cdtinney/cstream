@@ -22,7 +22,7 @@ public class HttpTransferClient {
 	
 	private static String TORRENT_DIR = "";
 	
-	private HttpClient client = HttpClientBuilder.create().build();	
+	private static HttpClient client = HttpClientBuilder.create().build();	
 	
 	public HttpTransferClient() {
 		
@@ -30,19 +30,16 @@ public class HttpTransferClient {
 		
 	}
 	
-	public void requestTorrent(TrackerPeer peer, String songId) {
-		
-		String ip = peer.getIp();
-		String httpPort = peer.getHttpPort();
-		
-		String url = ip + ":" + httpPort + "/" + songId;
+	public static void requestTorrent(String ip, String port, String songId) {
+			
+		String url = "http://" + ip + ":" + port;
 		
 		HttpResponse response = get(url, new BasicHeader("User-Agent", "cstream/1.0"), new BasicHeader("songId", songId));
 		parseResponse(response);		
 		
 	}
 	
-	private void parseResponse(HttpResponse response) {
+	private static void parseResponse(HttpResponse response) {
 				
 		try {
 			
@@ -68,7 +65,7 @@ public class HttpTransferClient {
 		
 	}
 	
-	private HttpResponse get(String url, Header... headers) {
+	private static HttpResponse get(String url, Header... headers) {
 
 		try {
 			
