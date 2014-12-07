@@ -98,17 +98,14 @@ public class IOWebSocket extends WebSocketClient {
 				break;
 				
 			case IOMessage.ACK:
-				// TODO - Socket - Handle ACK messages
 				LOGGER.info("ACK message received");
 				break;
 				
 			case IOMessage.ERROR:
-				// TODO - Socket - Handle ERROR messages
 				LOGGER.info("ERROR message received");
 				break;
 				
 			case IOMessage.DISCONNECT:
-				// TODO - Socket - Handle DISCONNECT messages
 				LOGGER.info("DISCONNECT message received");
 				break;
 			

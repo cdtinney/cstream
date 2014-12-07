@@ -45,8 +45,16 @@ public class LocalAudioPlayback {
 		
 	}
 	
+	public void playFromPath(String path, LineListener listener) {
+		
+		new Thread(() -> {
+			play(path, listener);
+		}).start();
+		
+	}
+	
 	@SuppressWarnings("deprecation")
-	public void play(String path, LineListener listener) {
+	private void play(String path, LineListener listener) {
 
 		String filename = path;
 
@@ -121,7 +129,7 @@ public class LocalAudioPlayback {
 					 * We also pass in a buffer size (1024 in our example), although Xuggler
 					 * will probably allocate more space than just the 1024 (it's not important why).
 					 */
-					IAudioSamples samples = IAudioSamples.make(1, audioCoder.getChannels());
+					IAudioSamples samples = IAudioSamples.make(1024, audioCoder.getChannels());
 
 					/*
 					 * A packet can actually contain multiple sets of samples (or frames of samples

@@ -15,6 +15,7 @@ import com.cstream.controller.Controller;
 import com.cstream.media.LibraryController;
 import com.cstream.media.MediaController;
 import com.cstream.model.Song;
+import com.cstream.server.HttpServer;
 import com.cstream.tracker.TrackerClient;
 import com.cstream.tracker.TrackerPeer;
 import com.cstream.util.FxUtils;
@@ -42,8 +43,12 @@ public class CApplicationController extends Controller {
 
 	// Model
 	private TrackerClient client;
+	
+	// Networking
+	private HttpServer server;
 
 	public void initialize(Stage stage) {
+		
 		this.stage = stage;
 
 		view = new CApplicationView(WIDTH, HEIGHT);
@@ -55,6 +60,7 @@ public class CApplicationController extends Controller {
 		stage.centerOnScreen();
 
 		client = new TrackerClient(new TrackerPeer());
+		server = new HttpServer();
 
 		libraryController.initialize();
 		mediaController.initialize(libraryController, client);
@@ -71,7 +77,6 @@ public class CApplicationController extends Controller {
 	public void stop() {
 
 		LOGGER.info("Attempting to stop the application...");
-		
 		client.stop();
 		
 	}

@@ -17,14 +17,15 @@ import com.cstream.model.Song;
 import com.cstream.playback.LocalAudioPlayback;
 import com.cstream.tracker.TrackerClient;
 
-public class MediaController extends Controller implements LineListener {
+public class MediaController extends Controller {
 
 	private static Logger LOGGER = Logger.getLogger(MediaController.class.getName());
 	
-	private Timer timer;
-	
 	// View
 	private MediaView view; 
+	
+	// Sub-controllers
+	private LibraryController libraryController;
 
 	// Model
 	private TrackerClient client;
@@ -32,9 +33,6 @@ public class MediaController extends Controller implements LineListener {
 	private LocalAudioPlayback audioPlayback;
 	private Song activeSong;
 	private Song queuedSong;
-	
-	// Sub-controllers
-	private LibraryController libraryController;
 
 	public void initialize(LibraryController libraryController, TrackerClient client) {
 
@@ -51,52 +49,6 @@ public class MediaController extends Controller implements LineListener {
 
 	public Node getView() {
 		return view;
-	}
-
-	@Override
-	public void update(LineEvent event) {
-		
-        LineEvent.Type type = event.getType();
-        
-        if (type == LineEvent.Type.START) {
-        	
-            LOGGER.info("Playback started");   
-            
-            timer = new Timer();
-            SongTimer songTimer = new SongTimer();
-            timer.schedule(songTimer, 0, (long) 500);         
-            
-            Platform.runLater(() -> {
-            	
-    			view.togglePlayButton(audioPlayback.isPaused());
-                view.getButton("stopButton").setDisable(false);
-                view.updateNowPlaying(activeSong);
-            	
-            });
-             
-        } else if (type == LineEvent.Type.STOP) {
-        	
-            LOGGER.info("Playback stopped");        
-            
-            timer.cancel();    
-            
-            Platform.runLater(() -> {
-
-    			view.togglePlayButton(audioPlayback.isPaused());
-                view.getButton("stopButton").setDisable(true);
-                
-                view.updateNowPlaying(activeSong = null);
-                view.updateTimes(0, 0, 0);
-                
-                if (queuedSong != null) {
-                	play(queuedSong);
-                	queuedSong = null;
-                }
-            	
-            });
-            
-        }
-		
 	}
 
 	private void play(Song song) {
@@ -124,13 +76,7 @@ public class MediaController extends Controller implements LineListener {
 		boolean isLocal = song.sharedByPeer(client.getPeer().getId());
 		if (isLocal) {
 			LOGGER.info("Play song locally: " + song);	
-			
-			// Start local audio play back on a new thread, so we don't block the UI thread
-			new Thread(() -> {
-				
-				audioPlayback.play(activeSong.getPath(), this);
-				
-			}).start();
+			audioPlayback.playFromPath(activeSong.getPath(), new AudioListener());
 			
 		} else {
 			LOGGER.info("Play song stream: " + song);
@@ -148,12 +94,7 @@ public class MediaController extends Controller implements LineListener {
 
 		boolean isLocal = activeSong.sharedByPeer(client.getPeer().getId());
 		if (isLocal) {
-			
-			LOGGER.info("Toggle pause song locally " + activeSong);
 			audioPlayback.togglePause();
-			
-			String text = audioPlayback.isPaused() ? "Play" : "Pause";
-			view.getButton("playButton").setText(text);		
 			view.togglePlayButton(audioPlayback.isPaused());
 			
 		}
@@ -169,13 +110,29 @@ public class MediaController extends Controller implements LineListener {
 		
 		boolean isLocal = activeSong.sharedByPeer(client.getPeer().getId());
 		if (isLocal) {
-			LOGGER.info("Stop song locally " + activeSong);
 			audioPlayback.stop();
 			
 		}
 		
 		activeSong = null;
 		
+	}
+
+	@SuppressWarnings("unused")
+	private void handlePlayButton(Event event) {
+		
+		if (activeSong == null) {
+			play(libraryController.getSelectedSong());
+			return;
+		}
+		
+		play(activeSong);
+		
+	}
+
+	@SuppressWarnings("unused")
+	private void handleStopbutton(Event event) {
+		stop();		
 	}
 
 	private void addHandlers() {
@@ -201,25 +158,70 @@ public class MediaController extends Controller implements LineListener {
 		});
 		
 	}
-
-	@SuppressWarnings("unused")
-	private void handlePlayButton(Event event) {
+	
+	private class AudioListener implements LineListener {
 		
-		if (activeSong == null) {
-			play(libraryController.getSelectedSong());
-			return;
+		private Timer timer;
+
+		@Override
+		public void update(LineEvent event) {
+
+	        LineEvent.Type type = event.getType();
+	        
+	        if (type == LineEvent.Type.START) {
+	             handleStartEvent();
+	             
+	        } else if (type == LineEvent.Type.STOP) {
+	            handleStopEvent();
+	        	
+	        }
+			
 		}
 		
-		play(activeSong);
+		private void handleStartEvent() {
+        	
+            LOGGER.info("Playback started: " + activeSong);
+            
+            timer = new Timer();
+            SongTimer songTimer = new SongTimer();
+            timer.schedule(songTimer, 0, (long) 500);         
+            
+            Platform.runLater(() -> {
+            	
+    			view.togglePlayButton(audioPlayback.isPaused());
+                view.getButton("stopButton").setDisable(false);
+                view.updateNowPlaying(activeSong);
+            	
+            });
+			
+		}
+		
+		private void handleStopEvent() {
+        	
+            LOGGER.info("Playback stopped: " + activeSong);
+            
+            timer.cancel();    
+            
+            Platform.runLater(() -> {
+
+    			view.togglePlayButton(audioPlayback.isPaused());
+                view.getButton("stopButton").setDisable(true);
+                
+                view.updateNowPlaying(activeSong = null);
+                view.updateTimes(0, 0, 0);
+                
+                if (queuedSong != null) {
+                	play(queuedSong);
+                	queuedSong = null;
+                }
+            	
+            });
+			
+		}
 		
 	}
-
-	@SuppressWarnings("unused")
-	private void handleStopbutton(Event event) {
-		stop();		
-	}
 	
-	public class SongTimer extends TimerTask {
+	private class SongTimer extends TimerTask {
 		
 		private volatile int time = 0;
 

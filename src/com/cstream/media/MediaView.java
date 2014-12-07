@@ -86,7 +86,7 @@ public class MediaView extends HBox {
     private void addControlButtons() {
     	
     	Button playButton = FxUtils.buildButton("Play", "playButton", 75, 35, false, MediaView.class, PLAY_ICON);
-    	Button stopButton = FxUtils.buildButton("Stop", "stopButton", 75, 35, false, MediaView.class, STOP_ICON);
+    	Button stopButton = FxUtils.buildButton("Stop", "stopButton", 75, 35, true, MediaView.class, STOP_ICON);
     	
     	getChildren().addAll(playButton, stopButton);
     	
@@ -110,9 +110,6 @@ public class MediaView extends HBox {
     	timeSlider.setMaxWidth(Double.MAX_VALUE);
     	timeSlider.setDisable(true);
     	timeSlider.setMajorTickUnit(0.1f);
-//    	timeSlider.setMax(100);
-//    	timeSlider.setMin(0);
-//    	timeSlider.setMajorTickUnit(0.1);
     	
     	remainingTimeLabel = new Label("");
     	
