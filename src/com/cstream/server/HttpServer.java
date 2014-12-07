@@ -80,24 +80,39 @@ public class HttpServer {
 		@Override
 		public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 			
+			LOGGER.info("Requested received");
+			
 			response.setContentType("text/html;charset=utf-8");
 			response.setStatus(HttpServletResponse.SC_OK);
 			baseRequest.setHandled(true);
 			
-			// TODO - Ignore based on user-agent? How?
-			System.out.println("request for: " + request.getHeader("User-Agent"));
-			
-			String songId = request.getHeader("songId");
-			
-			response.setBufferSize(BUFFER_SIZE);
-	        OutputStream outStream = response.getOutputStream();
+			String agent = request.getHeader("User-Agent");
+			if (!agent.contains("cstream")) {
+	        	response.getWriter().println("Cannot process GET from applications other than cstream");
+	        	return;
+			}
 	        
+	        if (client == null) {
+	        	LOGGER.warning("Client is null");
+	        	response.getWriter().println("Client is null");
+	        	return;
+	        }
+	        
+			String songId = request.getHeader("songId");
 	        String fileName = client.findSongPathById(songId);
+	        
+	        LOGGER.info("Request for song: " + songId + " received");
+	        
 	        if (fileName == null) {
 	        	LOGGER.warning("Could not find requested song: " + songId);
 	        	response.getWriter().println("Error - could not find song: " + songId);
 	        	return;
 	        }
+	        
+	        response.setHeader("filename", fileName);
+			
+			response.setBufferSize(BUFFER_SIZE);
+	        OutputStream outStream = response.getOutputStream();
 
 	        try (FileInputStream stream = new FileInputStream(new File(TORRENT_DIR + fileName + ".torrent"))) {
 	        	

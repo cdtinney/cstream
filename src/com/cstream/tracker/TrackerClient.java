@@ -44,6 +44,11 @@ public final class TrackerClient {
 		return peer;
 	}
 	
+	public void setFiles(Map<String, Song> files) {
+		sharedLibrary = files;
+		peer.setFiles(files);
+	}
+	
 	public boolean start() {
 		
 		boolean joined = join(peer);

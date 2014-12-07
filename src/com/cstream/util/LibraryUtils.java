@@ -1,6 +1,11 @@
 package com.cstream.util;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +15,7 @@ import com.cstream.model.Song;
 import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.ID3v1Tag;
 import com.mpatric.mp3agic.Mp3File;
+import com.turn.ttorrent.common.Torrent;
 
 public class LibraryUtils {
 	
@@ -22,7 +28,7 @@ public class LibraryUtils {
 	 * Builds a map of songs, where the key is the song ID, from a specific directory and
 	 * all its sub directories.
 	 */
-	public static Map<String, Song> buildLocalLibrary(String directoryName, String peerId) {
+	public static Map<String, Song> buildLocalLibrary(String directoryName, String peerId, String torrentDir) {
 		
 		if (directoryName == null || directoryName.isEmpty()) {
 			LOGGER.warning("Cannot build library from null or empty directory path");
@@ -42,7 +48,10 @@ public class LibraryUtils {
 			song.setLocal(true);
 			
 			if (song.getMp3() != null && song.getId() != null) {
+				
 				results.put(song.getId(), song);
+				buildTorrentFile(torrentDir, directoryName, fileList.get(i));
+				
 				count++;
 				
 			} else {
@@ -55,6 +64,22 @@ public class LibraryUtils {
 		LOGGER.info("Added " + count + " songs");
 		
 		return results;
+		
+	}
+	
+	public static void buildTorrentFile(String torrentDir, String fileDirectory, File file) {
+
+		String filePath = fileDirectory + "\\"+ file.getName();
+		
+		try {
+			Torrent t = Torrent.create(new File(filePath), new URI(""), "colin");
+			OutputStream output = new FileOutputStream(new File(torrentDir + file.getName() + ".torrent"));
+			t.save(output);
+			
+		} catch (InterruptedException | IOException | URISyntaxException e) {
+			e.printStackTrace();
+			
+		}
 		
 	}
 	
