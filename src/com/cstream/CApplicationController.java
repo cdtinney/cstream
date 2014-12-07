@@ -1,11 +1,6 @@
 package com.cstream;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Optional;
@@ -28,9 +23,6 @@ import com.cstream.tracker.TrackerPeer;
 import com.cstream.util.FxUtils;
 import com.cstream.util.LibraryUtils;
 import com.cstream.util.OSUtils;
-import com.turn.ttorrent.client.Client;
-import com.turn.ttorrent.client.SharedTorrent;
-import com.turn.ttorrent.common.Torrent;
 
 public class CApplicationController extends Controller {
 
@@ -72,24 +64,24 @@ public class CApplicationController extends Controller {
 		stage.setHeight(HEIGHT);
 		stage.centerOnScreen();
 		
-		try {
-			
-			Torrent t = Torrent.create(new File("C:\\test.mp3"), new URI(""), "colin");
-			OutputStream output = new FileOutputStream(new File(TORRENT_DIR + "test" + ".torrent"));
-			t.save(output);
-			
-			SharedTorrent st = new SharedTorrent(t, new File(TORRENT_DIR));
-			Client client = new Client(InetAddress.getLocalHost(), st);
-			client.share();
-			
-		} catch (InterruptedException | IOException | URISyntaxException e) {
-			e.printStackTrace();
-			
-		}
+//		try {
+//			
+//			Torrent t = Torrent.create(new File("C:\\test.mp3"), new URI(""), "colin");
+//			OutputStream output = new FileOutputStream(new File(TORRENT_DIR + "test" + ".torrent"));
+//			t.save(output);
+//			
+//			SharedTorrent st = new SharedTorrent(t, new File(TORRENT_DIR));
+//			Client client = new Client(InetAddress.getLocalHost(), st);
+//			client.share();
+//			
+//		} catch (InterruptedException | IOException | URISyntaxException e) {
+//			e.printStackTrace();
+//			
+//		}
 		
 
 		client = new TrackerClient(new TrackerPeer());
-		server = new HttpServer();
+		server = new HttpServer(client);
 
 		libraryController.initialize();
 		mediaController.initialize(libraryController, client);
@@ -127,9 +119,9 @@ public class CApplicationController extends Controller {
 	private void initLocalLibrary() {
 		
 		String directory = showPathDialog();
-		Map<String, Song> files = LibraryUtils.buildLocalLibrary(directory, client.getPeer().getId());
+		Map<String, Song> files = LibraryUtils.buildLocalLibrary(directory, client.getPeer().getId(), TORRENT_DIR);
 		
-		client.getPeer().setFiles(files);
+		client.setFiles(files);
 		
 		if (files != null) {
 			libraryController.addData(files.values());

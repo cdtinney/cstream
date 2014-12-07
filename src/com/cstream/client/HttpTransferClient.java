@@ -5,6 +5,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -13,10 +14,13 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 
+import com.cstream.tracker.TrackerClient;
 import com.cstream.tracker.TrackerPeer;
 import com.cstream.util.OSUtils;
 
 public class HttpTransferClient {
+
+	private static Logger LOGGER = Logger.getLogger(HttpTransferClient.class.getName());
 
 	private final static String DEFAULT_BASE_DIR = System.getProperty("user.home");
 	
@@ -47,6 +51,11 @@ public class HttpTransferClient {
 		try {
 			
 			Header header = response.getFirstHeader("filename");
+			if (header == null) {
+				LOGGER.warning("Response header did not contain a valid filename");
+				return;
+			}
+			
 			String fileName = header.getValue();
 			
 			BufferedInputStream input = new BufferedInputStream(response.getEntity().getContent());
