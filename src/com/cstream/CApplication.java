@@ -19,7 +19,14 @@ public class CApplication extends Application {
 		
 		primaryStage.setResizable(false);
 		primaryStage.setTitle("cStream ");
-		primaryStage.getIcons().add(new Image("/images/icon.png"));
+		
+		try {
+			primaryStage.getIcons().add(new Image("/images/icon.png"));
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			
+		}
 		
 		controller.initialize(primaryStage);
 		

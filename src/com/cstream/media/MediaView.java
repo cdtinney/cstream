@@ -13,10 +13,18 @@ import com.cstream.util.FxUtils;
 
 public class MediaView extends HBox {
 	
+	private final String PLAY_ICON = "/images/play.png";
+	private final String PAUSE_ICON = "/images/pause.png";
+	private final String STOP_ICON = "/images/stop.png";
+	
 	private Label title;
 	private Label artist;
 	private Label album;
+	
+	private Label currentTimeLabel;
 	private Label remainingTimeLabel;
+	
+	private Slider timeSlider;
 	
     public void initialize() {    	
     	
@@ -31,6 +39,16 @@ public class MediaView extends HBox {
     	addControlButtons();
     	addSeekBar();
     	addNowPlayingInfo();
+    	
+    }
+    
+    public void updateTimes(int currentTime, int remainingTime, int totalTime) {
+
+    	currentTimeLabel.setText(String.format("%2d:%02d", (currentTime%3600)/60, (currentTime%60)));
+    	remainingTimeLabel.setText(String.format("%2d:%02d", (remainingTime%3600)/60, (remainingTime%60)));
+    	
+    	double progress = ((float) currentTime / (float) totalTime) * 100.0;
+    	timeSlider.setValue(progress);
     	
     }
     
@@ -55,10 +73,20 @@ public class MediaView extends HBox {
     	return FxUtils.lookup(this, id);
     }
     
+    public void togglePlayButton(boolean paused) {
+    	
+    	String icon = paused ? PLAY_ICON : PAUSE_ICON;
+		getButton("playButton").setGraphic(FxUtils.getButtonGraphic(icon));
+		
+		String text = paused ? "Play" : "Pause";
+		getButton("playButton").setText(text);
+    	
+    }
+    
     private void addControlButtons() {
     	
-    	Button playButton = FxUtils.buildButton("Play", "playButton", 60, 35, false);
-    	Button stopButton = FxUtils.buildButton("Stop", "stopButton", 60, 35, true);
+    	Button playButton = FxUtils.buildButton("Play", "playButton", 75, 35, false, MediaView.class, PLAY_ICON);
+    	Button stopButton = FxUtils.buildButton("Stop", "stopButton", 75, 35, false, MediaView.class, STOP_ICON);
     	
     	getChildren().addAll(playButton, stopButton);
     	
@@ -73,16 +101,20 @@ public class MediaView extends HBox {
     	// Insets: top, right, bottom, left
     	seekBox.setPadding(new Insets(15, 25, 15, 25));
     	
-    	Label currentTimeLabel = new Label("0:00");
+    	currentTimeLabel = new Label("0:00");
     	
-    	Slider timeSlider = new Slider();
+    	timeSlider = new Slider();
     	timeSlider.setId("timeSlider");
     	timeSlider.setMinWidth(50);
     	timeSlider.setPrefWidth(400);
     	timeSlider.setMaxWidth(Double.MAX_VALUE);
     	timeSlider.setDisable(true);
+    	timeSlider.setMajorTickUnit(0.1f);
+//    	timeSlider.setMax(100);
+//    	timeSlider.setMin(0);
+//    	timeSlider.setMajorTickUnit(0.1);
     	
-    	remainingTimeLabel = new Label("5:00");
+    	remainingTimeLabel = new Label("");
     	
     	seekBox.getChildren().addAll(currentTimeLabel, timeSlider, remainingTimeLabel);
     	getChildren().add(seekBox);
@@ -98,9 +130,9 @@ public class MediaView extends HBox {
     	nowPlayingVBox.setAlignment(Pos.CENTER);
     	nowPlayingVBox.setPadding(new Insets(10, 0, 10, 10));
 		
-    	title = FxUtils.buildLabel("title", "", 390, 50, 20, Pos.CENTER);
-    	artist = FxUtils.buildLabel("artistLabel", "", 390, 50, 16, Pos.CENTER);
-    	album = FxUtils.buildLabel("albumLabel", "", 390, 50, 16, Pos.CENTER);
+    	title = FxUtils.buildLabel("", "", 390, 50, 20, Pos.CENTER);
+    	artist = FxUtils.buildLabel("", "", 390, 50, 16, Pos.CENTER);
+    	album = FxUtils.buildLabel("", "", 390, 50, 16, Pos.CENTER);
 		
     	nowPlayingVBox.getChildren().addAll(title, artist, album);
     	

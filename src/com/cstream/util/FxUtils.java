@@ -1,5 +1,8 @@
 package com.cstream.util;
 
+import java.io.InputStream;
+import java.util.logging.Logger;
+
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -11,9 +14,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.text.Font;
 
 public class FxUtils {
+	
+	private static Logger LOGGER = Logger.getLogger(FxUtils.class.getName());
 
 	public static void showDialog(AlertType type, String title, String header, String message) {
 		
@@ -35,6 +42,46 @@ public class FxUtils {
 		label.setMinWidth(minWidth);
 		return label;
 		
+	}
+	
+	public static ImageView getButtonGraphic(String graphic) {
+		
+		InputStream is = FxUtils.class.getResourceAsStream(graphic);
+		if (is == null) {
+			LOGGER.warning("Graphic not found: " + graphic);
+			
+		} else {
+			Image img = new Image(is);
+			ImageView imgView = new ImageView(img);
+			imgView.setFitHeight(16);
+			imgView.setFitWidth(16);
+			return imgView;
+		
+		}
+		
+		return null;
+		
+	}
+	
+	public static Button buildButton(String text, String id, int width, int height, boolean disable, Class<?> clazz, String graphic) {
+
+		Button button = buildButton(text, id, width, height, disable);
+		
+		InputStream is = clazz.getResourceAsStream(graphic);
+		if (is == null) {
+			LOGGER.warning("Graphic not found: " + graphic);
+			
+		} else {
+			Image img = new Image(is);
+			ImageView imgView = new ImageView(img);
+			imgView.setFitHeight(16);
+			imgView.setFitWidth(16);
+			button.setGraphic(imgView);
+			
+		}
+		
+		return button;
+	
 	}
     
 	public static Button buildButton(String text, String id, int width, int height, boolean disable) {

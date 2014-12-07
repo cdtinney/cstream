@@ -1,5 +1,7 @@
 package com.cstream.media;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Logger;
 
 import javafx.application.Platform;
@@ -18,16 +20,18 @@ import com.cstream.tracker.TrackerClient;
 public class MediaController extends Controller implements LineListener {
 
 	private static Logger LOGGER = Logger.getLogger(MediaController.class.getName());
-
+	
+	private Timer timer;
+	
 	// View
 	private MediaView view; 
 
 	// Model
 	private TrackerClient client;
+	
+	private LocalAudioPlayback audioPlayback;
 	private Song activeSong;
 	private Song queuedSong;
-	
-	private LocalAudioPlayback audioPlayback = new LocalAudioPlayback();
 	
 	// Sub-controllers
 	private LibraryController libraryController;
@@ -39,6 +43,7 @@ public class MediaController extends Controller implements LineListener {
 
 		this.libraryController = libraryController;
 		this.client = client;
+		this.audioPlayback = new LocalAudioPlayback();
 
 		addHandlers();
 
@@ -48,7 +53,53 @@ public class MediaController extends Controller implements LineListener {
 		return view;
 	}
 
-	private void playSong(Song song) {
+	@Override
+	public void update(LineEvent event) {
+		
+        LineEvent.Type type = event.getType();
+        
+        if (type == LineEvent.Type.START) {
+        	
+            LOGGER.info("Playback started");   
+            
+            timer = new Timer();
+            SongTimer songTimer = new SongTimer();
+            timer.schedule(songTimer, 0, (long) 500);         
+            
+            Platform.runLater(() -> {
+            	
+    			view.togglePlayButton(audioPlayback.isPaused());
+                view.getButton("stopButton").setDisable(false);
+                view.updateNowPlaying(activeSong);
+            	
+            });
+             
+        } else if (type == LineEvent.Type.STOP) {
+        	
+            LOGGER.info("Playback stopped");        
+            
+            timer.cancel();    
+            
+            Platform.runLater(() -> {
+
+    			view.togglePlayButton(audioPlayback.isPaused());
+                view.getButton("stopButton").setDisable(true);
+                
+                view.updateNowPlaying(activeSong = null);
+                view.updateTimes(0, 0, 0);
+                
+                if (queuedSong != null) {
+                	play(queuedSong);
+                	queuedSong = null;
+                }
+            	
+            });
+            
+        }
+		
+	}
+
+	private void play(Song song) {
 		
 		if (song == null) {
 			return;
@@ -57,11 +108,11 @@ public class MediaController extends Controller implements LineListener {
 		if (activeSong != null) {
 
 			if (song.getId().equals(activeSong.getId())) {
-				pauseSong();
+				togglePause();
 				
 			} else {
 				queuedSong = song;
-				stopSong();
+				stop();
 				
 			}
 			
@@ -72,7 +123,6 @@ public class MediaController extends Controller implements LineListener {
 		activeSong = song;
 		boolean isLocal = song.sharedByPeer(client.getPeer().getId());
 		if (isLocal) {
-			
 			LOGGER.info("Play song locally: " + song);	
 			
 			// Start local audio play back on a new thread, so we don't block the UI thread
@@ -83,14 +133,13 @@ public class MediaController extends Controller implements LineListener {
 			}).start();
 			
 		} else {
-			
 			LOGGER.info("Play song stream: " + song);
 			
 		}
 		
 	}
 	
-	private void pauseSong() {
+	private void togglePause() {
 		
 		if (activeSong == null) {
 			LOGGER.info("No active song to pause");
@@ -101,28 +150,17 @@ public class MediaController extends Controller implements LineListener {
 		if (isLocal) {
 			
 			LOGGER.info("Toggle pause song locally " + activeSong);
-			
 			audioPlayback.togglePause();
 			
-			if (audioPlayback.isPaused()) {
-	            view.getButton("playButton").setText("Play");
-			} else {
-	            view.getButton("playButton").setText("Pause");
-				
-			}
-        	
-            //view.getButton("playButton").setDisable(false);
-            //view.getButton("stopButton").setDisable(false);
-			
-			
-		} else {
-			LOGGER.info("Pause song stream " + activeSong);
+			String text = audioPlayback.isPaused() ? "Play" : "Pause";
+			view.getButton("playButton").setText(text);		
+			view.togglePlayButton(audioPlayback.isPaused());
 			
 		}
 		
 	}
 	
-	private void stopSong() {
+	private void stop() {
 		
 		if (activeSong == null) {
 			LOGGER.info("No active song to stop");
@@ -132,11 +170,7 @@ public class MediaController extends Controller implements LineListener {
 		boolean isLocal = activeSong.sharedByPeer(client.getPeer().getId());
 		if (isLocal) {
 			LOGGER.info("Stop song locally " + activeSong);
-			
-			audioPlayback.stopPlayback();
-			
-		} else {
-			LOGGER.info("Stop song stream " + activeSong);
+			audioPlayback.stop();
 			
 		}
 		
@@ -147,7 +181,6 @@ public class MediaController extends Controller implements LineListener {
 	private void addHandlers() {
 
 		addEventHandler(view, "playButton", "setOnAction", "handlePlayButton");
-		addEventHandler(view, "pauseButton", "setOnAction", "handlePauseButton");
 		addEventHandler(view, "stopButton", "setOnAction", "handleStopbutton");
 		
 		libraryController.getView().getTable().setRowFactory(tv -> {
@@ -158,7 +191,7 @@ public class MediaController extends Controller implements LineListener {
 		    	
 		        if (event.getClickCount() == 2 && (! row.isEmpty())) {
 		            Song song = row.getItem();
-		            playSong(song);
+		            play(song);
 		        }
 		        
 		    });
@@ -173,57 +206,43 @@ public class MediaController extends Controller implements LineListener {
 	private void handlePlayButton(Event event) {
 		
 		if (activeSong == null) {
-			playSong(libraryController.getSelectedSong());
+			play(libraryController.getSelectedSong());
 			return;
 		}
 		
-		playSong(activeSong);
+		play(activeSong);
 		
 	}
 
 	@SuppressWarnings("unused")
 	private void handleStopbutton(Event event) {
-		stopSong();		
+		stop();		
 	}
+	
+	public class SongTimer extends TimerTask {
+		
+		private volatile int time = 0;
 
-	@Override
-	public void update(LineEvent event) {
-		
-        LineEvent.Type type = event.getType();
-        
-        if (type == LineEvent.Type.START) {
-        	
-            LOGGER.info("Playback started");            
-            
-            Platform.runLater(() -> {
-            	
-                view.getButton("playButton").setText("Pause");
-                view.getButton("stopButton").setDisable(false);
-                
-                view.updateNowPlaying(activeSong);
-            	
-            });
-             
-        } else if (type == LineEvent.Type.STOP) {
-        	
-            LOGGER.info("Playback stopped");            
-            
-            Platform.runLater(() -> {
-            	
-                view.getButton("playButton").setText("Play");
-                view.getButton("stopButton").setDisable(true);
-                
-                view.updateNowPlaying(activeSong = null);
-                
-                if (queuedSong != null) {
-                	playSong(queuedSong);
-                	queuedSong = null;
-                }
-            	
-            });
-            
-        }
-		
+		@Override
+		public void run() {
+			
+			Platform.runLater(() -> {
+				
+				if (audioPlayback == null || activeSong == null) {
+					return;
+				}
+				
+				int current = audioPlayback.getPosition();
+				if (current != time) {
+					
+					int remaining = activeSong.getLength() - current;
+					view.updateTimes(time = current, remaining, activeSong.getLength());
+				}
+				
+			});
+			
+		}
+	    
 	}
 
 }

@@ -15,10 +15,7 @@ import com.xuggle.xuggler.IStream;
 import com.xuggle.xuggler.IStreamCoder;
 
 public class LocalAudioPlayback {
-
-	/**
-	 * The audio line we'll output sound to; it'll be the default audio device on your system if available
-	 */
+	
 	private SourceDataLine mLine;
 	private boolean isClosed;
 	private boolean isPaused = false;
@@ -26,18 +23,34 @@ public class LocalAudioPlayback {
 	public boolean isPaused() {
 		return isPaused;
 	}
+	
+	public void togglePause() {
+		isPaused = !isPaused;
+	}
 
-	/**
-	 * Takes a media container (file) as the first argument, opens it,
-	 * opens up the default audio device on your system, and plays back the audio.
-	 *  
-	 * @param path Must contain one string which represents a filename
-	 */
+	public void stop() {
+		
+		isClosed = true;
+		isPaused = true;
+		
+	}
+	
+	public int getPosition() {
+		
+		if (mLine == null) {
+			return 0;
+		}
+		
+		return (int) mLine.getMicrosecondPosition() / 1000000;
+		
+	}
+	
+	@SuppressWarnings("deprecation")
 	public void play(String path, LineListener listener) {
 
 		String filename = path;
 
-		// Create a Xuggler container object
+		// Create a container object
 		IContainer container = IContainer.make();
 
 		// Open up the container
@@ -46,6 +59,7 @@ public class LocalAudioPlayback {
 		}
 		
 		isClosed = false;
+		isPaused = false;
 
 		// query how many streams the call to open found
 		int numStreams = container.getNumStreams();
@@ -54,10 +68,11 @@ public class LocalAudioPlayback {
 		int audioStreamId = -1;
 		IStreamCoder audioCoder = null;
 
-		for(int i = 0; i < numStreams; i++) {
-			// Find the stream object
+		for (int i=0; i < numStreams; i++) {
+			
 			IStream stream = container.getStream(i);
-			// Get the pre-configured decoder that can decode this stream;
+			
+			// Get the configured decoder that can decode this stream
 			IStreamCoder coder = stream.getStreamCoder();
 
 			if (coder.getCodecType() == ICodec.Type.CODEC_TYPE_AUDIO) {
@@ -65,41 +80,40 @@ public class LocalAudioPlayback {
 				audioCoder = coder;
 				break;
 			}
+			
 		}
 
 		if (audioStreamId == -1) {
-			throw new RuntimeException("could not find audio stream in container: "+filename);
+			throw new RuntimeException("could not find audio stream in container: " + filename);
 		}
 
-		/*
-		 * Now we have found the audio stream in this file.  Let's open up our decoder so it can
-		 * do work.
-		 */
+		// Open up the decoder
 		if (audioCoder.open() < 0) {
-			throw new RuntimeException("could not open audio decoder for container: "+filename);
+			throw new RuntimeException("could not open audio decoder for container: " + filename);
 		}
 
-		/*
-		 * And once we have that, we ask the Java Sound System to get itself ready.
-		 */
+		// Prepare the Java sound system
 		openJavaSound(audioCoder, listener);
 
-		/*
-		 * Now, we start walking through the container looking at each packet.
-		 */
+		// Now, we start walking through the container looking at each packet.
 		IPacket packet = IPacket.make();
-
-		while(!isClosed) {
+		
+		while (!isClosed) {
+			
 			if (isPaused == true) {
+				
 				try {
 					Thread.sleep(200);
 					continue;
 				} catch (InterruptedException ex) { }
+				
 			}
 			
-			if(container.readNextPacket(packet) >= 0) {
-				//Now we have a packet, let's see if it belongs to our audio stream
+			if (container.readNextPacket(packet) >= 0) {
+				
+				// Now we have a packet, let's see if it belongs to our audio stream
 				if (packet.getStreamIndex() == audioStreamId) {
+					
 					/*
 					 * We allocate a set of samples with the same number of channels as the
 					 * coder tells us is in this buffer.
@@ -107,7 +121,7 @@ public class LocalAudioPlayback {
 					 * We also pass in a buffer size (1024 in our example), although Xuggler
 					 * will probably allocate more space than just the 1024 (it's not important why).
 					 */
-					IAudioSamples samples = IAudioSamples.make(1024, audioCoder.getChannels());
+					IAudioSamples samples = IAudioSamples.make(1, audioCoder.getChannels());
 
 					/*
 					 * A packet can actually contain multiple sets of samples (or frames of samples
@@ -116,14 +130,16 @@ public class LocalAudioPlayback {
 					 */
 					int offset = 0;
 
-					/*
-					 * Keep going until we've processed all data
-					 */
-					while(offset < packet.getSize()) {
+					// Process all data
+					while (offset < packet.getSize()) {
+						
 						int bytesDecoded = audioCoder.decodeAudio(samples, packet, offset);
-						if (bytesDecoded < 0)
+						if (bytesDecoded < 0) {
 							throw new RuntimeException("got error decoding audio in: " + filename);
+						}
+						
 						offset += bytesDecoded;
+						
 						/*
 						 * Some decoder will consume data in a packet, but will not be able to construct
 						 * a full set of samples yet.  Therefore you should always check if you
@@ -132,26 +148,31 @@ public class LocalAudioPlayback {
 						if (samples.isComplete()) {
 							playJavaSound(samples);
 						}
+						
 					}
+					
 				} else {
-					/*
-					 * This packet isn't part of our audio stream, so we just silently drop it.
-					 */
+					
+				
+					// This packet isn't part of our audio stream, so we just silently drop it.
 					do {} while(false);
+					
 				}
+				
 			} else {
+				
 				try {
 					Thread.sleep(500);
+					
 				} catch (Exception e) { }
+				
 				isClosed = true;
+				isPaused = true;
+				
 			}
+			
 		}
-
-		/*
-		 * Technically since we're exiting anyway, these will be cleaned up by 
-		 * the garbage collector... but because we're nice people and want
-		 * to be invited places for Christmas, we're going to show how to clean up.
-		 */
+		
 		closeJavaSound();
 
 		if (audioCoder != null) {
@@ -176,50 +197,44 @@ public class LocalAudioPlayback {
 		DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
 
 		try {
+			
 			mLine = (SourceDataLine) AudioSystem.getLine(info);
 			mLine.addLineListener(listener);
-			/**
-			 * if that succeeded, try opening the line.
-			 */
+			
+			// Try opening the line
 			mLine.open(audioFormat);
-			/**
-			 * And if that succeed, start the line.
-			 */
+			
+			// Try starting the line
 			mLine.start();
+			
 		} catch (LineUnavailableException e) {
-			throw new RuntimeException("could not open audio line");
+			throw new RuntimeException("could not open audio line " + e.getMessage());
+			
 		}
 
 	}
 
 	private void playJavaSound(IAudioSamples aSamples) {
-		/**
-		 * We're just going to dump all the samples into the line.
-		 */
+		
+		// Dump all the samples into the line
 		byte[] rawBytes = aSamples.getData().getByteArray(0, aSamples.getSize());
 		mLine.write(rawBytes, 0, aSamples.getSize());
+		
 	}
 
 	private void closeJavaSound() {
+		
 		if (mLine != null) {
-			/*
-			 * Wait for the line to finish playing
-			 */
+			
+			// Wait for the line to finish playing
 			mLine.drain();
-			/*
-			 * Close the line.
-			 */
+
+			// Close the line
 			mLine.close();
-			mLine=null;
+			mLine = null;
+			
 		}
+		
 	}
 	
-	public void togglePause() {
-		isPaused = !isPaused;
-	}
-
-	public void stopPlayback() {
-		isClosed = true;
-		isPaused = false;
-	}
 }
