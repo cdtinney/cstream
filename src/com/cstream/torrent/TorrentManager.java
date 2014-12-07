@@ -20,6 +20,8 @@ public class TorrentManager {
 	public final static String FILE_DIR = System.getProperty("user.home") + (OSUtils.isWindows() ? "\\cstream\\" : "/cstream/");
 	public final static String TORRENT_DIR = FILE_DIR + (OSUtils.isWindows() ? "torrent\\" : "torrent/");
 	
+	public final static String TRACKER_ANNOUNCE = "http://192.168.1.109:6969/announce";
+	
 	public static void buildTorrentsFromLibrary(Map<String, Song> library, String createdBy) {
 		
 		if (library == null) {
@@ -52,7 +54,7 @@ public class TorrentManager {
 				return;
 			}
 			
-			Torrent t = Torrent.create(file, new URI(""), createdBy);
+			Torrent t = Torrent.create(file, new URI(TRACKER_ANNOUNCE), createdBy);
 			
 			LOGGER.info("Creating .torrent file: " + fileName);			
 			OutputStream output = new FileOutputStream(createTorrentFile(fileName));
