@@ -18,6 +18,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 
@@ -39,8 +40,8 @@ public class HttpTransferClient {
 	public static boolean uploadTorrent(String name, byte[] torrentBytes, String ip, String port) {
 		
 		String url = "http://" + ip + ":" + port + UPLOAD_CONTEXT;
-		HttpResponse response = post(url, name, torrentBytes);	
 		
+		HttpResponse response = post(url, name, torrentBytes);	
 		if (response == null) {
 			LOGGER.warning("POST to /upload returned null response");
 			return false;
@@ -60,7 +61,12 @@ public class HttpTransferClient {
 	public static boolean downloadTorrents(String ip, String port) {
 
 		String url = "http://" + ip + ":" + port + DOWNLOAD_CONTEXT;
-		HttpResponse response = get(url);
+		
+		HttpResponse response = get(url);	
+		if (response == null) {
+			LOGGER.warning("GET to /download returned null response");
+			return false;
+		}
 		
 		int status = response.getStatusLine().getStatusCode();
 		if (status != HttpStatus.SC_OK) {
@@ -144,6 +150,9 @@ public class HttpTransferClient {
 			
 			HttpResponse response = client.execute(get);
 			return response;
+			
+		} catch (HttpHostConnectException e) {
+			LOGGER.warning(e.getMessage());
 
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -64,6 +64,8 @@ public class TorrentClientManager implements Observer {
 					Client c = new Client(InetAddress.getLocalHost(), st);
 					c.addObserver(this);
 					
+					c.download();
+					
 					// TODO - We want to always share local files. Regardless of whether the tracker is up/down at the moment, since the client
 					// will resolve that.
 					
@@ -73,7 +75,7 @@ public class TorrentClientManager implements Observer {
 						LOGGER.info("Torrent uploaded successfully: " + t.getName());
 						//c.addObserver(this);						
 						clients.put(c, c.getTorrent());	
-						c.share();		
+						//c.share();		
 					}
 					
 				} catch (IOException e) {

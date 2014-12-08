@@ -72,8 +72,6 @@ public class CApplicationController extends Controller {
 		clientManager = TorrentClientManager.getInstance();
 		clientManager.shareAll();
 		HttpTransferClient.downloadTorrents("192.168.1.109", "6970");
-		
-		client.start();
 
 		addEventHandlers();
 		
@@ -82,7 +80,6 @@ public class CApplicationController extends Controller {
 	public void stop() {
 
 		LOGGER.info("Attempting to stop the application...");
-		client.stop();
 		
 	}
 

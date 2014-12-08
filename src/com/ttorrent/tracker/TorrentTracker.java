@@ -55,7 +55,7 @@ public class TorrentTracker {
 			
 			tracker = new Tracker(new InetSocketAddress(TRACKER_PORT));
 			
-			// Announce all of the torrents we're already tracking
+			// Announce all of the torrents we're already sharing
 			announceAll();
 			
 			tracker.start();
