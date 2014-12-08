@@ -11,7 +11,7 @@ import org.json.JSONObject;
 import com.cstream.logging.LogLevel;
 import com.cstream.socket.IOSocket;
 import com.cstream.socket.MessageCallback;
-import com.cstream.tracker.TrackerPeer;
+import com.cstream.tracker.TrackerClient;
 
 public class WebSocketClient {
 	
@@ -25,13 +25,15 @@ public class WebSocketClient {
 	private static final int KEEP_ALIVE = 10;
 	
 	// Model
-	private TrackerPeer peer;
+	private String id;
+	private TrackerClient client;
 	
 	// Use this socket to communicate to the tracker server
 	private IOSocket socket;
 	
-	public WebSocketClient(TrackerPeer peer) {
-		this.peer = peer;
+	public WebSocketClient(TrackerClient client) {
+		this.client = client;
+		this.id = client.getPeer().getId();
 	}
 	
 	public void connect() {
@@ -76,8 +78,8 @@ public class WebSocketClient {
 			public void run() {
 				
 				try {
-					LOGGER.log(LogLevel.DEBUG, "Sending KEEP_ALIVE from ID = " + peer.getId());
-					socket.sendKeepAlive(peer.getId());
+					LOGGER.log(LogLevel.DEBUG, "Sending KEEP_ALIVE from ID = " + id);
+					socket.sendKeepAlive(id);
 					
 				} catch (IOException | InterruptedException e) {
 					e.printStackTrace();
@@ -96,16 +98,16 @@ public class WebSocketClient {
 		@Override
 		public void on(String event, JSONObject... data) {
 			
-			switch(event) {
+			switch (event) {
 			
 				case PEER_CONNECT:
 					LOGGER.info("PEER_CONNECT event received: " + data);
-					//updateLibrary();
+					client.updateLibrary();
 					break;
 				
 				case PEER_DISCONNECT:
 					LOGGER.info("PEER_DISCONNECT event received: " + data);
-					//updateLibrary();
+					client.updateLibrary();
 					break;
 					
 				default:
@@ -129,6 +131,7 @@ public class WebSocketClient {
 		public void onConnect() {
 			LOGGER.info("Connected to socket server");
 			startKeepAlive();
+			client.updateLibrary();
 		}
 
 		@Override

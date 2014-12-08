@@ -9,11 +9,11 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+import com.cstream.client.WebSocketClient;
 import com.cstream.controller.Controller;
 import com.cstream.media.LibraryController;
 import com.cstream.media.MediaController;
 import com.cstream.model.Song;
-import com.cstream.server.HttpServer;
 import com.cstream.torrent.TorrentClientManager;
 import com.cstream.torrent.TorrentManager;
 import com.cstream.tracker.TrackerClient;
@@ -42,7 +42,7 @@ public class CApplicationController extends Controller {
 	private TrackerClient client;
 	
 	// Networking
-	private HttpServer server;
+	private WebSocketClient socketClient;
 	
 	// Manager classes
 	private TorrentClientManager clientManager;
@@ -61,7 +61,6 @@ public class CApplicationController extends Controller {
 		stage.centerOnScreen();
 		
 		client = new TrackerClient(new TrackerPeer());
-		//server = new HttpServer(client);
 
 		libraryController.initialize();
 		mediaController.initialize(libraryController, client);
@@ -77,6 +76,9 @@ public class CApplicationController extends Controller {
 		clientManager.shareAll();
 		
 		client.start();
+		
+		socketClient = new WebSocketClient(client);
+		socketClient.connect();
 
 		addEventHandlers();
 		

@@ -3,28 +3,32 @@ package com.cstream.torrent;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import com.cstream.client.HttpTransferClient;
 import com.turn.ttorrent.client.Client;
+import com.turn.ttorrent.client.Client.ClientState;
 import com.turn.ttorrent.client.SharedTorrent;
 import com.turn.ttorrent.common.Torrent;
 
-public class TorrentClientManager {
+public class TorrentClientManager implements Observer {
 
 	private static Logger LOGGER = Logger.getLogger(TorrentClientManager.class.getName());
 	
-	// Constants
-	private static final int MAX_CLIENTS = 5;
+	private static final int MAX_TORRENTS = 5;
+	private static final String TRACKER_IP = "192.168.1.109";
+	private static final String TRACKER_PORT = "6970";
 
 	// Singleton instance
 	private static TorrentClientManager instance = null;
 	
 	// Map current clients to the torrents they are sharing
-	private Map<Client, SharedTorrent> clients = new HashMap<Client, SharedTorrent>();
+	private Map<Client, SharedTorrent> clients = new ConcurrentHashMap<Client, SharedTorrent>();
 	
 	// Torrent manager
 	private TorrentManager torrentManager = TorrentManager.getInstance();
@@ -45,7 +49,7 @@ public class TorrentClientManager {
 
 	public void shareAll() {
 		
-		//new Thread(() -> {
+		new Thread(() -> {
 			
 			List<Torrent> torrents = torrentManager.getQueue();
 			for (Torrent t : torrents) {
@@ -59,21 +63,12 @@ public class TorrentClientManager {
 					SharedTorrent st = new SharedTorrent(t, new File(outputDir));
 					Client c = new Client(InetAddress.getLocalHost(), st);
 					
-					if (c.getTorrent() == null) {
-						LOGGER.warning("Client created without torrent: " + st.getName());
-						continue;
-					}
-					
-					if (clients == null) {
-						LOGGER.warning("clients map is null");
-						continue;
-					}
-					
 					LOGGER.info("Uploading torrent to tracker: " + t.getName());
-					
-					boolean success = HttpTransferClient.uploadTorrent(st.getName(), st.getEncoded(), "192.168.1.109", "6970");
-					if (success) {
-						clients.put(c, c.getTorrent());				
+					boolean success = HttpTransferClient.uploadTorrent(st.getName(), st.getEncoded(), TRACKER_IP, TRACKER_PORT);
+					if (success) {					
+						LOGGER.info("Torrent uploaded successfully: " + t.getName());
+						c.addObserver(this);						
+						clients.put(c, c.getTorrent());	
 						c.share();		
 					}
 					
@@ -84,7 +79,22 @@ public class TorrentClientManager {
 				
 			}
 			
-		//}).start();
+		}).start();
+		
+	}
+
+	@Override
+	public void update(Observable object, Object property) {
+		
+		if (!(object instanceof Client)) {
+			return;
+		}
+		
+		Client c = (Client) object;
+		ClientState state = (ClientState) property;
+		
+		Torrent t = c.getTorrent();
+		LOGGER.info("Torrent state changed: " + t.getName() + " to " + state.toString());
 		
 	}
 	

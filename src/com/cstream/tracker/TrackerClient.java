@@ -59,7 +59,6 @@ public final class TrackerClient {
 		}
 		
 		LOGGER.info("Joined tracker successfully");
-		//initializeSocket();
 		return true;
 		
 	}
@@ -72,14 +71,12 @@ public final class TrackerClient {
 			return false;
 		}
 
-		LOGGER.info("Reqeust to remove peer from tracker was successful");		
-		//closeSocket();
+		LOGGER.info("Request to remove peer from tracker was successful");		
 		return true;
 		
 	}
 	
-	// TODO - Call this
-	private void updateLibrary() {
+	public void updateLibrary() {
 
 		// Fetch the library from the tracker
 		Map<String, Song> updatedLibrary = getLibrary();
@@ -99,6 +96,8 @@ public final class TrackerClient {
 	}
 	
 	private Map<String, Song> getLibrary() {
+		
+		LOGGER.info("Fetching the library from the web tracker");
 
 		String response = getRequest(LIB_URL);
 		if (response == null || response.isEmpty()) {

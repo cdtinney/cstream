@@ -19,12 +19,10 @@ public class TorrentManager {
 	
 	private static Logger LOGGER = Logger.getLogger(TorrentManager.class.getName());
 	
-	// Static constants
 	public final static String FILE_DIR = System.getProperty("user.home") + (OSUtils.isWindows() ? "\\cstream\\" : "/cstream/");
 	public final static String TORRENT_DIR = FILE_DIR + (OSUtils.isWindows() ? "torrent\\" : "torrent/");
 	public final static String TRACKER_ANNOUNCE = "http://192.168.1.109:6969/announce";
 
-	// Singleton instance
 	private static TorrentManager instance = null;
 	
 	// Queue of torrents to be shared	
