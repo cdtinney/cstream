@@ -72,9 +72,9 @@ public class MediaController extends Controller {
 			
 		}
 
-		activeSong = song;
 		boolean isLocal = song.sharedByPeer(client.getPeer().getId());
 		if (isLocal) {
+			activeSong = song;
 			LOGGER.info("Play song locally: " + song);	
 			audioPlayback.playFile(activeSong.getPath(), new SongListener());
 			

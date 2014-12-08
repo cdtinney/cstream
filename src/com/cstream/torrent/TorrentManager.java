@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import com.cstream.model.Song;
@@ -21,14 +22,19 @@ public class TorrentManager {
 	
 	public final static String FILE_DIR = System.getProperty("user.home") + (OSUtils.isWindows() ? "\\cstream\\" : "/cstream/");
 	public final static String TORRENT_DIR = FILE_DIR + (OSUtils.isWindows() ? "torrent\\" : "torrent/");
+	public final static String TORRENT_TMP_DIR = FILE_DIR + (OSUtils.isWindows() ? "torrent\\tmp\\" : "torrent/tmp/");
 	public final static String TRACKER_ANNOUNCE = "http://192.168.1.109:6969/announce";
 
 	private static TorrentManager instance = null;
 	
+	private ConcurrentHashMap<String, Torrent> torrents;
+	
 	// Queue of torrents to be shared	
 	public List<Torrent> queue = new ArrayList<Torrent>();
 	
-	private TorrentManager() { }
+	private TorrentManager() { 
+		this.torrents = new ConcurrentHashMap<String, Torrent>();		
+	}
 	
 	public static TorrentManager getInstance() {
 		

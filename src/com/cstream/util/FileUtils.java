@@ -13,6 +13,26 @@ public class FileUtils {
 	
 	private static Logger LOGGER = Logger.getLogger(FileUtils.class.getName());
 	
+	public static File getFile(String path) {
+		
+		File f = new File(path);
+		makeDirectory(f.getParentFile().getAbsolutePath());
+		return f;
+		
+	}
+	
+	public static File makeDirectory(String path) {
+		
+		File directory = new File(path);
+        if (!directory.exists()) {
+        	LOGGER.info("Creating directory: " + path);
+        	directory.mkdir();
+        }
+        
+        return directory;		
+		
+	}
+	
 	public static String generateMd5(String pathToFile) {
 		
 		try (FileInputStream fis = new FileInputStream(new File(pathToFile)) ){

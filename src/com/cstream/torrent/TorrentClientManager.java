@@ -62,12 +62,16 @@ public class TorrentClientManager implements Observer {
 					
 					SharedTorrent st = new SharedTorrent(t, new File(outputDir));
 					Client c = new Client(InetAddress.getLocalHost(), st);
+					c.addObserver(this);
+					
+					// TODO - We want to always share local files. Regardless of whether the tracker is up/down at the moment, since the client
+					// will resolve that.
 					
 					LOGGER.info("Uploading torrent to tracker: " + t.getName());
 					boolean success = HttpTransferClient.uploadTorrent(st.getName(), st.getEncoded(), TRACKER_IP, TRACKER_PORT);
 					if (success) {					
 						LOGGER.info("Torrent uploaded successfully: " + t.getName());
-						c.addObserver(this);						
+						//c.addObserver(this);						
 						clients.put(c, c.getTorrent());	
 						c.share();		
 					}
@@ -95,6 +99,8 @@ public class TorrentClientManager implements Observer {
 		
 		Torrent t = c.getTorrent();
 		LOGGER.info("Torrent state changed: " + t.getName() + " to " + state.toString());
+		
+		// TODO - Publish state to UI		
 		
 	}
 	

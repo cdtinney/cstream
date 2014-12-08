@@ -15,10 +15,8 @@ public class LibraryController extends Controller {
 	private LibraryView view;
 	
 	public void initialize() {
-		
 		view = new LibraryView();
 		view.initialize();
-		
 	}
 	
 	public void addData(Collection<Song> songs) {

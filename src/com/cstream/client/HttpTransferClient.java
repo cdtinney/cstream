@@ -2,12 +2,15 @@ package com.cstream.client;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.SocketException;
 import java.util.logging.Logger;
 
-import org.apache.http.Header;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -17,13 +20,16 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicHeader;
 
 import com.cstream.torrent.TorrentManager;
+import com.cstream.util.FileUtils;
 
 public class HttpTransferClient {
 
 	private static Logger LOGGER = Logger.getLogger(HttpTransferClient.class.getName());
+	
+	private static final String UPLOAD_CONTEXT = "/upload/";
+	private static final String DOWNLOAD_CONTEXT = "/download/";
 	
 	private static RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(2 * 1000).build();
 	private static HttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();	
@@ -32,7 +38,7 @@ public class HttpTransferClient {
 	
 	public static boolean uploadTorrent(String name, byte[] torrentBytes, String ip, String port) {
 		
-		String url = "http://" + ip + ":" + port + "/upload/";
+		String url = "http://" + ip + ":" + port + UPLOAD_CONTEXT;
 		HttpResponse response = post(url, name, torrentBytes);	
 		
 		if (response == null) {
@@ -51,29 +57,46 @@ public class HttpTransferClient {
 		
 	}
 	
-	public static void requestTorrent(String ip, String port, String songId) {
-			
-		String url = "http://" + ip + ":" + port;
+	public static boolean downloadTorrents(String ip, String port) {
+
+		String url = "http://" + ip + ":" + port + DOWNLOAD_CONTEXT;
+		HttpResponse response = get(url);
 		
-		HttpResponse response = get(url, new BasicHeader("User-Agent", "cstream/1.0"), new BasicHeader("songId", songId));
-		parseResponse(response);		
+		int status = response.getStatusLine().getStatusCode();
+		if (status != HttpStatus.SC_OK) {
+			LOGGER.warning("GET to /download returned: " + status);
+			return false;
+		}
+
+		LOGGER.warning("GET to /download returned: " + status);
+		
+		try {
+			 parseDownloadResponse(response);	
+			 return true;
+			
+		} catch (ZipException e) {
+			LOGGER.warning("ZipException: " + e.getMessage());
+			
+		}
+
+		return false;
 		
 	}
 	
-	private static void parseResponse(HttpResponse response) {
+	private static void parseDownloadResponse(HttpResponse response) throws ZipException {
 				
 		try {
+
+			File temp = FileUtils.getFile(TorrentManager.TORRENT_TMP_DIR + "torrents.zip");
+			LOGGER.info("Creating temporary zip file at: " + temp.getAbsolutePath());
 			
-			Header header = response.getFirstHeader("filename");
-			if (header == null) {
-				LOGGER.warning("Response header did not contain a valid filename");
+			if (response == null || response.getEntity() == null || response.getEntity().getContent() == null) {
+				LOGGER.warning("Torrent download returned no response");
 				return;
 			}
 			
-			String fileName = header.getValue();
-			
 			BufferedInputStream input = new BufferedInputStream(response.getEntity().getContent());
-			BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(TorrentManager.createTorrentFile(fileName)));
+			BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(temp));
 			
 			int inByte;
 			while ((inByte = input.read()) != -1) { 
@@ -83,6 +106,28 @@ public class HttpTransferClient {
 			input.close();
 			output.close(); 
 			
+			ZipFile zip = new ZipFile(temp.getAbsolutePath());
+			if (!zip.isValidZipFile()) {
+				throw new ZipException("HTTP client received an invalid torrent zip from the server");
+			}
+			
+			LOGGER.info("Extracting " + zip.getFileHeaders().size() + " .torrent files..");
+			
+			// TODO - Do not overwrite current .torrent files...
+			zip.extractAll(TorrentManager.TORRENT_DIR);		
+			
+			LOGGER.info("Torrent files successfully extracted to: " + TorrentManager.TORRENT_DIR);
+			
+			LOGGER.info("Deleting temporary zip file at: " + temp.getAbsolutePath() + "...");
+			boolean zipDeleted = temp.delete();
+			boolean tmpDeleted = temp.getParentFile().delete();
+			if (!zipDeleted || !tmpDeleted) {
+				LOGGER.warning("Failed to delete temporary zip file at: " + temp.getAbsolutePath());
+				return;
+			}
+
+			LOGGER.info("Temporary zip file at: " + temp.getAbsolutePath() + " deleted successfully");
+			
 		} catch (IllegalStateException | IOException e) {
 			e.printStackTrace();
 			
@@ -90,15 +135,12 @@ public class HttpTransferClient {
 		
 	}
 	
-	private static HttpResponse get(String url, Header... headers) {
+	private static HttpResponse get(String url) {
 
 		try {
 			
-			HttpGet get = new HttpGet(url);
-			
-			for (Header h : headers) {
-				get.addHeader(h);
-			}
+			HttpGet get = new HttpGet(url);			
+			get.setHeader("User-Agent", "cstream");
 			
 			HttpResponse response = client.execute(get);
 			return response;
