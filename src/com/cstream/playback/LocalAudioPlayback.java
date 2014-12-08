@@ -17,34 +17,50 @@ import com.xuggle.xuggler.IStreamCoder;
 
 public class LocalAudioPlayback {
 	
-	private String directory;
+	private SourceDataLine audioLine;
 	
-	private SourceDataLine mLine;
-	private boolean isClosed;
-	private boolean isPaused = false;
+	private AudioState state = AudioState.CLOSED;
+	
+	public enum AudioState {
+		PLAYING,
+		PAUSED,
+		BUFFERING,
+		CLOSED
+	};
+	
+	public boolean isPlaying() {
+		return AudioState.PLAYING.equals(this.state);
+	}
+	
+	public boolean isClosed() {
+		return AudioState.CLOSED.equals(this.state);
+	}
 	
 	public boolean isPaused() {
-		return isPaused;
+		return AudioState.PAUSED.equals(this.state);
 	}
 	
 	public void togglePause() {
-		isPaused = !isPaused;
+		
+		if (isPlaying()) {
+			this.state = AudioState.PAUSED;
+			
+		} else if (isPaused()) {
+			this.state = AudioState.PLAYING;
+		}
 	}
 
 	public void stop() {
-		
-		isClosed = true;
-		isPaused = true;
-		
+		this.state = AudioState.CLOSED;
 	}
 	
 	public int getPosition() {
 		
-		if (mLine == null) {
+		if (audioLine == null) {
 			return 0;
 		}
 		
-		return (int) mLine.getMicrosecondPosition() / 1000000;
+		return (int) audioLine.getMicrosecondPosition() / 1000000;
 		
 	}
 	
@@ -53,7 +69,9 @@ public class LocalAudioPlayback {
 		String path = TorrentManager.FILE_DIR + fileName;
 		
 		new Thread(() -> {
+			
 			play(path, listener);
+			
 		}).start();
 		
 	}
@@ -71,8 +89,7 @@ public class LocalAudioPlayback {
 			throw new IllegalArgumentException("could not open file: " + filename);
 		}
 		
-		isClosed = false;
-		isPaused = false;
+		state = AudioState.BUFFERING;
 
 		// query how many streams the call to open found
 		int numStreams = container.getNumStreams();
@@ -111,9 +128,9 @@ public class LocalAudioPlayback {
 		// Now, we start walking through the container looking at each packet.
 		IPacket packet = IPacket.make();
 		
-		while (!isClosed) {
+		while (!isClosed()) {
 			
-			if (isPaused == true) {
+			if (isPaused()) {
 				
 				try {
 					Thread.sleep(200);
@@ -123,6 +140,8 @@ public class LocalAudioPlayback {
 			}
 			
 			if (container.readNextPacket(packet) >= 0) {
+				
+				state = AudioState.PLAYING;
 				
 				// Now we have a packet, let's see if it belongs to our audio stream
 				if (packet.getStreamIndex() == audioStreamId) {
@@ -179,8 +198,7 @@ public class LocalAudioPlayback {
 					
 				} catch (Exception e) { }
 				
-				isClosed = true;
-				isPaused = true;
+				state = AudioState.CLOSED;
 				
 			}
 			
@@ -211,14 +229,14 @@ public class LocalAudioPlayback {
 
 		try {
 			
-			mLine = (SourceDataLine) AudioSystem.getLine(info);
-			mLine.addLineListener(listener);
+			audioLine = (SourceDataLine) AudioSystem.getLine(info);
+			audioLine.addLineListener(listener);
 			
 			// Try opening the line
-			mLine.open(audioFormat);
+			audioLine.open(audioFormat);
 			
 			// Try starting the line
-			mLine.start();
+			audioLine.start();
 			
 		} catch (LineUnavailableException e) {
 			throw new RuntimeException("could not open audio line " + e.getMessage());
@@ -229,22 +247,25 @@ public class LocalAudioPlayback {
 
 	private void playJavaSound(IAudioSamples aSamples) {
 		
-		// Dump all the samples into the line
+		if (audioLine == null) {
+			return;
+		}
+		
 		byte[] rawBytes = aSamples.getData().getByteArray(0, aSamples.getSize());
-		mLine.write(rawBytes, 0, aSamples.getSize());
+		audioLine.write(rawBytes, 0, aSamples.getSize());
 		
 	}
 
 	private void closeJavaSound() {
 		
-		if (mLine != null) {
+		if (audioLine != null) {
 			
 			// Wait for the line to finish playing
-			mLine.drain();
+			audioLine.drain();
 
 			// Close the line
-			mLine.close();
-			mLine = null;
+			audioLine.close();
+			audioLine = null;
 			
 		}
 		

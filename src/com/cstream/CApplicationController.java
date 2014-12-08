@@ -14,6 +14,7 @@ import com.cstream.media.LibraryController;
 import com.cstream.media.MediaController;
 import com.cstream.model.Song;
 import com.cstream.server.HttpServer;
+import com.cstream.torrent.TorrentClientManager;
 import com.cstream.torrent.TorrentManager;
 import com.cstream.tracker.TrackerClient;
 import com.cstream.tracker.TrackerPeer;
@@ -42,6 +43,10 @@ public class CApplicationController extends Controller {
 	
 	// Networking
 	private HttpServer server;
+	
+	// Manager classes
+	private TorrentClientManager clientManager;
+	private TorrentManager torrentManager;
 
 	public void initialize(Stage stage) {
 		
@@ -55,9 +60,8 @@ public class CApplicationController extends Controller {
 		stage.setHeight(HEIGHT);
 		stage.centerOnScreen();
 		
-
 		client = new TrackerClient(new TrackerPeer());
-		server = new HttpServer(client);
+		//server = new HttpServer(client);
 
 		libraryController.initialize();
 		mediaController.initialize(libraryController, client);
@@ -65,6 +69,13 @@ public class CApplicationController extends Controller {
 		addViews();
 		
 		initLocalLibrary(); 
+		
+		torrentManager = TorrentManager.getInstance();
+		torrentManager.addTorrentsFromLibrary(client.getPeer().getFiles(), client.getPeer().getId());
+		
+		clientManager = TorrentClientManager.getInstance();
+		clientManager.shareAll();
+		
 		client.start();
 
 		addEventHandlers();
@@ -81,7 +92,6 @@ public class CApplicationController extends Controller {
 	private void initLocalLibrary() {
 		
 		Map<String, Song> files = LibraryUtils.buildLocalLibrary(TorrentManager.FILE_DIR, client.getPeer().getId());
-		TorrentManager.buildTorrentsFromLibrary(files, client.getPeer().getId());
 		
 		client.setFiles(files);
 		

@@ -94,7 +94,7 @@ public class LibraryUtils {
 			fileName = fileName.substring(index+1);
 			
 			// Strip the extension
-			fileName = fileName.substring(0, fileName.lastIndexOf('.'));
+			//fileName = fileName.substring(0, fileName.lastIndexOf('.'));
 
 			tag.setTitle(fileName);
 			

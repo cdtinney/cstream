@@ -1,6 +1,7 @@
 package com.cstream.tracker;
 
 import java.io.UnsupportedEncodingException;
+import java.net.SocketException;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -194,6 +195,9 @@ public final class TrackerClient {
 			post.setHeader("Content-Type", "application/json");
 			HttpResponse response = client.execute(post);
 			return EntityUtils.toString(response.getEntity(), "UTF-8");
+			
+		} catch (SocketException e) {
+			LOGGER.warning("SocketException: " + e.getMessage());			
 
 		} catch (Exception e) {
 			e.printStackTrace();

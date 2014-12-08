@@ -187,7 +187,7 @@ public class MediaController extends Controller {
             
             Platform.runLater(() -> {
             	
-    			view.togglePlayButton(audioPlayback.isPaused());
+    			view.togglePlayButton(audioPlayback.isPaused() || audioPlayback.isClosed());
                 view.getButton("stopButton").setDisable(false);
                 view.updateNowPlaying(activeSong);
             	
@@ -203,7 +203,7 @@ public class MediaController extends Controller {
             
             Platform.runLater(() -> {
 
-    			view.togglePlayButton(audioPlayback.isPaused());
+    			view.togglePlayButton(audioPlayback.isPaused() || audioPlayback.isClosed());
                 view.getButton("stopButton").setDisable(true);
                 
                 view.updateNowPlaying(activeSong = null);
