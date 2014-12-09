@@ -25,6 +25,20 @@ public final class TrackerClient {
 		return peer;
 	}
 	
+	public Song getSong(String name) {
+		
+		for (Song s : sharedLibrary.values()) {
+			
+			if (s.getPath().contains(name)) {
+				return s;
+			}
+			
+		}
+		
+		return null;
+		
+	}
+	
 	public void setFiles(Map<String, Song> files) {
 		sharedLibrary = files;
 		peer.setFiles(files);

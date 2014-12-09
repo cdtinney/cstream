@@ -6,14 +6,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+import com.cstream.client.HttpTransferClient;
 import com.cstream.model.Song;
 import com.cstream.util.OSUtils;
+import com.turn.ttorrent.client.SharedTorrent;
 import com.turn.ttorrent.common.Torrent;
 
 public class TorrentManager {
@@ -23,17 +23,24 @@ public class TorrentManager {
 	public final static String FILE_DIR = System.getProperty("user.home") + (OSUtils.isWindows() ? "\\cstream\\" : "/cstream/");
 	public final static String TORRENT_DIR = FILE_DIR + (OSUtils.isWindows() ? "torrent\\" : "torrent/");
 	public final static String TORRENT_TMP_DIR = FILE_DIR + (OSUtils.isWindows() ? "torrent\\tmp\\" : "torrent/tmp/");
-	public final static String TRACKER_ANNOUNCE = "http://192.168.1.109:6969/announce";
+	
+	public final static String TRACKER_URL = "http://192.168.1.109";
+	public final static String TRACKER_HTTP = "6970";
+	public final static String TRACKER_TCP = "6969";
+	public final static String TRACKER_ANNOUNCE = TRACKER_URL + ":" + TRACKER_TCP + "/announce";
 
 	private static TorrentManager instance = null;
 	
-	private ConcurrentHashMap<String, Torrent> torrents;
+	private ConcurrentHashMap<String, Song> songs;
+	private ConcurrentHashMap<String, SharedTorrent> torrents;
 	
-	// Queue of torrents to be shared	
-	public List<Torrent> queue = new ArrayList<Torrent>();
+	private boolean stop;
 	
 	private TorrentManager() { 
-		this.torrents = new ConcurrentHashMap<String, Torrent>();		
+		
+		this.songs = new ConcurrentHashMap<String, Song>();		
+		this.torrents = new ConcurrentHashMap<String, SharedTorrent>();		
+		
 	}
 	
 	public static TorrentManager getInstance() {
@@ -46,8 +53,16 @@ public class TorrentManager {
 		
 	}
 	
-	public List<Torrent> getQueue() {
-		return queue;
+	public void start() {
+		// TODO	
+	}
+	
+	public void stop() {
+		this.stop = true;
+	}
+	
+	public ConcurrentHashMap<String, SharedTorrent> getTorrents() {
+		return torrents;
 	}
 	
 	public void addTorrentsFromLibrary(Map<String, Song> library, String createdBy) {
@@ -60,7 +75,20 @@ public class TorrentManager {
 			
 			Torrent t = buildTorrentFromFile(file, createdBy);
 			if (t != null) {
-				queue.add(t);
+				
+				try {
+					
+					LOGGER.info("Creating new shared torrent: " + t.getName());
+					SharedTorrent st = new SharedTorrent(t, new File(FILE_DIR));
+					
+					// TODO - Check if already in map?
+					torrents.put(st.getHexInfoHash(), st);
+					
+				} catch (IOException e) {
+					e.printStackTrace();
+					
+				} 
+				
 			}
 			
 		}
@@ -103,6 +131,34 @@ public class TorrentManager {
 		}
 		
 		return null;
+		
+	}
+
+	private class TorrentCollectorThread extends Thread {
+
+		private static final int TORRENT_COLLECTION_FREQUENCY = 30;
+
+		@Override
+		public void run() {
+			
+			LOGGER.info("Starting torrent collection from tracker: " + TRACKER_URL + ":" + TRACKER_HTTP);
+
+			while (!stop) {
+				
+				HttpTransferClient.downloadTorrents(TRACKER_URL, TRACKER_HTTP);
+//				for (TrackedTorrent torrent : torrents.values()) {
+//					torrent.collectUnfreshPeers();
+//				}
+
+				try {
+					Thread.sleep(TorrentCollectorThread.TORRENT_COLLECTION_FREQUENCY * 1000);
+				} catch (InterruptedException ie) {
+					// Ignore
+				}
+				
+			}
+			
+		}
 		
 	}
 

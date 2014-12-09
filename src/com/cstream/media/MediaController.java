@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 
 import javafx.application.Platform;
 import javafx.event.Event;
-import javafx.scene.Node;
 import javafx.scene.control.TableRow;
 
 import javax.sound.sampled.LineEvent;
@@ -16,16 +15,16 @@ import com.cstream.controller.Controller;
 import com.cstream.model.Song;
 import com.cstream.playback.LocalAudioPlayback;
 import com.cstream.tracker.TrackerClient;
+import com.turn.ttorrent.client.SharedTorrent;
 
 public class MediaController extends Controller {
 
 	private static Logger LOGGER = Logger.getLogger(MediaController.class.getName());
 	
-	// View
-	private MediaView view; 
-	
-	// Sub-controllers
-	private LibraryController libraryController;
+	// Views
+	private MediaView mediaView; 
+	private LibraryView libraryView;
+	private TorrentActionView actionView;
 
 	// Model
 	private TrackerClient client;
@@ -34,21 +33,48 @@ public class MediaController extends Controller {
 	private Song activeSong;
 	private Song queuedSong;
 
-	public void initialize(LibraryController libraryController, TrackerClient client) {
+	public void initialize(TrackerClient client) {
 
-		view = new MediaView();
-		view.initialize();
-
-		this.libraryController = libraryController;
 		this.client = client;
 		this.audioPlayback = new LocalAudioPlayback();
+		
+		actionView = new TorrentActionView();
+		actionView.initialize();
+
+		mediaView = new MediaView();
+		mediaView.initialize();
+		
+		libraryView = new LibraryView();
+		libraryView.initialize();
 
 		addHandlers();
 
 	}
 
-	public Node getView() {
-		return view;
+	public TorrentActionView getActionView() {
+		return actionView;
+	}
+	
+	public LibraryView getLibraryView() {
+		return libraryView;
+	}
+
+	public MediaView getMediaView() {
+		return mediaView;
+	}
+	
+	private void playTorrent(SharedTorrent torrent) {
+		
+		LOGGER.info("Playing: " + torrent.getName());
+		
+		Song song = client.getSong(torrent.getName());
+		if (song == null) {
+			LOGGER.warning("Client is not storing song: " + torrent.getName());
+			return;
+		}
+		
+		play(song);		
+		
 	}
 
 	private void play(Song song) {
@@ -72,15 +98,9 @@ public class MediaController extends Controller {
 			
 		}
 
-		boolean isLocal = song.sharedByPeer(client.getPeer().getId());
-		if (isLocal) {
-			activeSong = song;
-			LOGGER.info("Play song locally: " + song);	
-			audioPlayback.playFile(activeSong.getPath(), new SongListener());
-			
-		} else {
-			LOGGER.info("Play song stream: " + song);
-		}
+		activeSong = song;
+		LOGGER.info("Play song locally: " + song);	
+		audioPlayback.playFile(activeSong.getPath(), new SongListener());
 		
 	}
 	
@@ -90,13 +110,9 @@ public class MediaController extends Controller {
 			LOGGER.info("No active song to pause");
 			return;
 		}
-
-		boolean isLocal = activeSong.sharedByPeer(client.getPeer().getId());
-		if (isLocal) {
-			audioPlayback.togglePause();
-			view.togglePlayButton(audioPlayback.isPaused());
-			
-		}
+		
+		audioPlayback.togglePause();
+		mediaView.togglePlayButton(audioPlayback.isPaused());
 		
 	}
 	
@@ -106,13 +122,8 @@ public class MediaController extends Controller {
 			LOGGER.info("No active song to stop");
 			return;
 		}
-		
-		boolean isLocal = activeSong.sharedByPeer(client.getPeer().getId());
-		if (isLocal) {
-			audioPlayback.stop();
-			
-		}
-		
+
+		audioPlayback.stop();
 		activeSong = null;
 		
 	}
@@ -121,7 +132,8 @@ public class MediaController extends Controller {
 	private void handlePlayButton(Event event) {
 		
 		if (activeSong == null) {
-			play(libraryController.getSelectedSong());
+			SharedTorrent selected = libraryView.getSelected();
+			playTorrent(selected);
 			return;
 		}
 		
@@ -134,20 +146,38 @@ public class MediaController extends Controller {
 		stop();		
 	}
 
+	@SuppressWarnings("unused")
+	private void handleStartTorrentButton(Event event) {
+		
+		// TODO
+		
+		
+		
+	}
+
+	@SuppressWarnings("unused")
+	private void handleStopTorrentButton(Event event) {
+		
+		// TODO
+		
+		
+		
+	}
+
 	private void addHandlers() {
 
-		addEventHandler(view, "playButton", "setOnAction", "handlePlayButton");
-		addEventHandler(view, "stopButton", "setOnAction", "handleStopbutton");
+		addEventHandler(mediaView, "playButton", "setOnAction", "handlePlayButton");
+		addEventHandler(mediaView, "stopButton", "setOnAction", "handleStopbutton");
 		
-		libraryController.getView().getTable().setRowFactory(tv -> {
+		libraryView.getTable().setRowFactory(tv -> {
 			
-		    TableRow<Song> row = new TableRow<>();
+		    TableRow<SharedTorrent> row = new TableRow<>();
 		    
 		    row.setOnMouseClicked(event -> {
 		    	
 		        if (event.getClickCount() == 2 && (! row.isEmpty())) {
-		            Song song = row.getItem();
-		            play(song);
+		            SharedTorrent torrent = row.getItem();
+		            playTorrent(torrent);
 		        }
 		        
 		    });
@@ -155,6 +185,9 @@ public class MediaController extends Controller {
 		    return row ;
 		    
 		});
+
+		addEventHandler(actionView, "startButton", "setOnAction", "handleStartTorrentButton");
+		addEventHandler(actionView, "stopButton", "setOnAction", "handleStopTorrentButton");
 		
 	}
 	
@@ -187,9 +220,9 @@ public class MediaController extends Controller {
             
             Platform.runLater(() -> {
             	
-    			view.togglePlayButton(audioPlayback.isPaused() || audioPlayback.isClosed());
-                view.getButton("stopButton").setDisable(false);
-                view.updateNowPlaying(activeSong);
+    			mediaView.togglePlayButton(audioPlayback.isPaused() || audioPlayback.isClosed());
+                mediaView.getButton("stopButton").setDisable(false);
+                mediaView.updateNowPlaying(activeSong);
             	
             });
 			
@@ -203,11 +236,11 @@ public class MediaController extends Controller {
             
             Platform.runLater(() -> {
 
-    			view.togglePlayButton(audioPlayback.isPaused() || audioPlayback.isClosed());
-                view.getButton("stopButton").setDisable(true);
+    			mediaView.togglePlayButton(audioPlayback.isPaused() || audioPlayback.isClosed());
+                mediaView.getButton("stopButton").setDisable(true);
                 
-                view.updateNowPlaying(activeSong = null);
-                view.updateTimes(0, 0, 0);
+                mediaView.updateNowPlaying(activeSong = null);
+                mediaView.updateTimes(0, 0, 0);
                 
                 if (queuedSong != null) {
                 	play(queuedSong);
@@ -237,7 +270,7 @@ public class MediaController extends Controller {
 				if (current != time) {
 					
 					int remaining = activeSong.getLength() - current;
-					view.updateTimes(time = current, remaining, activeSong.getLength());
+					mediaView.updateTimes(time = current, remaining, activeSong.getLength());
 				}
 				
 			});

@@ -5,9 +5,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
-
 import com.cstream.util.FileUtils;
 import com.cstream.util.LibraryUtils;
 import com.mpatric.mp3agic.ID3v1;
@@ -95,42 +92,6 @@ public class Song implements Comparable<Song> {
 	
 	public Mp3File getMp3() {
 		return this.mp3;
-	}
-	
-	public boolean isLocal() {
-		return local;
-	}
-	
-	public void setLocal(boolean local) {
-		this.local = local;
-	}
-	
-	public void setPeers(Set<String> peers) {
-		this.peers = peers;
-	}
-	
-	public Set<String> getPeers() {
-		return peers;
-	}
-	
-	public boolean sharedByPeer(String id) {
-		return peers.contains(id);
-	}
-	
-	public SimpleStringProperty artistProperty() {
-		return new SimpleStringProperty(artist);
-	}
-	
-	public SimpleStringProperty titleProperty() {
-		return new SimpleStringProperty(title);
-	}
-	
-	public SimpleStringProperty albumProperty() {
-		return new SimpleStringProperty(album);
-	}
-	
-	public SimpleIntegerProperty peersProperty() {
-		return new SimpleIntegerProperty(peers == null ? 0 : peers.size());
 	}
 	
 	@Override

@@ -1,16 +1,17 @@
 package com.cstream.torrent;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.InetAddress;
-import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import com.cstream.client.HttpTransferClient;
+import com.cstream.media.LibraryView;
 import com.turn.ttorrent.client.Client;
 import com.turn.ttorrent.client.Client.ClientState;
 import com.turn.ttorrent.client.SharedTorrent;
@@ -21,6 +22,7 @@ public class TorrentClientManager implements Observer {
 	private static Logger LOGGER = Logger.getLogger(TorrentClientManager.class.getName());
 	
 	private static final int MAX_TORRENTS = 5;
+	
 	private static final String TRACKER_IP = "192.168.1.109";
 	private static final String TRACKER_PORT = "6970";
 
@@ -30,7 +32,6 @@ public class TorrentClientManager implements Observer {
 	// Map current clients to the torrents they are sharing
 	private Map<Client, SharedTorrent> clients = new ConcurrentHashMap<Client, SharedTorrent>();
 	
-	// Torrent manager
 	private TorrentManager torrentManager = TorrentManager.getInstance();
 	
 	// Private constructor so no other instances can be created
@@ -46,44 +47,56 @@ public class TorrentClientManager implements Observer {
 		return instance;
 		
 	}
+	
+	public Client findClient(SharedTorrent torrent) {
+		
+		for (Client c : clients.keySet()) {
+			
+			if (c.getTorrent() == torrent) {
+				return c;
+			}
+			
+		}
+		
+		return null;		
+		
+	}
 
-	public void shareAll() {
+	public void shareAll(LibraryView view) {
 		
 		new Thread(() -> {
 			
-			List<Torrent> torrents = torrentManager.getQueue();
-			for (Torrent t : torrents) {
-				
-				String outputDir = TorrentManager.FILE_DIR;
-				
+			ObservableList<SharedTorrent> shared = FXCollections.observableArrayList();
+			
+			for (SharedTorrent torrent : torrentManager.getTorrents().values()) {
+
 				try {
-					
-					LOGGER.info("Creating new shared torrent: " + t.getName());
-					
-					SharedTorrent st = new SharedTorrent(t, new File(outputDir));
-					Client c = new Client(InetAddress.getLocalHost(), st);
+					Client c = new Client(InetAddress.getLocalHost(), torrent);
 					c.addObserver(this);
-					
-					c.download();
+				
+					shared.add(torrent);
+	
+					//c.download();
 					
 					// TODO - We want to always share local files. Regardless of whether the tracker is up/down at the moment, since the client
 					// will resolve that.
 					
-					LOGGER.info("Uploading torrent to tracker: " + t.getName());
-					boolean success = HttpTransferClient.uploadTorrent(st.getName(), st.getEncoded(), TRACKER_IP, TRACKER_PORT);
+					LOGGER.info("Uploading torrent to tracker: " + torrent.getName());
+					boolean success = HttpTransferClient.uploadTorrent(torrent.getName(), torrent.getEncoded(), TRACKER_IP, TRACKER_PORT);
 					if (success) {					
-						LOGGER.info("Torrent uploaded successfully: " + t.getName());
-						//c.addObserver(this);						
+						LOGGER.info("Torrent uploaded successfully: " + torrent.getName());					
 						clients.put(c, c.getTorrent());	
-						//c.share();		
+						c.share();		
 					}
 					
-				} catch (IOException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 					
 				}
 				
 			}
+			
+			view.setItems(shared);
 			
 		}).start();
 		

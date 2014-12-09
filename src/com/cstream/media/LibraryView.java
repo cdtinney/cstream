@@ -1,29 +1,31 @@
 package com.cstream.media;
 
 import java.beans.PropertyChangeEvent;
-import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 
 import com.cstream.logging.LogLevel;
 import com.cstream.model.Song;
-import com.cstream.notifier.Notifier;
-import com.cstream.tracker.TrackerClient;
+import com.cstream.torrent.TorrentClientManager;
+import com.turn.ttorrent.client.Client;
+import com.turn.ttorrent.client.SharedTorrent;
 
 public class LibraryView extends HBox {
 
 	private static Logger LOGGER = Logger.getLogger(LibraryView.class.getName());
 	
 	private final int TABLE_WIDTH = 1280;
+	
+	private TableView<SharedTorrent> table = new TableView<SharedTorrent>();
 	
 	// View
 	private TableView<Song> libTableView = new TableView<Song>();
@@ -32,23 +34,25 @@ public class LibraryView extends HBox {
 	private ObservableList<Song> data = FXCollections.observableArrayList();
 
 	public void initialize() {
-
-		addColumns();
-
-		libTableView.setPrefWidth(TABLE_WIDTH);
-		getChildren().add(libTableView);
-		libTableView.setItems(data);
 		
-		addListeners();
+		table.setPrefWidth(TABLE_WIDTH);
+		
+		addTableColumns();
+		getChildren().add(table);
 		
 	}
 	
-	public void addData(Collection<Song> songs) {
-		data.addAll(songs);
+	public void setItems(ObservableList<SharedTorrent> torrents) {
+		table.setItems(torrents);
 	}
 	
-	public TableView<Song> getTable() {
-		return libTableView;
+	
+	public SharedTorrent getSelected() {
+		return table.getSelectionModel().getSelectedItem();
+	}
+	
+	public TableView<SharedTorrent> getTable() {
+		return table;
 	}
 	
 	@SuppressWarnings({ "unchecked", "unused" })
@@ -65,7 +69,7 @@ public class LibraryView extends HBox {
 		data.clear();
 		
 		// Add all of the updated songs
-		addData(newLib.values());		
+		//addData(newLib.values());		
 		
 		// Try to re-select the previous song
 		selectSong(selectedSong);
@@ -91,32 +95,53 @@ public class LibraryView extends HBox {
 		
 	}
 	
-	private void addListeners() {
-		
-		Notifier.getInstance().addListener(TrackerClient.class, "sharedLibrary", this, "onLibraryChanged", true);
-		
-	}
-	
 	@SuppressWarnings("unchecked")
-	private void addColumns() {
-		 
-        TableColumn<Song, String> artistCol = new TableColumn<Song, String>("Artist");
-        artistCol.setCellValueFactory(new PropertyValueFactory<Song, String>("artist"));
-        
-        TableColumn<Song, String> titleCol = new TableColumn<Song, String>("Title");
-        titleCol.setCellValueFactory(new PropertyValueFactory<Song, String>("title"));
-        
-        TableColumn<Song, String> albumCol = new TableColumn<Song, String>("Album");
-        albumCol.setCellValueFactory(new PropertyValueFactory<Song, String>("album"));
-        
-        TableColumn<Song, Integer> peersCol = new TableColumn<Song, Integer>("Peers");
-        peersCol.setCellValueFactory(new PropertyValueFactory<Song, Integer>("peers"));
-        peersCol.setCellFactory(column -> {
+	private void addTableColumns() {
+
+        TableColumn<SharedTorrent, String> nameCol = new TableColumn<SharedTorrent, String>("Name");
+		nameCol.setCellValueFactory(row -> {
+			
+			SharedTorrent t = row.getValue();
+			return new SimpleStringProperty(t.getName());
+			
+		});
+
+        TableColumn<SharedTorrent, String> percentCol = new TableColumn<SharedTorrent, String>("Percentage");
+        percentCol.setCellValueFactory(row -> {
+			
+        	SharedTorrent t = row.getValue();
+			return new SimpleStringProperty(Float.toString(t.getCompletion()) + "%");
+			
+		});
+
+        TableColumn<SharedTorrent, String> stateCol = new TableColumn<SharedTorrent, String>("State");
+        stateCol.setCellValueFactory(row -> {
         	
-        	return new TableCell<Song, Integer>() {
+        	LOGGER.info("Changing state col");
+        	
+			SharedTorrent t = row.getValue();
+        	
+        	TorrentClientManager manager = TorrentClientManager.getInstance();
+        	Client client = manager.findClient(t);
+        	
+        	if (client == null) {
+        		
+        		// TODO - This returns incomplete if the file is locally complete but tracker is down
+        		String state = t.isComplete() ? "Complete" : "Incomplete";
+        		return new SimpleStringProperty(state);
+        		
+        	}
+        	
+        	return new SimpleStringProperty(client.getState().toString());
+			
+		});
+        
+        stateCol.setCellFactory(column -> {
+        	
+        	return new TableCell<SharedTorrent, String>() {
         		
                 @Override
-                public void updateItem(Integer item, boolean empty) {
+                public void updateItem(String item, boolean empty) {
                 	super.updateItem(item, empty);
                 	
                 	if (item == null || empty) {
@@ -125,15 +150,13 @@ public class LibraryView extends HBox {
                 		return;
                 	}
                 	
-                	Song song = (Song) this.getTableRow().getItem();
-                	if (song != null && song.isLocal()) {
-                		setTextFill(Color.GREEN);
-                		
-                	} else {
-                		setTextFill(Color.RED);
-                		
+                	SharedTorrent torrent = (SharedTorrent) this.getTableRow().getItem();
+                	if (torrent.isComplete()) {
+                        this.setStyle("-fx-background-color:green");
+                        
                 	}
                 	
+                	this.setTextFill(Color.WHITE);                	
                 	setText(item.toString());
                 	
                 }
@@ -141,13 +164,13 @@ public class LibraryView extends HBox {
             };
         	
         });
-        
-        artistCol.prefWidthProperty().bind(libTableView.widthProperty().divide(4));
-        titleCol.prefWidthProperty().bind(libTableView.widthProperty().divide(4));
-        albumCol.prefWidthProperty().bind(libTableView.widthProperty().divide(4));
-        peersCol.prefWidthProperty().bind(libTableView.widthProperty().divide(4));
-        
-        libTableView.getColumns().addAll(artistCol, titleCol, albumCol, peersCol);
+		
+		nameCol.prefWidthProperty().bind(table.widthProperty().divide(3));
+		percentCol.prefWidthProperty().bind(table.widthProperty().divide(3));
+		stateCol.prefWidthProperty().bind(table.widthProperty().divide(3));
+		
+		table.getColumns().addAll(nameCol, percentCol, stateCol);
+		
 		
 	}
 

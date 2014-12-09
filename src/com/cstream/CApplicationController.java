@@ -3,40 +3,27 @@ package com.cstream;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import javafx.event.Event;
-import javafx.scene.Parent;
-import javafx.scene.control.Alert.AlertType;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
+import javafx.scene.Scene;
 
 import com.cstream.client.HttpTransferClient;
 import com.cstream.controller.Controller;
-import com.cstream.media.LibraryController;
 import com.cstream.media.MediaController;
 import com.cstream.model.Song;
 import com.cstream.torrent.TorrentClientManager;
 import com.cstream.torrent.TorrentManager;
 import com.cstream.tracker.TrackerClient;
 import com.cstream.tracker.TrackerPeer;
-import com.cstream.util.FxUtils;
 import com.cstream.util.LibraryUtils;
 
 public class CApplicationController extends Controller {
 
 	private static Logger LOGGER = Logger.getLogger(CApplicationController.class.getName());
-
-	public final static int WIDTH = 1280;
-	public final static int HEIGHT = 720;
-
-	// Primary stage
-	private Stage stage;
 	
-	// View
-	private CApplicationView view; 
+	// Primary scene
+	private CApplicationView scene; 
 
-	// Sub-Controllers
+	// Sub-Controller
 	private MediaController mediaController = new MediaController();
-	private LibraryController libraryController = new LibraryController();
 
 	// Model
 	private TrackerClient client;
@@ -45,24 +32,23 @@ public class CApplicationController extends Controller {
 	private TorrentClientManager clientManager;
 	private TorrentManager torrentManager;
 
-	public void initialize(Stage stage) {
-		
-		this.stage = stage;
+	public void initialize() {
 
-		view = new CApplicationView(WIDTH, HEIGHT);
-		view.initialize();
-
-		stage.setScene(view);
-		stage.setWidth(WIDTH);
-		stage.setHeight(HEIGHT);
-		stage.centerOnScreen();
+		scene = new CApplicationView(CApplication.WIDTH, CApplication.HEIGHT);
+		scene.initialize();
 		
 		client = new TrackerClient(new TrackerPeer());
-
-		libraryController.initialize();
-		mediaController.initialize(libraryController, client);
+		mediaController.initialize(client);
 		
 		addViews();
+		
+	}
+	
+	public Scene getScene() {
+		return scene;
+	}
+	
+	public void start() {
 		
 		initLocalLibrary(); 
 		
@@ -70,10 +56,8 @@ public class CApplicationController extends Controller {
 		torrentManager.addTorrentsFromLibrary(client.getPeer().getFiles(), client.getPeer().getId());
 		
 		clientManager = TorrentClientManager.getInstance();
-		clientManager.shareAll();
+		clientManager.shareAll(mediaController.getLibraryView());
 		HttpTransferClient.downloadTorrents("192.168.1.109", "6970");
-
-		addEventHandlers();
 		
 	}
 
@@ -86,39 +70,16 @@ public class CApplicationController extends Controller {
 	private void initLocalLibrary() {
 		
 		Map<String, Song> files = LibraryUtils.buildLocalLibrary(TorrentManager.FILE_DIR, client.getPeer().getId());
-		
 		client.setFiles(files);
-		
-		if (files != null) {
-			libraryController.addData(files.values());
-		}
 
 	}
 
 	private void addViews() {
 
-		view.addToBorderPane(libraryController.getView(), "center");
-		view.addToBorderPane(mediaController.getView(), "bottom");
+		scene.addToBorderPane(mediaController.getActionView(), "top");
+		scene.addToBorderPane(mediaController.getLibraryView(), "center");
+		scene.addToBorderPane(mediaController.getMediaView(), "bottom");
 
-	}
-
-	private void addEventHandlers() {
-
-		Parent root = view.getRoot();
-
-		addEventHandler(root, "quitMenuItem", "setOnAction", "handleQuitAction");
-		addEventHandler(root, "aboutMenuItem", "setOnAction", "handleAboutAction");
-
-	}
-
-	@SuppressWarnings("unused")
-	private void handleQuitAction(Event event) {
-		stage.fireEvent( new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST) );
-	}
-
-	@SuppressWarnings("unused")
-	private void handleAboutAction(Event event) {
-		FxUtils.showDialog(AlertType.INFORMATION, "About", "cStream", "cStream is a peer-to-peer audo streaming application by Benjamin Sweett & Colin Tinney");
 	}
 
 }

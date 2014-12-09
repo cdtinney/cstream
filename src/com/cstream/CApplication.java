@@ -11,6 +11,9 @@ import com.cstream.logging.LogHandler;
 public class CApplication extends Application {
 		
 	private static Logger LOGGER = Logger.getLogger(CApplication.class.getName());
+
+	public final static int WIDTH = 1280;
+	public final static int HEIGHT = 720;
 	
 	private CApplicationController controller = new CApplicationController();
 	
@@ -19,6 +22,9 @@ public class CApplication extends Application {
 		
 		primaryStage.setResizable(false);
 		primaryStage.setTitle("cStream ");
+		primaryStage.centerOnScreen();
+		primaryStage.setWidth(WIDTH);
+		primaryStage.setHeight(HEIGHT);
 		
 		try {
 			primaryStage.getIcons().add(new Image("/images/icon.png"));
@@ -28,9 +34,12 @@ public class CApplication extends Application {
 			
 		}
 		
-		controller.initialize(primaryStage);
+		controller.initialize();
 		
+		primaryStage.setScene(controller.getScene());
 		primaryStage.show();
+		
+		controller.start();
 		
 	}
 	

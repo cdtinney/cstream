@@ -2,9 +2,6 @@ package com.cstream;
 
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
 
 import com.cstream.util.FxUtils;
@@ -23,7 +20,7 @@ public class CApplicationView extends Scene {
 	}
 	
 	public void initialize() {
-		addMenuBar();
+		// Nothing
 	}
 	
 	public void addToBorderPane(Node node, String position) {
@@ -44,27 +41,6 @@ public class CApplicationView extends Scene {
 			root.setRight(node);
 			
 		}
-		
-	}
-	
-	private void addMenuBar() {
-		
-		MenuBar menuBar = new MenuBar();
-		menuBar.setPrefWidth(getWidth());
-		
-		Menu fileMenu = new Menu("File");
-		
-		MenuItem aboutItem = new MenuItem("About");
-		aboutItem.setId("aboutMenuItem");
-		
-		MenuItem quitAppItem = new MenuItem("Quit");
-		quitAppItem.setId("quitMenuItem");
-		
-		fileMenu.getItems().addAll(aboutItem, quitAppItem);
-		
-		menuBar.getMenus().addAll(fileMenu);
-		
-		root.setTop(menuBar);
 		
 	}
 	

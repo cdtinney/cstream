@@ -1,17 +1,42 @@
 package com.cstream.util;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
 public class FileUtils {
 	
 	private static Logger LOGGER = Logger.getLogger(FileUtils.class.getName());
+	
+	public static ZipFile unzip(InputStream is, File f) throws IOException, ZipException {
+		
+		BufferedInputStream input = new BufferedInputStream(is);
+		BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(f));
+		
+		int inByte;
+		while ((inByte = input.read()) != -1) { 
+			output.write(inByte);
+		}
+
+		output.close(); 
+		input.close();
+		
+		ZipFile zip = new ZipFile(f);
+		return zip;
+		
+	}
 	
 	public static File getFile(String path) {
 		

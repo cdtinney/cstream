@@ -1,16 +1,21 @@
 package com.cstream.client;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.SocketException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.FileHeader;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -24,6 +29,11 @@ import org.apache.http.impl.client.HttpClientBuilder;
 
 import com.cstream.torrent.TorrentManager;
 import com.cstream.util.FileUtils;
+import com.turn.ttorrent.bcodec.BDecoder;
+import com.turn.ttorrent.bcodec.BEValue;
+import com.turn.ttorrent.bcodec.BEncoder;
+import com.turn.ttorrent.bcodec.InvalidBEncodingException;
+import com.turn.ttorrent.common.Torrent;
 
 public class HttpTransferClient {
 
@@ -53,91 +63,144 @@ public class HttpTransferClient {
 			return false;
 		}
 
-		LOGGER.warning("POST to /upload returned: " + status);
+		LOGGER.info("POST to /upload returned: " + status);
 		return true;
 		
 	}
 	
-	public static boolean downloadTorrents(String ip, String port) {
+	public static Map<String, Torrent> downloadTorrents(String ip, String port) {
 
 		String url = "http://" + ip + ":" + port + DOWNLOAD_CONTEXT;
 		
 		HttpResponse response = get(url);	
 		if (response == null) {
 			LOGGER.warning("GET to /download returned null response");
-			return false;
+			return null;
 		}
 		
 		int status = response.getStatusLine().getStatusCode();
 		if (status != HttpStatus.SC_OK) {
 			LOGGER.warning("GET to /download returned: " + status);
-			return false;
+			return null;
 		}
 
 		LOGGER.warning("GET to /download returned: " + status);
 		
 		try {
-			 parseDownloadResponse(response);	
-			 return true;
+			 return parseDownloadResponse(response);	
 			
 		} catch (ZipException e) {
 			LOGGER.warning("ZipException: " + e.getMessage());
 			
 		}
 
-		return false;
+		return null;
 		
 	}
 	
-	private static void parseDownloadResponse(HttpResponse response) throws ZipException {
+	@SuppressWarnings("unchecked")
+	private static Map<String, Torrent> parseDownloadResponse(HttpResponse response) throws ZipException {
 				
 		try {
-
-			File temp = FileUtils.getFile(TorrentManager.TORRENT_TMP_DIR + "torrents.zip");
-			LOGGER.info("Creating temporary zip file at: " + temp.getAbsolutePath());
 			
 			if (response == null || response.getEntity() == null || response.getEntity().getContent() == null) {
 				LOGGER.warning("Torrent download returned no response");
-				return;
+				return null;
 			}
+
+			File temp = FileUtils.getFile(TorrentManager.TORRENT_TMP_DIR + "torrents.zip");
+			LOGGER.info("Created temporary zip file at: " + temp.getAbsolutePath());
 			
-			BufferedInputStream input = new BufferedInputStream(response.getEntity().getContent());
-			BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(temp));
-			
-			int inByte;
-			while ((inByte = input.read()) != -1) { 
-				output.write(inByte);
-			}
-			
-			input.close();
-			output.close(); 
-			
-			ZipFile zip = new ZipFile(temp.getAbsolutePath());
+			ZipFile zip = FileUtils.unzip(response.getEntity().getContent(), temp);
 			if (!zip.isValidZipFile()) {
 				throw new ZipException("HTTP client received an invalid torrent zip from the server");
 			}
 			
+			Map<String, Torrent> torrents = new HashMap<String, Torrent>();
+
 			LOGGER.info("Extracting " + zip.getFileHeaders().size() + " .torrent files..");
+			List<FileHeader> headers = zip.getFileHeaders();
+			for (FileHeader h : headers) {
+				
+				// Convert the input stream to a byte array, which we can then compute
+				// the torrent info hash from.
+				InputStream is = zip.getInputStream(h);
+				byte[] bytes = IOUtils.toByteArray(is);
+				String hexInfoHash = getInfoHash(bytes);
+				
+				// The client is already storing this torrent - ignore it
+				if (TorrentManager.getInstance().getTorrents().get(hexInfoHash) != null) {
+					LOGGER.warning("Tracker returned a torrent we already have - ignoring it - hash: " + hexInfoHash);
+					
+				} else {
+					
+					// Create a new torrent object, extract the file, and add it to the results map
+					Torrent t = new Torrent(bytes, false);
+					zip.extractFile(h.getFileName(), TorrentManager.TORRENT_DIR);
+					torrents.put(t.getHexInfoHash(), t);
+					
+				}
+				
+				// We need to close the file handler regardless of whether we loaded the torrent or not,
+				// otherwise we cannot delete the temporary .zip file
+				if (is != null){
+					is.close();
+					is = null;
+				}
+				
+			}
 			
-			// TODO - Do not overwrite current .torrent files...
-			zip.extractAll(TorrentManager.TORRENT_DIR);		
-			
-			LOGGER.info("Torrent files successfully extracted to: " + TorrentManager.TORRENT_DIR);
+			int numDownloaded = torrents.values().size();
+			LOGGER.info(numDownloaded + " new torrents downloaded from tracker.");			
 			
 			LOGGER.info("Deleting temporary zip file at: " + temp.getAbsolutePath() + "...");
-			boolean zipDeleted = temp.delete();
-			boolean tmpDeleted = temp.getParentFile().delete();
-			if (!zipDeleted || !tmpDeleted) {
+			if (!temp.delete() || !temp.getParentFile().delete()) {
 				LOGGER.warning("Failed to delete temporary zip file at: " + temp.getAbsolutePath());
-				return;
+				
+			} else {
+				LOGGER.info("Temporary zip file at: " + temp.getAbsolutePath() + " deleted successfully.");
+				
 			}
-
-			LOGGER.info("Temporary zip file at: " + temp.getAbsolutePath() + " deleted successfully");
+			
+			return torrents;
 			
 		} catch (IllegalStateException | IOException e) {
 			e.printStackTrace();
 			
 		}
+		
+		return null;
+		
+	}
+	
+	/*
+	 * Parses torrent meta-info binary to determine the info hash. This is easier
+	 * than creating an entirely new Torrent object simply to check the hash.
+	 */
+	private static String getInfoHash(byte[] bytes) throws InvalidBEncodingException, IOException {
+		
+		Map<String, BEValue> decoded = BDecoder.bdecode(new ByteArrayInputStream(bytes)).getMap();
+		
+		byte[] encoded_info;
+		Map<String, BEValue> decoded_info;
+		
+		byte[] info_hash;
+		String hex_info_hash;
+		
+		decoded_info = decoded.get("info").getMap();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		BEncoder.bencode(decoded_info, baos);
+		encoded_info = baos.toByteArray();
+		info_hash = Torrent.hash(encoded_info);
+		hex_info_hash = Torrent.byteArrayToHexString(info_hash);
+		
+		// Close the output stream!
+		if (baos != null) {
+			baos.close();
+			baos = null;
+		}
+		
+		return hex_info_hash;
 		
 	}
 	
