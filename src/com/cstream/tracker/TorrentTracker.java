@@ -1,4 +1,4 @@
-package com.ttorrent.tracker;
+package com.cstream.tracker;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -61,13 +61,13 @@ public class TorrentTracker {
 		
 		try {
 			
+			// Initialize the tracker, so we can announce our torrents
 			tracker = new Tracker(new InetSocketAddress(TRACKER_PORT));
-			
-			FileUtils.makeDirectory(TORRENT_DIR);
 			
 			// Announce all of the torrents we're already sharing
 			announceAll();
 			
+			// Start the tracker service
 			tracker.start();
 			
 		} catch (IOException e) {
@@ -92,9 +92,13 @@ public class TorrentTracker {
 		FilenameFilter filter = (file, name) -> {
 		    return name.endsWith(".torrent");
 		};
+		
+		// If the directory exists, grab it. Otherwise, it's created.
+		File dir = FileUtils.makeDirectory(TORRENT_DIR);
 
+		// Find all files ending with the .torrent extension
 		List<TrackedTorrent> tracked = new ArrayList<TrackedTorrent>();
-		for (File f : new File(TORRENT_DIR).listFiles(filter)) {
+		for (File f : dir.listFiles(filter)) {
 			
 			try {
 				tracked.add(TrackedTorrent.load(f));

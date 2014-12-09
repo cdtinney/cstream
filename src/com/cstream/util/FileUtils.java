@@ -50,7 +50,6 @@ public class FileUtils {
 		
 		File directory = new File(path);
         if (!directory.exists()) {
-        	LOGGER.info("Creating directory: " + path);
         	directory.mkdir();
         }
         
@@ -83,6 +82,7 @@ public class FileUtils {
     	
         File directory = new File(directoryName);
         
+        // TODO - Use filename filter in the future
         File[] fileList = directory.listFiles();
         if (fileList == null) {
         	LOGGER.warning("Cannot list files of a directory which does not exist - " + directoryName);

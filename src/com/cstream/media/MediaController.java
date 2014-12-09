@@ -11,14 +11,15 @@ import javafx.scene.control.TableRow;
 import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineListener;
 
+import com.cstream.client.TorrentActivityListener;
+import com.cstream.client.TorrentClientManager;
+import com.cstream.client.TorrentManager;
 import com.cstream.controller.Controller;
-import com.cstream.model.Song;
-import com.cstream.playback.LocalAudioPlayback;
-import com.cstream.torrent.TorrentClientManager;
-import com.cstream.torrent.TorrentManager;
+import com.cstream.song.LocalAudioPlayback;
+import com.cstream.song.Song;
 import com.turn.ttorrent.client.SharedTorrent;
 
-public class MediaController extends Controller {
+public class MediaController extends Controller implements TorrentActivityListener {
 
 	private static Logger LOGGER = Logger.getLogger(MediaController.class.getName());
 	
@@ -33,7 +34,7 @@ public class MediaController extends Controller {
 
 	public void initialize() {
 		
-		this.audioPlayback = new LocalAudioPlayback();
+		audioPlayback = new LocalAudioPlayback();
 		
 		actionView = new TorrentActionView();
 		actionView.initialize();
@@ -272,6 +273,26 @@ public class MediaController extends Controller {
 			
 		}
 	    
+	}
+
+	@Override
+	public void handleTorrentAdded(SharedTorrent torrent) {
+
+		LOGGER.info("Handle added torrent: " + torrent.getName());
+		
+		Platform.runLater(() -> {
+			libraryView.addItem(torrent);
+		});
+		
+	}
+
+	@Override
+	public void handleTorrentChanged(SharedTorrent torrent) {
+		
+		Platform.runLater(() -> {
+			libraryView.updateItem(torrent);
+		});
+		
 	}
 
 }

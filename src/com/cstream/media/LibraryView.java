@@ -1,6 +1,7 @@
 package com.cstream.media;
 
 import java.beans.PropertyChangeEvent;
+import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -13,11 +14,14 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 
+import com.cstream.client.TorrentClientManager;
 import com.cstream.logging.LogLevel;
-import com.cstream.model.Song;
-import com.cstream.torrent.TorrentClientManager;
+import com.cstream.song.Song;
+import com.cstream.util.EnumUtils;
 import com.turn.ttorrent.client.Client;
+import com.turn.ttorrent.client.Client.ClientState;
 import com.turn.ttorrent.client.SharedTorrent;
+
 
 public class LibraryView extends HBox {
 
@@ -31,7 +35,7 @@ public class LibraryView extends HBox {
 	private TableView<Song> libTableView = new TableView<Song>();
 	
 	// Model
-	private ObservableList<Song> data = FXCollections.observableArrayList();
+	private ObservableList<SharedTorrent> data = FXCollections.observableArrayList();
 
 	public void initialize() {
 		
@@ -40,10 +44,20 @@ public class LibraryView extends HBox {
 		addTableColumns();
 		getChildren().add(table);
 		
+		table.setItems(data);
+		
+	}
+	
+	public void addItem(SharedTorrent torrent) {
+		data.add(torrent);
+	}
+	
+	public void addItems(Collection<SharedTorrent> torrents) {
+		data.addAll(torrents);		
 	}
 	
 	public void setItems(ObservableList<SharedTorrent> torrents) {
-		table.setItems(torrents);
+		data.addAll(torrents);
 	}
 	
 	public SharedTorrent getSelected() {
@@ -84,13 +98,13 @@ public class LibraryView extends HBox {
 			return;
 		}
 		
-		for (Song s : data) {
-			
-			if (s.getId().equals(song.getId())) {
-				libTableView.getSelectionModel().select(s);
-			}
-			
-		}
+//		for (Song s : data) {
+//			
+//			if (s.getId().equals(song.getId())) {
+//				libTableView.getSelectionModel().select(s);
+//			}
+//			
+//		}
 		
 	}
 	
@@ -127,17 +141,11 @@ public class LibraryView extends HBox {
         	
 			SharedTorrent t = row.getValue();
         	
-        	LOGGER.info("Updating state column for torrent: " + t.getName());
-        	
         	TorrentClientManager manager = TorrentClientManager.getInstance();
         	Client client = manager.findClient(t);
         	
         	if (client == null) {
-        		
-        		// TODO - This returns incomplete if the file is locally complete but tracker is down
-        		String state = t.isComplete() ? "Complete" : "Incomplete";
-        		return new SimpleStringProperty(state);
-        		
+        		return new SimpleStringProperty("Stopped");
         	}
         	
         	return new SimpleStringProperty(client.getState().toString());
@@ -151,17 +159,62 @@ public class LibraryView extends HBox {
                 @Override
                 public void updateItem(String item, boolean empty) {
                 	super.updateItem(item, empty);
-                	
+
                 	if (item == null || empty) {
                 		setText(null);
                 		setStyle("");
                 		return;
                 	}
-                	
+
                 	SharedTorrent torrent = (SharedTorrent) this.getTableRow().getItem();
-                	if (torrent.isComplete()) {
-                        this.setStyle("-fx-background-color:green");   
-                	} 
+                	if (torrent == null) {
+                		setText(null);
+                		setStyle("");
+                		return;
+                	}
+                	
+                	TorrentClientManager manager = TorrentClientManager.getInstance();
+                	Client client = manager.findClient(torrent);
+                	
+                	if (client == null) {
+                        this.setStyle("-fx-background-color: none"); 
+                    	this.setTextFill(Color.BLACK);                  	
+                    	setText(item.toString());
+                    	return;
+                	}
+                	
+                	ClientState state = EnumUtils.lookup(ClientState.class, item.toString());
+                	if (state == null) {
+                        this.setStyle("-fx-background-color: none"); 
+                    	this.setTextFill(Color.BLACK);                 	
+                    	setText(item.toString()); 
+                    	return;
+                	}
+                	
+                	switch (state) {
+                	
+                		case WAITING:
+                		case VALIDATING:
+                            this.setStyle("-fx-background-color: #FF9900");
+                			break;
+                			
+                		case SHARING:
+                            this.setStyle("-fx-background-color: #00CC00");
+                			break;
+                			
+                		case SEEDING:
+                            this.setStyle("-fx-background-color: #00CC00");
+                			break;
+                			
+                		case DONE:
+                            this.setStyle("-fx-background-color: #006600");
+                			break;
+                			
+                		case ERROR:
+                            this.setStyle("-fx-background-color: ##CC0000");
+                			break; 
+                			
+                	}
                 	
                 	this.setTextFill(Color.WHITE);                	
                 	setText(item.toString());
@@ -178,6 +231,17 @@ public class LibraryView extends HBox {
 		
 		table.getColumns().addAll(nameCol, percentCol, stateCol);
 		
+		
+	}
+
+	public void updateItem(SharedTorrent torrent) {
+
+		int index = data.indexOf(torrent);
+		
+		LOGGER.info("Updating torrent at index: " + index);
+		
+		data.set(index, null);
+		data.set(index, torrent);
 		
 	}
 

@@ -8,7 +8,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import com.cstream.model.Song;
+import com.cstream.song.Song;
 import com.cstream.util.FxUtils;
 
 public class MediaView extends HBox {

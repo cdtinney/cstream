@@ -2,12 +2,13 @@ package com.cstream;
 
 import java.util.logging.Logger;
 
+import javafx.collections.MapChangeListener;
 import javafx.scene.Scene;
 
+import com.cstream.client.TorrentClientManager;
+import com.cstream.client.TorrentManager;
 import com.cstream.controller.Controller;
 import com.cstream.media.MediaController;
-import com.cstream.torrent.TorrentClientManager;
-import com.cstream.torrent.TorrentManager;
 
 public class CApplicationController extends Controller {
 
@@ -40,12 +41,13 @@ public class CApplicationController extends Controller {
 	
 	public void start() {
 		
-		torrentManager = TorrentManager.getInstance();
-		torrentManager.start();
-		
+		torrentManager = TorrentManager.getInstance();		
+		torrentManager.register(mediaController);
+				
 		clientManager = TorrentClientManager.getInstance();
-		clientManager.shareAll(mediaController.getLibraryView());
-		//HTTPTorrentClient.downloadTorrents("192.168.1.109", "6970");
+		clientManager.register(mediaController);
+		
+		torrentManager.start();		
 		
 	}
 

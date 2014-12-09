@@ -23,11 +23,11 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 
-import com.cstream.torrent.TorrentManager;
 import com.cstream.util.FileUtils;
 import com.turn.ttorrent.bcodec.BDecoder;
 import com.turn.ttorrent.bcodec.BEValue;
@@ -70,21 +70,22 @@ public class HTTPTorrentClient {
 	
 	public static Map<String, Torrent> downloadTorrents(String ip, String port) {
 
+		Map<String, Torrent> results = new HashMap<String, Torrent>();
 		String url = "http://" + ip + ":" + port + DOWNLOAD_CONTEXT;
 		
 		HttpResponse response = get(url);	
 		if (response == null) {
 			LOGGER.warning("GET to /download returned null response");
-			return null;
+			return results;
 		}
 		
 		int status = response.getStatusLine().getStatusCode();
 		if (status != HttpStatus.SC_OK) {
 			LOGGER.warning("GET to /download returned: " + status);
-			return null;
+			return results;
 		}
 
-		LOGGER.warning("GET to /download returned: " + status);
+		LOGGER.info("GET to /download returned: " + status);
 		
 		try {
 			 return parseDownloadResponse(response);	
@@ -94,23 +95,23 @@ public class HTTPTorrentClient {
 			
 		}
 
-		return null;
+		return results;
 		
 	}
 	
 	@SuppressWarnings("unchecked")
 	private static Map<String, Torrent> parseDownloadResponse(HttpResponse response) throws ZipException {
-				
+		
+		Map<String, Torrent> results = new HashMap<String, Torrent>();
+		
 		try {
 			
 			if (response == null || response.getEntity() == null || response.getEntity().getContent() == null) {
 				LOGGER.warning("Torrent download returned no response");
-				return null;
+				return results;
 			}
 
 			File temp = FileUtils.getFile(TorrentManager.TORRENT_TMP_DIR + "torrents.zip");
-			LOGGER.info("Created temporary zip file at: " + temp.getAbsolutePath());
-			
 			ZipFile zip = FileUtils.unzip(response.getEntity().getContent(), temp);
 			if (!zip.isValidZipFile()) {
 				throw new ZipException("HTTP client received an invalid torrent zip from the server");
@@ -130,7 +131,7 @@ public class HTTPTorrentClient {
 				
 				// The client is already storing this torrent - ignore it
 				if (TorrentManager.getInstance().getTorrents().get(hexInfoHash) != null) {
-					LOGGER.warning("Tracker returned a torrent we already have - ignoring it - hash: " + hexInfoHash);
+					LOGGER.info("Tracker returned a torrent we already have - ignoring it - hash: " + hexInfoHash);
 					
 				} else {
 					
@@ -150,16 +151,8 @@ public class HTTPTorrentClient {
 				
 			}
 			
-			int numDownloaded = torrents.values().size();
-			LOGGER.info(numDownloaded + " new torrents downloaded from tracker.");			
-			
-			LOGGER.info("Deleting temporary zip file at: " + temp.getAbsolutePath() + "...");
 			if (!temp.delete() || !temp.getParentFile().delete()) {
 				LOGGER.warning("Failed to delete temporary zip file at: " + temp.getAbsolutePath());
-				
-			} else {
-				LOGGER.info("Temporary zip file at: " + temp.getAbsolutePath() + " deleted successfully.");
-				
 			}
 			
 			return torrents;
@@ -169,7 +162,7 @@ public class HTTPTorrentClient {
 			
 		}
 		
-		return null;
+		return results;
 		
 	}
 	
@@ -246,8 +239,8 @@ public class HTTPTorrentClient {
 			
 			return response;
 			
-		} catch (SocketException e) {
-			LOGGER.warning("SocketException: " + e.getMessage());			
+		} catch (SocketException | ConnectTimeoutException e) {
+			LOGGER.warning(e.getClass().getSimpleName() + ": " + e.getMessage());	
 
 		} catch (Exception e) {
 			e.printStackTrace();

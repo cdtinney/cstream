@@ -1,4 +1,4 @@
-package com.cstream.model;
+package com.cstream.song;
 
 import java.io.IOException;
 import java.util.logging.Logger;
