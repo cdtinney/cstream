@@ -14,6 +14,7 @@ import javax.sound.sampled.LineListener;
 import com.cstream.controller.Controller;
 import com.cstream.model.Song;
 import com.cstream.playback.LocalAudioPlayback;
+import com.cstream.torrent.TorrentClientManager;
 import com.cstream.torrent.TorrentManager;
 import com.turn.ttorrent.client.SharedTorrent;
 
@@ -145,20 +146,16 @@ public class MediaController extends Controller {
 	@SuppressWarnings("unused")
 	private void handleStartTorrentButton(Event event) {
 		
-		// TODO
 		SharedTorrent selected = libraryView.getSelected();
-		
-		
+		TorrentClientManager.getInstance().share(selected);		
 		
 	}
 
 	@SuppressWarnings("unused")
 	private void handleStopTorrentButton(Event event) {
 		
-		// TODO
 		SharedTorrent selected = libraryView.getSelected();
-		
-		
+		TorrentClientManager.getInstance().stopShare(selected);	
 		
 	}
 

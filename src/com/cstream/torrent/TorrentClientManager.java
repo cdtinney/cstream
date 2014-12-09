@@ -23,7 +23,8 @@ public class TorrentClientManager implements Observer {
 	
 	private static final int MAX_CLIENTS = 5;
 	
-	private static final String TRACKER_IP = "192.168.1.109";
+	//private static final String TRACKER_IP = "192.168.1.109";
+	private static final String TRACKER_IP = "192.168.1.100";
 	private static final String TRACKER_PORT = "6970";
 
 	// Singleton instance
@@ -69,9 +70,45 @@ public class TorrentClientManager implements Observer {
 			return;			
 		}
 		
-		// TODO
+		try {
 		
+			Client c = findClient(torrent);
+			
+			if(c != null) {
+				c.share();
+				LOGGER.info("Torrent is sharing successfully: " + torrent.getName() + ": " + c.getState().toString());	
+			}
 		
+		} catch (Exception e) {
+			e.printStackTrace();
+			
+		}
+					
+	}
+	
+	public void stopShare(SharedTorrent torrent) {
+		
+		//new Thread(() -> {
+			
+			try {
+				
+				torrent.finish();
+				Client c = findClient(torrent);
+				
+				//TODO: Check client state
+				if(c != null && c.isSeed()) {
+					c.stop();
+					clients.remove(c);
+					LOGGER.info("Torrent is was stopped successfully: " + torrent.getName());
+				}
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+				
+			}
+			
+		//}).start();
+
 	}
 
 	public void shareAll(LibraryView view) {
@@ -126,7 +163,8 @@ public class TorrentClientManager implements Observer {
 		Torrent t = c.getTorrent();
 		LOGGER.info("Torrent state changed: " + t.getName() + " to " + state.toString());
 		
-		// TODO - Publish state to UI		
+		// TODO - Publish state to UI	
+		//Notifier.getInstance().notify();
 		
 	}
 	

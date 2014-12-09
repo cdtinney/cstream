@@ -63,6 +63,8 @@ public class TorrentTracker {
 			
 			tracker = new Tracker(new InetSocketAddress(TRACKER_PORT));
 			
+			FileUtils.makeDirectory(TORRENT_DIR);
+			
 			// Announce all of the torrents we're already sharing
 			announceAll();
 			

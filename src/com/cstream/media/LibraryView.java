@@ -160,9 +160,8 @@ public class LibraryView extends HBox {
                 	
                 	SharedTorrent torrent = (SharedTorrent) this.getTableRow().getItem();
                 	if (torrent.isComplete()) {
-                        this.setStyle("-fx-background-color:green");
-                        
-                	}
+                        this.setStyle("-fx-background-color:green");   
+                	} 
                 	
                 	this.setTextFill(Color.WHITE);                	
                 	setText(item.toString());
