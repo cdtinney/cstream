@@ -46,7 +46,6 @@ public class LibraryView extends HBox {
 		table.setItems(torrents);
 	}
 	
-	
 	public SharedTorrent getSelected() {
 		return table.getSelectionModel().getSelectedItem();
 	}
@@ -114,12 +113,21 @@ public class LibraryView extends HBox {
 			
 		});
 
+        TableColumn<SharedTorrent, String> peersCol = new TableColumn<SharedTorrent, String>("Peers");
+        peersCol.setCellValueFactory(row -> {
+			
+        	//SharedTorrent t = row.getValue();
+        	// TODO
+			return new SimpleStringProperty("TODO");
+			
+		});
+
         TableColumn<SharedTorrent, String> stateCol = new TableColumn<SharedTorrent, String>("State");
         stateCol.setCellValueFactory(row -> {
         	
-        	LOGGER.info("Changing state col");
-        	
 			SharedTorrent t = row.getValue();
+        	
+        	LOGGER.info("Updating state column for torrent: " + t.getName());
         	
         	TorrentClientManager manager = TorrentClientManager.getInstance();
         	Client client = manager.findClient(t);

@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import com.cstream.client.HttpTransferClient;
+import com.cstream.client.HTTPTorrentClient;
 import com.cstream.media.LibraryView;
 import com.turn.ttorrent.client.Client;
 import com.turn.ttorrent.client.Client.ClientState;
@@ -21,7 +21,7 @@ public class TorrentClientManager implements Observer {
 
 	private static Logger LOGGER = Logger.getLogger(TorrentClientManager.class.getName());
 	
-	private static final int MAX_TORRENTS = 5;
+	private static final int MAX_CLIENTS = 5;
 	
 	private static final String TRACKER_IP = "192.168.1.109";
 	private static final String TRACKER_PORT = "6970";
@@ -61,6 +61,18 @@ public class TorrentClientManager implements Observer {
 		return null;		
 		
 	}
+	
+	public void share(SharedTorrent torrent) {
+		
+		if (clients.keySet().size() == MAX_CLIENTS) {
+			LOGGER.warning("Maximum number of clients reached.");
+			return;			
+		}
+		
+		// TODO
+		
+		
+	}
 
 	public void shareAll(LibraryView view) {
 		
@@ -71,22 +83,21 @@ public class TorrentClientManager implements Observer {
 			for (SharedTorrent torrent : torrentManager.getTorrents().values()) {
 
 				try {
+					
 					Client c = new Client(InetAddress.getLocalHost(), torrent);
 					c.addObserver(this);
 				
 					shared.add(torrent);
 	
+					// Download = no seeding, share = seeding
 					//c.download();
-					
-					// TODO - We want to always share local files. Regardless of whether the tracker is up/down at the moment, since the client
-					// will resolve that.
+					//c.share();		
 					
 					LOGGER.info("Uploading torrent to tracker: " + torrent.getName());
-					boolean success = HttpTransferClient.uploadTorrent(torrent.getName(), torrent.getEncoded(), TRACKER_IP, TRACKER_PORT);
+					boolean success = HTTPTorrentClient.uploadTorrent(torrent.getName(), torrent.getEncoded(), TRACKER_IP, TRACKER_PORT);
 					if (success) {					
 						LOGGER.info("Torrent uploaded successfully: " + torrent.getName());					
 						clients.put(c, c.getTorrent());	
-						c.share();		
 					}
 					
 				} catch (Exception e) {

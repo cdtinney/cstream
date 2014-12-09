@@ -19,10 +19,10 @@ public class LibraryUtils {
 	private final static String[] extensions = {"mp3"};
 
 	/**
-	 * Builds a map of songs, where the key is the song ID, from a specific directory and
+	 * Builds a map of songs, where the key is the filename, from a specific directory and
 	 * all its sub directories.
 	 */
-	public static Map<String, Song> buildLocalLibrary(String directoryName, String peerId) {
+	public static Map<String, Song> buildLocalLibrary(String directoryName) {
 		
 		if (directoryName == null || directoryName.isEmpty()) {
 			LOGGER.warning("Cannot build library from null or empty directory path");
@@ -37,11 +37,12 @@ public class LibraryUtils {
 		int count = 0;
 		for (int i = 0; i < fileList.size(); i++) {
 			
-			Song song = new Song(fileList.get(i).getName(), fileList.get(i).getAbsolutePath());
+			String fileName = fileList.get(i).getName();
+			Song song = new Song(fileName, fileList.get(i).getAbsolutePath());
 			
 			if (song.getMp3() != null && song.getId() != null) {
 				
-				results.put(song.getId(), song);				
+				results.put(fileName, song);				
 				count++;
 				
 			} else {
@@ -51,8 +52,7 @@ public class LibraryUtils {
 			
 		}
 		
-		LOGGER.info("Added " + count + " songs");
-		
+		LOGGER.info("Found " + count + " local song files in: " + directoryName);		
 		return results;
 		
 	}

@@ -1,8 +1,6 @@
 package com.cstream.model;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import com.cstream.util.FileUtils;
@@ -24,18 +22,12 @@ public class Song implements Comparable<Song> {
 	private transient Mp3File mp3;	
 	private String path;
 	
-	// Set of peer IDs that are sharing this song
-	private Set<String> peers;
-	
 	// Primitive string properties required for JSON parsing
 	private String artist;
 	private String album;
 	private String title;
 	private String track;
 	private int length = 0;
-	
-	// Indicates whether this song is stored locally or not
-	private transient boolean local = false;
 	
 	// Constructor
 	public Song(String fileName, String path) {
@@ -51,7 +43,6 @@ public class Song implements Comparable<Song> {
 		
 		this.id = FileUtils.generateMd5(path);	
 		this.path = fileName;
-		this.peers = new HashSet<String>();
 		
 		if (mp3 != null) {
 			

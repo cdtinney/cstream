@@ -14,7 +14,7 @@ import javax.sound.sampled.LineListener;
 import com.cstream.controller.Controller;
 import com.cstream.model.Song;
 import com.cstream.playback.LocalAudioPlayback;
-import com.cstream.tracker.TrackerClient;
+import com.cstream.torrent.TorrentManager;
 import com.turn.ttorrent.client.SharedTorrent;
 
 public class MediaController extends Controller {
@@ -25,17 +25,13 @@ public class MediaController extends Controller {
 	private MediaView mediaView; 
 	private LibraryView libraryView;
 	private TorrentActionView actionView;
-
-	// Model
-	private TrackerClient client;
 	
 	private LocalAudioPlayback audioPlayback;
 	private Song activeSong;
 	private Song queuedSong;
 
-	public void initialize(TrackerClient client) {
-
-		this.client = client;
+	public void initialize() {
+		
 		this.audioPlayback = new LocalAudioPlayback();
 		
 		actionView = new TorrentActionView();
@@ -67,7 +63,7 @@ public class MediaController extends Controller {
 		
 		LOGGER.info("Playing: " + torrent.getName());
 		
-		Song song = client.getSong(torrent.getName());
+		Song song = TorrentManager.getInstance().getSongs().get(torrent.getName());
 		if (song == null) {
 			LOGGER.warning("Client is not storing song: " + torrent.getName());
 			return;
@@ -150,6 +146,7 @@ public class MediaController extends Controller {
 	private void handleStartTorrentButton(Event event) {
 		
 		// TODO
+		SharedTorrent selected = libraryView.getSelected();
 		
 		
 		
@@ -159,6 +156,7 @@ public class MediaController extends Controller {
 	private void handleStopTorrentButton(Event event) {
 		
 		// TODO
+		SharedTorrent selected = libraryView.getSelected();
 		
 		
 		

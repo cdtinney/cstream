@@ -1,5 +1,7 @@
 package com.ttorrent.tracker;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -10,6 +12,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -31,6 +34,11 @@ import org.slf4j.LoggerFactory;
 
 import com.cstream.util.FileUtils;
 import com.cstream.util.OSUtils;
+import com.turn.ttorrent.bcodec.BDecoder;
+import com.turn.ttorrent.bcodec.BEValue;
+import com.turn.ttorrent.bcodec.BEncoder;
+import com.turn.ttorrent.bcodec.InvalidBEncodingException;
+import com.turn.ttorrent.common.Torrent;
 import com.turn.ttorrent.tracker.TrackedTorrent;
 import com.turn.ttorrent.tracker.Tracker;
 
@@ -173,29 +181,25 @@ public class TorrentTracker {
 				
 				InputStream input = request.getInputStream();
 				byte[] bytes = IOUtils.toByteArray(input);
+				String hexInfoHash = getInfoHash(bytes);
 				
-				// Attempt to create a new TrackedTorrent object
-				TrackedTorrent torrent = new TrackedTorrent(bytes);
-				
-				// Announce it!
-				TrackedTorrent existing = tracker.announce(torrent);
-				
-				// If the objects are not equal, we're already tracking this torrent. 
-				if (torrent != existing) {
-					LOGGER.info("Torrent uploaded is already being tracked: " + torrent.getName());
-					
-				// Otherwise, it's new, so write it out to file
-				} else {
-					
-					File file = new File(TORRENT_DIR + filename + ".torrent");	
-					OutputStream output = new FileOutputStream(file);
-					torrent.save(output);
-					
-					LOGGER.info("Torrent uploaded: " + file.getName());
+				// Check the info hash to determine whether this .torrent has already been uploaded
+				if (torrentExists(hexInfoHash)) {
+					LOGGER.info("Torrent uploaded is already being tracked: " + hexInfoHash);
+					response.setStatus(HttpServletResponse.SC_OK);
+					return;
 					
 				}
-
-				// Send an OK response
+				
+				// Announce the new tracked torrent
+				TrackedTorrent torrent = new TrackedTorrent(bytes);
+				tracker.announce(torrent);
+				
+				File file = new File(TORRENT_DIR + filename + ".torrent");	
+				OutputStream output = new FileOutputStream(file);
+				torrent.save(output);
+				
+				LOGGER.info("Torrent uploaded: " + file.getName());
 				response.setStatus(HttpServletResponse.SC_OK);
 				return;
 				
@@ -207,6 +211,47 @@ public class TorrentTracker {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			
 	    }
+		
+		private boolean torrentExists(String hexInfoHash) {
+			
+			for (TrackedTorrent t : tracker.getTrackedTorrents()) {
+				
+				if (t.getHexInfoHash().equals(hexInfoHash)) {
+					return true;
+				}
+				
+			}
+			
+			return false;
+			
+		}
+		
+		private String getInfoHash(byte[] bytes) throws InvalidBEncodingException, IOException {
+			
+			Map<String, BEValue> decoded = BDecoder.bdecode(new ByteArrayInputStream(bytes)).getMap();
+			
+			byte[] encoded_info;
+			Map<String, BEValue> decoded_info;
+			
+			byte[] info_hash;
+			String hex_info_hash;
+			
+			decoded_info = decoded.get("info").getMap();
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			BEncoder.bencode(decoded_info, baos);
+			encoded_info = baos.toByteArray();
+			info_hash = Torrent.hash(encoded_info);
+			hex_info_hash = Torrent.byteArrayToHexString(info_hash);
+			
+			// Close the output stream!
+			if (baos != null) {
+				baos.close();
+				baos = null;
+			}
+			
+			return hex_info_hash;
+			
+		}
 		
 	}
 	

@@ -35,9 +35,9 @@ import com.turn.ttorrent.bcodec.BEncoder;
 import com.turn.ttorrent.bcodec.InvalidBEncodingException;
 import com.turn.ttorrent.common.Torrent;
 
-public class HttpTransferClient {
+public class HTTPTorrentClient {
 
-	private static Logger LOGGER = Logger.getLogger(HttpTransferClient.class.getName());
+	private static Logger LOGGER = Logger.getLogger(HTTPTorrentClient.class.getName());
 	
 	private static final String UPLOAD_CONTEXT = "/upload/";
 	private static final String DOWNLOAD_CONTEXT = "/download/";
@@ -45,7 +45,7 @@ public class HttpTransferClient {
 	private static RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(2 * 1000).build();
 	private static HttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();	
 	
-	public HttpTransferClient() { }
+	public HTTPTorrentClient() { }
 	
 	public static boolean uploadTorrent(String name, byte[] torrentBytes, String ip, String port) {
 		

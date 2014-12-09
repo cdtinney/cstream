@@ -1,19 +1,13 @@
 package com.cstream;
 
-import java.util.Map;
 import java.util.logging.Logger;
 
 import javafx.scene.Scene;
 
-import com.cstream.client.HttpTransferClient;
 import com.cstream.controller.Controller;
 import com.cstream.media.MediaController;
-import com.cstream.model.Song;
 import com.cstream.torrent.TorrentClientManager;
 import com.cstream.torrent.TorrentManager;
-import com.cstream.tracker.TrackerClient;
-import com.cstream.tracker.TrackerPeer;
-import com.cstream.util.LibraryUtils;
 
 public class CApplicationController extends Controller {
 
@@ -24,9 +18,6 @@ public class CApplicationController extends Controller {
 
 	// Sub-Controller
 	private MediaController mediaController = new MediaController();
-
-	// Model
-	private TrackerClient client;
 	
 	// Manager classes
 	private TorrentClientManager clientManager;
@@ -37,8 +28,7 @@ public class CApplicationController extends Controller {
 		scene = new CApplicationView(CApplication.WIDTH, CApplication.HEIGHT);
 		scene.initialize();
 		
-		client = new TrackerClient(new TrackerPeer());
-		mediaController.initialize(client);
+		mediaController.initialize();
 		
 		addViews();
 		
@@ -50,14 +40,12 @@ public class CApplicationController extends Controller {
 	
 	public void start() {
 		
-		initLocalLibrary(); 
-		
 		torrentManager = TorrentManager.getInstance();
-		torrentManager.addTorrentsFromLibrary(client.getPeer().getFiles(), client.getPeer().getId());
+		torrentManager.start();
 		
 		clientManager = TorrentClientManager.getInstance();
 		clientManager.shareAll(mediaController.getLibraryView());
-		HttpTransferClient.downloadTorrents("192.168.1.109", "6970");
+		//HTTPTorrentClient.downloadTorrents("192.168.1.109", "6970");
 		
 	}
 
@@ -65,13 +53,6 @@ public class CApplicationController extends Controller {
 
 		LOGGER.info("Attempting to stop the application...");
 		
-	}
-
-	private void initLocalLibrary() {
-		
-		Map<String, Song> files = LibraryUtils.buildLocalLibrary(TorrentManager.FILE_DIR, client.getPeer().getId());
-		client.setFiles(files);
-
 	}
 
 	private void addViews() {
