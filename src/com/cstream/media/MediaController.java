@@ -147,8 +147,10 @@ public class MediaController extends Controller implements TorrentActivityListen
 	@SuppressWarnings("unused")
 	private void handleStartTorrentButton(Event event) {
 		
-		SharedTorrent selected = libraryView.getSelected();
-		TorrentClientManager.getInstance().share(selected);		
+		SharedTorrent selected = libraryView.getSelected();	
+		if (selected != null) {
+			TorrentClientManager.getInstance().share(selected);	
+		}
 		
 	}
 
@@ -156,7 +158,9 @@ public class MediaController extends Controller implements TorrentActivityListen
 	private void handleStopTorrentButton(Event event) {
 		
 		SharedTorrent selected = libraryView.getSelected();
-		TorrentClientManager.getInstance().stopShare(selected);	
+		if (selected != null) {
+			TorrentClientManager.getInstance().stopShare(selected);	
+		}
 		
 	}
 
