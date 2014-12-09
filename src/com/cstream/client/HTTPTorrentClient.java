@@ -119,7 +119,7 @@ public class HTTPTorrentClient {
 			
 			Map<String, Torrent> torrents = new HashMap<String, Torrent>();
 
-			LOGGER.info("Extracting " + zip.getFileHeaders().size() + " .torrent files..");
+			LOGGER.info("Extracting " + zip.getFileHeaders().size() + " .torrent file(s).");
 			List<FileHeader> headers = zip.getFileHeaders();
 			for (FileHeader h : headers) {
 				

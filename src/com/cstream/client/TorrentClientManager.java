@@ -13,21 +13,14 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import com.cstream.media.LibraryView;
-import com.cstream.media.MediaController;
 import com.turn.ttorrent.client.Client;
-import com.turn.ttorrent.client.Client.ClientState;
 import com.turn.ttorrent.client.SharedTorrent;
-import com.turn.ttorrent.common.Torrent;
 
 public class TorrentClientManager implements Observer {
 
 	private static Logger LOGGER = Logger.getLogger(TorrentClientManager.class.getName());
 	
 	private static final int MAX_CLIENTS = 5;
-	
-	private static final String TRACKER_IP = "192.168.1.109";
-	//private static final String TRACKER_IP = "192.168.1.100";
-	private static final String TRACKER_PORT = "6970";
 
 	// Singleton instance
 	private static TorrentClientManager instance = null;
@@ -119,41 +112,6 @@ public class TorrentClientManager implements Observer {
 			
 		}
 
-	}
-
-	public void shareAll(LibraryView view) {
-		
-		new Thread(() -> {
-			
-			ObservableList<SharedTorrent> shared = FXCollections.observableArrayList();
-			
-			for (SharedTorrent torrent : torrentManager.getTorrents().values()) {
-
-				try {
-					
-					Client c = new Client(InetAddress.getLocalHost(), torrent);
-					c.addObserver(this);
-				
-					shared.add(torrent);	
-					
-					LOGGER.info("Uploading torrent to tracker: " + torrent.getName());
-					boolean success = HTTPTorrentClient.uploadTorrent(torrent.getName(), torrent.getEncoded(), TRACKER_IP, TRACKER_PORT);
-					if (success) {					
-						LOGGER.info("Torrent uploaded successfully: " + torrent.getName());					
-						clients.put(c, c.getTorrent());	
-					}
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-					
-				}
-				
-			}
-			
-			view.setItems(shared);
-			
-		}).start();
-		
 	}
 	
 	public void register(TorrentActivityListener listener) {

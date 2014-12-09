@@ -21,7 +21,6 @@ import com.cstream.util.FileUtils;
 import com.cstream.util.LibraryUtils;
 import com.cstream.util.OSUtils;
 import com.turn.ttorrent.client.SharedTorrent;
-import com.turn.ttorrent.client.peer.PeerActivityListener;
 import com.turn.ttorrent.common.Torrent;
 
 public class TorrentManager {
@@ -96,8 +95,9 @@ public class TorrentManager {
 			
 			// Create a new .torrent file, and load it into a new Torrent object
 			// TODO - Change createdBy to user.name!
-			File torrentFile = createTorrentFile(songName);
-			Torrent torrent = loadTorrentFromFile(torrentFile, "createdBy");
+			//File torrentFile = createTorrentFile(songName);
+			File song = new File(FILE_DIR + this.songs.get(songName).getPath());
+			Torrent torrent = loadTorrentFromFile(song, "createdBy");
 			
 			// Add the torrent to our temporary map
 			torrents.put(torrent.getHexInfoHash(), torrent);
@@ -146,6 +146,11 @@ public class TorrentManager {
 			this.collector.setName("torrent-collector");
 			this.collector.start();
 		}
+		
+		// Start the torrent upload on a new thread
+		Thread upload = new Thread(new TorrentUpload());
+		upload.setName("torrent-upload");
+		upload.start();
 		
 	}
 	
@@ -205,7 +210,7 @@ public class TorrentManager {
 			LOGGER.info("Creating new .torrent file for: " + fileName);			
 			
 			// Create the new torrent object from our song file, and write it to a .torrent file
-			Torrent t = Torrent.create(file, new URI(TRACKER_ANNOUNCE), createdBy);
+			Torrent t = Torrent.create(file, new URI("http://" + TRACKER_ANNOUNCE), createdBy);
 			OutputStream output = new FileOutputStream(createTorrentFile(fileName));
 			t.save(output);
 			
@@ -271,6 +276,25 @@ public class TorrentManager {
 				} catch (InterruptedException ie) {
 					// Ignore
 					
+				}
+				
+			}
+			
+		}
+		
+	}
+	
+	private class TorrentUpload implements Runnable {
+
+		@Override
+		public void run() {
+			
+			for (SharedTorrent torrent : torrents.values()) {
+				
+				LOGGER.info("Uploading torrent to tracker: " + torrent.getName());
+				boolean success = HTTPTorrentClient.uploadTorrent(torrent.getName(), torrent.getEncoded(), TRACKER_IP, TRACKER_HTTP);
+				if (success) {					
+					LOGGER.info("Torrent uploaded successfully: " + torrent.getName());	
 				}
 				
 			}

@@ -332,8 +332,10 @@ public class TorrentTracker {
 					LOGGER.info("\t" + (i + 1) + ". " + torrentFiles.get(i).getName());					
 				}
 				
-				zip.addFiles(torrentFiles, parameters);
-				LOGGER.info("Archive created successfully: " + zip.getFile().getAbsolutePath());
+				if (!torrentFiles.isEmpty()) {
+					zip.addFiles(torrentFiles, parameters);
+					LOGGER.info("Archive created successfully: " + zip.getFile().getAbsolutePath());
+				}
 				
 				return true;
 				
