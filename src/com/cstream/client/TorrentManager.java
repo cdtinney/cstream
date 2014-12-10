@@ -162,8 +162,17 @@ public class TorrentManager {
 		return torrents;
 	}
 	
-	public ObservableMap<String, SharedTorrent> getObservable() {
-		return observableTorrents;
+	public void addCompletedTorrent(SharedTorrent torrent) {
+
+		Song song = new Song(torrent.getName(), FILE_DIR + torrent.getName());
+		
+		if (song.getMp3() == null) {		
+			LOGGER.warning("Mp3 Object or Song Id were not created correctly");	
+			return;			
+		} 
+		
+		songs.put(song.getPath(), song);
+		
 	}
 	
 	public Map<String, Song> getSongs() {

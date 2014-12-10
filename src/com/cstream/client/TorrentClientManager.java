@@ -14,6 +14,7 @@ import javafx.collections.ObservableList;
 
 import com.cstream.media.LibraryView;
 import com.turn.ttorrent.client.Client;
+import com.turn.ttorrent.client.Client.ClientState;
 import com.turn.ttorrent.client.SharedTorrent;
 
 public class TorrentClientManager implements Observer {
@@ -126,7 +127,13 @@ public class TorrentClientManager implements Observer {
 		}
 		
 		Client c = (Client) object;		
+		ClientState state = c.getState();
 		SharedTorrent t = c.getTorrent();		
+		
+		if (state == ClientState.DONE || state == ClientState.SEEDING) {
+			TorrentManager.getInstance().addCompletedTorrent(t);
+		}
+		
 		fireTorrentChangedEvent(t);
 		
 	}
