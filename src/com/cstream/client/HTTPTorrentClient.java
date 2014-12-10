@@ -28,6 +28,7 @@ import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 
+import com.cstream.logging.LogLevel;
 import com.cstream.util.FileUtils;
 import com.turn.ttorrent.bcodec.BDecoder;
 import com.turn.ttorrent.bcodec.BEValue;
@@ -62,7 +63,7 @@ public class HTTPTorrentClient {
 			return false;
 		}
 
-		LOGGER.info("POST to /upload returned: " + status);
+		LOGGER.log(LogLevel.DEBUG, "POST to /upload returned: " + status);
 		return true;
 		
 	}
@@ -129,7 +130,7 @@ public class HTTPTorrentClient {
 				
 				// The client is already storing this torrent - ignore it
 				if (TorrentManager.getInstance().getTorrents().get(hexInfoHash) != null) {
-					LOGGER.info("Tracker returned a torrent we already have - ignoring it - hash: " + hexInfoHash);
+					LOGGER.log(LogLevel.DEBUG, "Tracker returned a torrent we already have - ignoring it - hash: " + hexInfoHash);
 					
 				} else {
 					

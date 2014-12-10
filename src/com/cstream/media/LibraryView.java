@@ -1,5 +1,6 @@
 package com.cstream.media;
 
+import java.text.DecimalFormat;
 import java.util.logging.Logger;
 
 import javafx.beans.property.SimpleStringProperty;
@@ -107,12 +108,12 @@ public class LibraryView extends HBox {
 			
 		});
 
-        TableColumn<SharedTorrent, String> peersCol = new TableColumn<SharedTorrent, String>("Peers");
-        peersCol.setCellValueFactory(row -> {
+        TableColumn<SharedTorrent, String> sizeCol = new TableColumn<SharedTorrent, String>("Size");
+        sizeCol.setCellValueFactory(row -> {
 			
-        	//SharedTorrent t = row.getValue();
-        	// TODO
-			return new SimpleStringProperty("TODO");
+        	SharedTorrent t = row.getValue();
+        	DecimalFormat formatter = new DecimalFormat("###,###,###");
+			return new SimpleStringProperty(formatter.format(t.getSize() / 1000) + " KB");
 			
 		});
 
@@ -205,11 +206,12 @@ public class LibraryView extends HBox {
         	
         });
 		
-		nameCol.prefWidthProperty().bind(table.widthProperty().divide(3));
-		percentCol.prefWidthProperty().bind(table.widthProperty().divide(3));
-		stateCol.prefWidthProperty().bind(table.widthProperty().divide(3));
+		nameCol.prefWidthProperty().bind(table.widthProperty().divide(4));
+		percentCol.prefWidthProperty().bind(table.widthProperty().divide(4));
+		sizeCol.prefWidthProperty().bind(table.widthProperty().divide(4));
+		stateCol.prefWidthProperty().bind(table.widthProperty().divide(4));
 		
-		table.getColumns().addAll(nameCol, percentCol, stateCol);
+		table.getColumns().addAll(nameCol, percentCol, sizeCol, stateCol);
 		
 		
 	}
