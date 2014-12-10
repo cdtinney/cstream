@@ -55,7 +55,7 @@ public class CApplicationController extends Controller {
 		LOGGER.info("Attempting to stop the application...");
 		
 		torrentManager.stop();
-		clientManager.stop();
+		clientManager.stopAll();
 		
 	}
 

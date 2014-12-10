@@ -1,13 +1,11 @@
 package com.cstream.media;
 
-import java.beans.PropertyChangeEvent;
-import java.util.Collection;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -15,14 +13,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 
 import com.cstream.client.TorrentClientManager;
-import com.cstream.logging.LogLevel;
-import com.cstream.song.Song;
 import com.cstream.util.EnumUtils;
 import com.turn.ttorrent.client.Client;
 import com.turn.ttorrent.client.Client.ClientState;
 import com.turn.ttorrent.client.SharedTorrent;
 import com.turn.ttorrent.common.Torrent;
-
 
 public class LibraryView extends HBox {
 
@@ -31,11 +26,6 @@ public class LibraryView extends HBox {
 	private final int TABLE_WIDTH = 1280;
 	
 	private TableView<SharedTorrent> table = new TableView<SharedTorrent>();
-	
-	// View
-	private TableView<Song> libTableView = new TableView<Song>();
-	
-	// Model
 	private ObservableList<SharedTorrent> data = FXCollections.observableArrayList();
 
 	public void initialize() {
@@ -46,19 +36,48 @@ public class LibraryView extends HBox {
 		getChildren().add(table);
 		
 		table.setItems(data);
+		table.setPlaceholder(new Label("No shared songs found."));
 		
 	}
 	
 	public void addItem(SharedTorrent torrent) {
+		
 		data.add(torrent);
+		
+		// Re-sort it
+		FXCollections.sort(table.getItems(), (t1, t2) -> t1.getName().compareTo(t2.getName()));
+		
 	}
-	
-	public void addItems(Collection<SharedTorrent> torrents) {
-		data.addAll(torrents);		
-	}
-	
-	public void setItems(ObservableList<SharedTorrent> torrents) {
-		data.addAll(torrents);
+
+	public void updateItem(SharedTorrent torrent) {
+
+		int index = data.indexOf(torrent);
+		if (index < 0) {
+			
+			// Search by hash
+			for (Torrent t : data) {
+				
+				if (t.getHexInfoHash().equals(torrent.getHexInfoHash())) {
+					
+					LOGGER.info("Replacing torrent in library view: " + torrent.getName());
+					index = data.indexOf(t);
+					data.set(index, null);
+					data.set(index, torrent);
+					
+					return;
+					
+				}
+				
+			}
+			
+			LOGGER.warning("No torrent found in library view: " + torrent.getName());
+			return;
+			
+		}
+		
+		data.set(index, null);
+		data.set(index, torrent);
+		
 	}
 	
 	public SharedTorrent getSelected() {
@@ -67,46 +86,6 @@ public class LibraryView extends HBox {
 	
 	public TableView<SharedTorrent> getTable() {
 		return table;
-	}
-	
-	@SuppressWarnings({ "unchecked", "unused" })
-	private void onLibraryChanged(PropertyChangeEvent evt) {
-
-		LOGGER.log(LogLevel.DEBUG, "Updating library view");
-		
-		Song selectedSong = libTableView.getSelectionModel().getSelectedItem();
-				
-		Map<String, Song> oldLib = (Map<String, Song>) evt.getOldValue();
-		Map<String, Song> newLib = (Map<String, Song>) evt.getNewValue();
-		
-		// Clear the saved library, and create a new list
-		data.clear();
-		
-		// Add all of the updated songs
-		//addData(newLib.values());		
-		
-		// Try to re-select the previous song
-		selectSong(selectedSong);
-		
-		// Sort the songs
-	    FXCollections.sort(libTableView.getItems());
-
-	}
-	
-	private void selectSong(Song song) {
-		
-		if (song == null) {
-			return;
-		}
-		
-//		for (Song s : data) {
-//			
-//			if (s.getId().equals(song.getId())) {
-//				libTableView.getSelectionModel().select(s);
-//			}
-//			
-//		}
-		
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -232,36 +211,6 @@ public class LibraryView extends HBox {
 		
 		table.getColumns().addAll(nameCol, percentCol, stateCol);
 		
-		
-	}
-
-	public void updateItem(SharedTorrent torrent) {
-
-		int index = data.indexOf(torrent);
-		if (index < 0) {
-			
-			// Search by hash
-			for (Torrent t : data) {
-				
-				if (t.getHexInfoHash().equals(torrent.getHexInfoHash())) {
-					
-					LOGGER.info("Replacing torrent in library view: " + torrent.getName());
-					index = data.indexOf(t);
-					data.set(index, null);
-					data.set(index, torrent);
-					return;
-					
-				}
-				
-			}
-			
-			LOGGER.warning("No torrent found in library view: " + torrent.getName());
-			return;
-			
-		}
-		
-		data.set(index, null);
-		data.set(index, torrent);
 		
 	}
 

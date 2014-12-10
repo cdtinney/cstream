@@ -159,7 +159,7 @@ public class MediaController extends Controller implements TorrentActivityListen
 		
 		SharedTorrent selected = libraryView.getSelected();
 		if (selected != null) {
-			TorrentClientManager.getInstance().stopShare(selected);	
+			TorrentClientManager.getInstance().stop(selected);	
 		}
 		
 	}

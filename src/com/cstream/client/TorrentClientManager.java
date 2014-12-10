@@ -10,7 +10,6 @@ import java.util.Observer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
-import com.cstream.logging.LogLevel;
 import com.turn.ttorrent.client.Client;
 import com.turn.ttorrent.client.Client.ClientState;
 import com.turn.ttorrent.client.SharedTorrent;
@@ -62,7 +61,7 @@ public class TorrentClientManager implements Observer {
 		
 	}
 
-	public void stop() {
+	public void stopAll() {
 
 		// Stop the client gracefully
 		clients.keySet().forEach((client) -> client.stop());
@@ -92,9 +91,14 @@ public class TorrentClientManager implements Observer {
 
 			// Create a new client object to share the torrent with
 			Client client = new Client(InetAddress.getLocalHost(), st);
+			
+			// Listen to events
 			client.addObserver(this);
 			
+			// Start sharing
 			client.share();
+			
+			// Store the client in our map
 			clients.put(client, st);
 			
 		
@@ -105,7 +109,7 @@ public class TorrentClientManager implements Observer {
 					
 	}
 	
-	public void stopShare(SharedTorrent torrent) {
+	public void stop(SharedTorrent torrent) {
 			
 		try {
 			

@@ -69,80 +69,86 @@ public class TorrentManager {
 	
 	public void start() {
 		
-		// Load in all of our local song files
-		this.songs = LibraryUtils.buildLocalLibrary(TorrentManager.FILE_DIR);
-		
-		// Load in all of our local .torrent files
-		Map<String, Torrent> torrents = loadTorrents();
-		
-		// Store the number of torrents we already have
-		int numTorrents = torrents.values().size();
-		
-		// Find any song files that have no corresponding torrent file. A match is denoted
-		// by an identical file name for now. TODO encode bytes -> check hex_info_hash
-		for (String songName : this.songs.keySet()) {
+		// Do processing on a separate thread so we don't block JavaFX
+		new Thread(() -> {
 			
-			Torrent existing = torrents.get(songName);
-			if (existing != null) {
-				LOGGER.info("Torrent already exists: " + songName);
-				continue;
+			// Load in all of our local song files
+			this.songs = LibraryUtils.buildLocalLibrary(TorrentManager.FILE_DIR);
+			
+			// Load in all of our local .torrent files
+			Map<String, Torrent> torrents = loadTorrents();
+			
+			// Store the number of torrents we already have
+			int numTorrents = torrents.values().size();
+			
+			// Find any song files that have no corresponding torrent file. A match is denoted
+			// by an identical file name for now. TODO encode bytes -> check hex_info_hash
+			for (String songName : this.songs.keySet()) {
+				
+				Torrent existing = torrents.get(songName);
+				if (existing != null) {
+					LOGGER.info("Torrent already exists: " + songName);
+					continue;
+				}
+				
+				// Create a new .torrent file, and load it into a new Torrent object
+				// TODO - Change createdBy to user.name!
+				//File torrentFile = createTorrentFile(songName);
+				File song = new File(FILE_DIR + this.songs.get(songName).getPath());
+				Torrent torrent = loadTorrentFromFile(song, "createdBy");
+				
+				// Add the torrent to our temporary map
+				torrents.put(torrent.getHexInfoHash(), torrent);
+				
 			}
 			
-			// Create a new .torrent file, and load it into a new Torrent object
-			// TODO - Change createdBy to user.name!
-			//File torrentFile = createTorrentFile(songName);
-			File song = new File(FILE_DIR + this.songs.get(songName).getPath());
-			Torrent torrent = loadTorrentFromFile(song, "createdBy");
+			int newTorrents = torrents.values().size() - numTorrents;
+			if (newTorrents != 0) {
+				LOGGER.info(newTorrents + " new torrents created.");
+			}
 			
-			// Add the torrent to our temporary map
-			torrents.put(torrent.getHexInfoHash(), torrent);
-			
-		}
-		
-		int newTorrents = torrents.values().size() - numTorrents;
-		if (newTorrents != 0) {
-			LOGGER.info(newTorrents + " new torrents created.");
-		}
-		
-		// Convert all of the Torrent objects to SharedTorrent, initialize
-		// them, and store in our map.
-		for (Torrent t : torrents.values()) {
-
-			try {
-				
-				LOGGER.info("Creating new shared torrent: " + t.getName());				
-				SharedTorrent st = new SharedTorrent(t, new File(FILE_DIR));
+			// Convert all of the Torrent objects to SharedTorrent, initialize
+			// them, and store in our map.
+			for (Torrent t : torrents.values()) {
+	
 				try {
-					st.init();
 					
-				} catch (InterruptedException e) {
+					LOGGER.info("Creating new shared torrent: " + t.getName());				
+					SharedTorrent st = new SharedTorrent(t, new File(FILE_DIR));
+					try {
+						st.init();
+						
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+						
+					}
+					
+					this.torrents.put(st.getHexInfoHash(), st);
+					fireTorrentAddedEvent(st);
+					
+				} catch (IOException e) {
 					e.printStackTrace();
 					
 				}
 				
-				this.torrents.put(st.getHexInfoHash(), st);
-				fireTorrentAddedEvent(st);
-				
-			} catch (IOException e) {
-				e.printStackTrace();
-				
 			}
 			
-		}
+			LOGGER.info(this.torrents.values().size() + " shared torrents created.");
+			
+			// Start the collector thread
+			if (this.collector == null || !this.collector.isAlive()) {
+				this.collector = new TorrentCollectorThread();
+				this.collector.setName("torrent-collector");
+				this.collector.start();
+			}
+			
+			// Start the torrent upload on a new thread
+			Thread upload = new Thread(new TorrentUpload());
+			upload.setName("torrent-upload");
+			upload.start();
 		
-		LOGGER.info(this.torrents.values().size() + " shared torrents created.");
-		
-		// Start the collector thread
-		if (this.collector == null || !this.collector.isAlive()) {
-			this.collector = new TorrentCollectorThread();
-			this.collector.setName("torrent-collector");
-			this.collector.start();
-		}
-		
-		// Start the torrent upload on a new thread
-		Thread upload = new Thread(new TorrentUpload());
-		upload.setName("torrent-upload");
-		upload.start();
+
+		}).start();
 		
 	}
 	
