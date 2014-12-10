@@ -60,6 +60,13 @@ public class TorrentClientManager implements Observer {
 		return null;		
 		
 	}
+
+	public void stopAll() {
+
+		// Stop the client gracefully
+		clients.keySet().forEach((client) -> client.stop());
+		
+	}
 	
 	public void share(SharedTorrent torrent) {
 		
@@ -84,10 +91,14 @@ public class TorrentClientManager implements Observer {
 
 			// Create a new client object to share the torrent with
 			Client client = new Client(InetAddress.getLocalHost(), st);
+			
+			// Listen to events
 			client.addObserver(this);
 			
-			
+			// Start sharing
 			client.share();
+			
+			// Store the client in our map
 			clients.put(client, st);
 			
 		
@@ -98,7 +109,7 @@ public class TorrentClientManager implements Observer {
 					
 	}
 	
-	public void stopShare(SharedTorrent torrent) {
+	public void stop(SharedTorrent torrent) {
 			
 		try {
 			
@@ -135,7 +146,7 @@ public class TorrentClientManager implements Observer {
 		SharedTorrent t = c.getTorrent();		
 		
 		if (state == ClientState.DONE || state == ClientState.SEEDING) {
-			TorrentManager.getInstance().addCompletedTorrent(t);
+			torrentManager.addCompletedTorrent(t);
 		}
 		
 		fireTorrentChangedEvent(t);
@@ -145,7 +156,6 @@ public class TorrentClientManager implements Observer {
 	private void fireTorrentChangedEvent(SharedTorrent torrent) {
 		
 		for (TorrentActivityListener listener : listeners) {
-			LOGGER.info("Firing torrent changed event");
 			listener.handleTorrentChanged(torrent);
 		}
 		

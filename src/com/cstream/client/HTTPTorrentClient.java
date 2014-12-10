@@ -53,7 +53,6 @@ public class HTTPTorrentClient {
 		
 		HttpResponse response = post(url, name, torrentBytes);	
 		if (response == null) {
-			LOGGER.warning("POST to /upload returned null response");
 			return false;
 		}
 		
@@ -75,7 +74,6 @@ public class HTTPTorrentClient {
 		
 		HttpResponse response = get(url);	
 		if (response == null) {
-			LOGGER.warning("GET to /download returned null response");
 			return results;
 		}
 		
