@@ -35,7 +35,7 @@ public class TorrentManager {
 	
 	private final static String userId = OSUtils.generateUserId();
 
-	private static TorrentManager instance = null;
+	private static volatile TorrentManager instance = null;
 	
 	private Map<String, Song> songs;
 	

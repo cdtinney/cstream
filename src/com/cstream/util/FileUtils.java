@@ -5,6 +5,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -82,7 +83,11 @@ public class FileUtils {
     	
         File directory = new File(directoryName);
         
-        // TODO - Use filename filter in the future
+        // TODO - Test this
+        FilenameFilter filter = (file, name) -> {
+		    return !file.isDirectory() && (extensions == null || extensions.length == 0 || validExtension(file, extensions));
+		};
+		
         File[] fileList = directory.listFiles();
         if (fileList == null) {
         	LOGGER.warning("Cannot list files of a directory which does not exist - " + directoryName);
@@ -91,9 +96,7 @@ public class FileUtils {
         
         for (File file : fileList) {
         	
-        	if (file.isDirectory()) {
-        		
-        		// Recursively add files within sub-directories
+        	if (file.isDirectory()) {        		
         		results.addAll(listFiles(file.getAbsolutePath(), extensions));
         		
         	} else {

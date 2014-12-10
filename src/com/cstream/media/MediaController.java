@@ -15,7 +15,7 @@ import com.cstream.client.TorrentActivityListener;
 import com.cstream.client.TorrentClientManager;
 import com.cstream.client.TorrentManager;
 import com.cstream.controller.Controller;
-import com.cstream.song.LocalAudioPlayback;
+import com.cstream.song.AudioPlayback;
 import com.cstream.song.Song;
 import com.turn.ttorrent.client.SharedTorrent;
 
@@ -28,7 +28,7 @@ public class MediaController extends Controller implements TorrentActivityListen
 	private LibraryView libraryView;
 	private TorrentActionView actionView;
 	
-	private LocalAudioPlayback audioPlayback;
+	private AudioPlayback audioPlayback;
 	private Song activeSong;
 	private Song queuedSong;
 	
@@ -36,7 +36,7 @@ public class MediaController extends Controller implements TorrentActivityListen
 
 	public void initialize() {
 		
-		audioPlayback = new LocalAudioPlayback();
+		audioPlayback = new AudioPlayback();
 		
 		actionView = new TorrentActionView();
 		actionView.initialize();
@@ -61,6 +61,24 @@ public class MediaController extends Controller implements TorrentActivityListen
 
 	public MediaView getMediaView() {
 		return mediaView;
+	}
+
+	@Override
+	public void handleTorrentAdded(SharedTorrent torrent) {
+		
+		Platform.runLater(() -> {
+			libraryView.addItem(torrent);
+		});
+		
+	}
+
+	@Override
+	public void handleTorrentChanged(SharedTorrent torrent) {
+		
+		Platform.runLater(() -> {
+			libraryView.updateItem(torrent);
+		});
+		
 	}
 	
 	private void playTorrent(SharedTorrent torrent) {
@@ -300,24 +318,6 @@ public class MediaController extends Controller implements TorrentActivityListen
 			
 		}
 	    
-	}
-
-	@Override
-	public void handleTorrentAdded(SharedTorrent torrent) {
-		
-		Platform.runLater(() -> {
-			libraryView.addItem(torrent);
-		});
-		
-	}
-
-	@Override
-	public void handleTorrentChanged(SharedTorrent torrent) {
-		
-		Platform.runLater(() -> {
-			libraryView.updateItem(torrent);
-		});
-		
 	}
 
 }

@@ -2,9 +2,7 @@ package com.cstream.song;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.BooleanControl;
 import javax.sound.sampled.DataLine;
-import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
@@ -17,7 +15,7 @@ import com.xuggle.xuggler.IPacket;
 import com.xuggle.xuggler.IStream;
 import com.xuggle.xuggler.IStreamCoder;
 
-public class LocalAudioPlayback {
+public class AudioPlayback {
 
 	private SourceDataLine audioLine;
 
@@ -44,27 +42,6 @@ public class LocalAudioPlayback {
 
 	public boolean isPaused() {
 		return AudioState.PAUSED.equals(this.state);
-	}
-	
-	public void setVolume(float value) {
-		
-		if(audioLine != null) {
-			
-			BooleanControl mute = (BooleanControl) audioLine.getControl(BooleanControl.Type.MUTE);
-			FloatControl volumeControl = (FloatControl) audioLine.getControl(FloatControl.Type.VOLUME);
-			
-			if(value == 0) {
-				
-				mute.setValue(true);
-				
-			} else {
-				
-				mute.setValue(false);
-				volumeControl.setValue(value); //10.0f
-				
-			}
-		}
-		
 	}
 
 	public void togglePause() {
@@ -143,22 +120,24 @@ public class LocalAudioPlayback {
 		}
 
 		if (audioStreamId == -1) {
-			throw new RuntimeException("could not find audio stream in container: " + filename);
+			throw new RuntimeException("No audio stream found in container: " + filename);
 		}
 		
-		if(seek != 0) {
+		if (seek != 0) {
+			
 			final double timebase = container.getStream(audioStreamId).getTimeBase().getDouble();
 			final long position = (long) (seek / timebase);
 	
 			final long min = Math.max(0, position - 100);
 			final long max = position;
 			container.seekKeyFrame(audioStreamId, min, position, max, 0);
+			
 		}
 
 		audioCoder = coder;
 		
 		// Open up the decoder
-		if (audioCoder.open() < 0) {
+		if (audioCoder == null || audioCoder.open() < 0) {
 			throw new RuntimeException("could not open audio decoder for container: " + filename);
 		}
 

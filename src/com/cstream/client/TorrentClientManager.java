@@ -26,7 +26,7 @@ public class TorrentClientManager implements Observer {
 	private static final int MAX_CLIENTS = 5;
 
 	// Singleton instance
-	private static TorrentClientManager instance = null;
+	private static volatile TorrentClientManager instance = null;
 	
 	// Map current clients to the torrents they are sharing
 	// TODO - switch map around
