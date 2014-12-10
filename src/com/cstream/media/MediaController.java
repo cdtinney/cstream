@@ -241,7 +241,7 @@ public class MediaController extends Controller implements TorrentActivityListen
                 
                 mediaView.updateNowPlaying(activeSong = null);
                 mediaView.updateTimes(0, 0, 0);
-                
+                                
                 if (queuedSong != null) {
                 	play(queuedSong);
                 	queuedSong = null;

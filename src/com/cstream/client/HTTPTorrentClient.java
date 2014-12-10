@@ -84,7 +84,7 @@ public class HTTPTorrentClient {
 			return results;
 		}
 
-		LOGGER.info("GET to /download returned: " + status);
+		LOGGER.log(LogLevel.DEBUG, "GET to /download returned: " + status);
 		
 		try {
 			 return parseDownloadResponse(response);	
