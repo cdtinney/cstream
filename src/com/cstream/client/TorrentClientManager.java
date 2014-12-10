@@ -1,5 +1,6 @@
 package com.cstream.client;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,13 +10,10 @@ import java.util.Observer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-
-import com.cstream.media.LibraryView;
 import com.turn.ttorrent.client.Client;
 import com.turn.ttorrent.client.Client.ClientState;
 import com.turn.ttorrent.client.SharedTorrent;
+import com.turn.ttorrent.common.Torrent;
 
 public class TorrentClientManager implements Observer {
 
@@ -77,14 +75,20 @@ public class TorrentClientManager implements Observer {
 				LOGGER.warning("Torrent is already being shared: " + torrent.getName());
 				return;
 			}
+			
+			LOGGER.info("Creating new torrent for already created shared torrent");
+			Torrent t = Torrent.load(new File(TorrentManager.FILE_DIR + torrent.getName() + ".torrent"));
+			SharedTorrent st = new SharedTorrent(t, new File(TorrentManager.FILE_DIR));
+			
+			torrent = null;
 
 			// Create a new client object to share the torrent with
-			Client client = new Client(InetAddress.getLocalHost(), torrent);
+			Client client = new Client(InetAddress.getLocalHost(), st);
 			client.addObserver(this);
 			
 			
 			client.share();
-			clients.put(client, torrent);
+			clients.put(client, st);
 			
 		
 		} catch (Exception e) {
