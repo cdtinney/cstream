@@ -151,7 +151,10 @@ public class MediaController extends Controller implements TorrentActivityListen
 		
 		SharedTorrent selected = libraryView.getSelected();	
 		if (selected != null) {
-			TorrentClientManager.getInstance().share(selected);	
+			
+			new Thread(() -> {
+				TorrentClientManager.getInstance().share(selected);	
+			}).start();
 		}
 		
 	}
@@ -161,7 +164,10 @@ public class MediaController extends Controller implements TorrentActivityListen
 		
 		SharedTorrent selected = libraryView.getSelected();
 		if (selected != null) {
-			TorrentClientManager.getInstance().stop(selected);	
+			
+			new Thread(() -> {
+				TorrentClientManager.getInstance().stop(selected);	
+			}).start();
 		}
 		
 	}
@@ -258,7 +264,7 @@ public class MediaController extends Controller implements TorrentActivityListen
                 
                 mediaView.updateNowPlaying(activeSong = null);
                 mediaView.updateTimes(0, 0, 0);
-                
+                                
                 if (queuedSong != null) {
                 	play(queuedSong);
                 	queuedSong = null;

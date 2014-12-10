@@ -215,7 +215,7 @@ public class LibraryView extends HBox {
                 			break;
                 			
                 		case SEEDING:
-                            this.setStyle("-fx-background-color: #00CC00");
+                            this.setStyle("-fx-background-color: #006600");
                 			break;
                 			
                 		case DONE:
