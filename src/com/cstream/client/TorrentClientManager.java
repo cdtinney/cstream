@@ -10,6 +10,10 @@ import java.util.Observer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+import javafx.application.Platform;
+import javafx.scene.control.Alert.AlertType;
+
+import com.cstream.util.FxUtils;
 import com.turn.ttorrent.client.Client;
 import com.turn.ttorrent.client.Client.ClientState;
 import com.turn.ttorrent.client.SharedTorrent;
@@ -73,6 +77,12 @@ public class TorrentClientManager implements Observer {
 		
 		if (clients.keySet().size() == MAX_CLIENTS) {
 			LOGGER.warning("Maximum number of clients reached.");
+			
+			// TODO - Implement error logging 
+			Platform.runLater(() -> {
+				FxUtils.showDialog(AlertType.ERROR, "Error!", "Maximum number of clients reached.", "You can only share " + MAX_CLIENTS + " torrents at a time.");
+			});
+			
 			return;			
 		}
 		
