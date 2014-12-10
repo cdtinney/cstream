@@ -21,6 +21,7 @@ import com.cstream.util.EnumUtils;
 import com.turn.ttorrent.client.Client;
 import com.turn.ttorrent.client.Client.ClientState;
 import com.turn.ttorrent.client.SharedTorrent;
+import com.turn.ttorrent.common.Torrent;
 
 
 public class LibraryView extends HBox {
@@ -237,13 +238,29 @@ public class LibraryView extends HBox {
 	public void updateItem(SharedTorrent torrent) {
 
 		int index = data.indexOf(torrent);
-		
 		if (index < 0) {
+			
+			// Search by hash
+			for (Torrent t : data) {
+				
+				if (t.getHexInfoHash().equals(torrent.getHexInfoHash())) {
+					
+					LOGGER.info("Replacing torrent in library view: " + torrent.getName());
+					index = data.indexOf(t);
+					data.set(index, null);
+					data.set(index, torrent);
+					return;
+					
+				}
+				
+			}
+			
+			LOGGER.warning("No torrent found in library view: " + torrent.getName());
 			return;
+			
 		}
 		
 		LOGGER.info("Updating torrent at index: " + index);
-		
 		data.set(index, null);
 		data.set(index, torrent);
 		
