@@ -104,15 +104,48 @@ public class LibraryView extends HBox {
         percentCol.setCellValueFactory(row -> {
 			
         	SharedTorrent t = row.getValue();
-			return new SimpleStringProperty(Float.toString(t.getCompletion()) + "%");
+        	DecimalFormat df = new DecimalFormat("###.##");        	
+			return new SimpleStringProperty(df.format(t.getCompletion()) + "%");
+			
+		});
+
+        TableColumn<SharedTorrent, String> dlCol = new TableColumn<SharedTorrent, String>("DL");
+        dlCol.setCellValueFactory(row -> {
+			
+        	SharedTorrent t = row.getValue();
+        	
+        	Client client = TorrentClientManager.getInstance().findClient(t);        	
+        	if (client == null) {
+        		return new SimpleStringProperty("");
+        	}
+
+        	DecimalFormat formatter = new DecimalFormat("###,###,###");
+        	float kbPerSec = client.getDownloadRate() / 1000;
+			return new SimpleStringProperty(kbPerSec == 0 ? "" : formatter.format(kbPerSec) + " KB/s");
+			
+		});
+
+        TableColumn<SharedTorrent, String> ulCol = new TableColumn<SharedTorrent, String>("UL");
+        ulCol.setCellValueFactory(row -> {
+			
+        	SharedTorrent t = row.getValue();
+        	
+        	Client client = TorrentClientManager.getInstance().findClient(t);        	
+        	if (client == null) {
+        		return new SimpleStringProperty("");
+        	}
+
+        	DecimalFormat formatter = new DecimalFormat("###,###,###");
+        	float kbPerSec = client.getUploadRate() / 1000;
+			return new SimpleStringProperty(kbPerSec == 0 ? "" : formatter.format(kbPerSec) + " KB/s");
 			
 		});
 
         TableColumn<SharedTorrent, String> sizeCol = new TableColumn<SharedTorrent, String>("Size");
         sizeCol.setCellValueFactory(row -> {
 			
-        	SharedTorrent t = row.getValue();
-        	DecimalFormat formatter = new DecimalFormat("###,###,###");
+        	SharedTorrent t = row.getValue();        	
+        	DecimalFormat formatter = new DecimalFormat("###,###,###");        	
 			return new SimpleStringProperty(formatter.format(t.getSize() / 1000) + " KB");
 			
 		});
@@ -122,11 +155,9 @@ public class LibraryView extends HBox {
         	
 			SharedTorrent t = row.getValue();
         	
-        	TorrentClientManager manager = TorrentClientManager.getInstance();
-        	Client client = manager.findClient(t);
-        	
+        	Client client = TorrentClientManager.getInstance().findClient(t);
         	if (client == null) {
-        		return new SimpleStringProperty("Stopped");
+        		return new SimpleStringProperty("Inactive");
         	}
         	
         	return new SimpleStringProperty(client.getState().toString());
@@ -206,13 +237,14 @@ public class LibraryView extends HBox {
         	
         });
 		
-		nameCol.prefWidthProperty().bind(table.widthProperty().divide(4));
-		percentCol.prefWidthProperty().bind(table.widthProperty().divide(4));
-		sizeCol.prefWidthProperty().bind(table.widthProperty().divide(4));
-		stateCol.prefWidthProperty().bind(table.widthProperty().divide(4));
+		nameCol.prefWidthProperty().bind(table.widthProperty().divide(2.5));
+		percentCol.prefWidthProperty().bind(table.widthProperty().divide(10));
+		dlCol.prefWidthProperty().bind(table.widthProperty().divide(10));;
+		ulCol.prefWidthProperty().bind(table.widthProperty().divide(10));
+		sizeCol.prefWidthProperty().bind(table.widthProperty().divide(10));
+		stateCol.prefWidthProperty().bind(table.widthProperty().divide(5));
 		
-		table.getColumns().addAll(nameCol, percentCol, sizeCol, stateCol);
-		
+		table.getColumns().addAll(nameCol, percentCol, dlCol, ulCol, sizeCol, stateCol);
 		
 	}
 
