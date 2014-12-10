@@ -49,6 +49,7 @@ public class MediaView extends HBox {
     	
     	double progress = ((float) currentTime / (float) totalTime) * 100.0;
     	timeSlider.setValue(progress);
+
     	
     }
     

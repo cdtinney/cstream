@@ -98,7 +98,7 @@ public class MediaController extends Controller implements TorrentActivityListen
 
 		activeSong = song;
 		LOGGER.info("Play song locally: " + song);	
-		audioPlayback.playFile(activeSong.getPath(), new SongListener());
+		audioPlayback.playFile(activeSong.getPath(), new SongListener(), 0);
 		
 	}
 	
@@ -271,6 +271,7 @@ public class MediaController extends Controller implements TorrentActivityListen
 					
 					int remaining = activeSong.getLength() - current;
 					mediaView.updateTimes(time = current, remaining, activeSong.getLength());
+					//mediaView.g
 				}
 				
 			});
