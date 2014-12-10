@@ -51,7 +51,7 @@ public class TorrentClientManager implements Observer {
 		
 		for (Client c : clients.keySet()) {
 			
-			if (c.getTorrent() == torrent) {
+			if (c.getTorrent().getHexInfoHash().equals(torrent.getHexInfoHash())) {
 				return c;
 			}
 			
