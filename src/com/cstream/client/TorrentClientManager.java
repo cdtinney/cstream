@@ -60,6 +60,13 @@ public class TorrentClientManager implements Observer {
 		return null;		
 		
 	}
+
+	public void stop() {
+
+		// Stop the client gracefully
+		clients.keySet().forEach((client) -> client.stop());
+		
+	}
 	
 	public void share(SharedTorrent torrent) {
 		
@@ -85,7 +92,6 @@ public class TorrentClientManager implements Observer {
 			// Create a new client object to share the torrent with
 			Client client = new Client(InetAddress.getLocalHost(), st);
 			client.addObserver(this);
-			
 			
 			client.share();
 			clients.put(client, st);

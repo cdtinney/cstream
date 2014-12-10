@@ -260,7 +260,6 @@ public class LibraryView extends HBox {
 			
 		}
 		
-		LOGGER.info("Updating torrent at index: " + index);
 		data.set(index, null);
 		data.set(index, torrent);
 		

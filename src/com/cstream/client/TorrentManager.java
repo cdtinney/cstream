@@ -156,6 +156,12 @@ public class TorrentManager {
 	
 	public void stop() {
 		this.stop = true;
+
+		if (this.collector != null && this.collector.isAlive()) {
+			this.collector.interrupt();
+			LOGGER.info("Torrent collection terminated.");
+		}
+		
 	}
 	
 	public ConcurrentHashMap<String, SharedTorrent> getTorrents() {

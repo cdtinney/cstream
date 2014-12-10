@@ -2,7 +2,6 @@ package com.cstream;
 
 import java.util.logging.Logger;
 
-import javafx.collections.MapChangeListener;
 import javafx.scene.Scene;
 
 import com.cstream.client.TorrentClientManager;
@@ -54,6 +53,9 @@ public class CApplicationController extends Controller {
 	public void stop() {
 
 		LOGGER.info("Attempting to stop the application...");
+		
+		torrentManager.stop();
+		clientManager.stop();
 		
 	}
 
