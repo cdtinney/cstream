@@ -22,7 +22,7 @@ public class Song implements Comparable<Song> {
 	private transient Mp3File mp3;	
 	private String path;
 	
-	// Primitive string properties required for JSON parsing
+	// Primitive string properties
 	private String artist;
 	private String album;
 	private String title;
