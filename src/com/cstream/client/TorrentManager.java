@@ -13,9 +13,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableMap;
-
 import com.cstream.song.Song;
 import com.cstream.util.FileUtils;
 import com.cstream.util.LibraryUtils;
@@ -41,7 +38,6 @@ public class TorrentManager {
 	private Map<String, Song> songs;
 	
 	private ConcurrentHashMap<String, SharedTorrent> torrents;
-	private ObservableMap<String, SharedTorrent> observableTorrents;
 	
 	private List<TorrentActivityListener> listeners;
 	
@@ -52,7 +48,6 @@ public class TorrentManager {
 		
 		this.songs = new ConcurrentHashMap<String, Song>();		
 		this.torrents = new ConcurrentHashMap<String, SharedTorrent>();	
-		this.observableTorrents = FXCollections.observableMap(torrents);
 		
 		this.listeners = new ArrayList<TorrentActivityListener>();
 		
@@ -89,7 +84,7 @@ public class TorrentManager {
 			
 			Torrent existing = torrents.get(songName);
 			if (existing != null) {
-				LOGGER.info("Torrent already exists for song: " + songName);
+				LOGGER.info("Torrent already exists: " + songName);
 				continue;
 			}
 			
@@ -127,9 +122,6 @@ public class TorrentManager {
 				
 				this.torrents.put(st.getHexInfoHash(), st);
 				fireTorrentAddedEvent(st);
-				
-				this.observableTorrents.put(st.getHexInfoHash(), st);
-		        LOGGER.info("Size: "+observableTorrents.size());
 				
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -247,7 +239,6 @@ public class TorrentManager {
 	private void fireTorrentAddedEvent(SharedTorrent torrent) {
 		
 		for (TorrentActivityListener listener : listeners) {
-			LOGGER.info("Firing handle torrent added event");
 			listener.handleTorrentAdded(torrent);
 		}
 		

@@ -281,8 +281,6 @@ public class MediaController extends Controller implements TorrentActivityListen
 
 	@Override
 	public void handleTorrentAdded(SharedTorrent torrent) {
-
-		LOGGER.info("Handle added torrent: " + torrent.getName());
 		
 		Platform.runLater(() -> {
 			libraryView.addItem(torrent);

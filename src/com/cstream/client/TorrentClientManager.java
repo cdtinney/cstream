@@ -10,6 +10,7 @@ import java.util.Observer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+import com.cstream.logging.LogLevel;
 import com.turn.ttorrent.client.Client;
 import com.turn.ttorrent.client.Client.ClientState;
 import com.turn.ttorrent.client.SharedTorrent;
@@ -141,7 +142,7 @@ public class TorrentClientManager implements Observer {
 		SharedTorrent t = c.getTorrent();		
 		
 		if (state == ClientState.DONE || state == ClientState.SEEDING) {
-			TorrentManager.getInstance().addCompletedTorrent(t);
+			torrentManager.addCompletedTorrent(t);
 		}
 		
 		fireTorrentChangedEvent(t);
@@ -151,7 +152,6 @@ public class TorrentClientManager implements Observer {
 	private void fireTorrentChangedEvent(SharedTorrent torrent) {
 		
 		for (TorrentActivityListener listener : listeners) {
-			LOGGER.info("Firing torrent changed event");
 			listener.handleTorrentChanged(torrent);
 		}
 		
