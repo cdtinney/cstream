@@ -25,6 +25,7 @@ public class TorrentClientManager implements Observer {
 	private static TorrentClientManager instance = null;
 	
 	// Map current clients to the torrents they are sharing
+	// TODO - switch map around
 	private Map<Client, SharedTorrent> clients = new ConcurrentHashMap<Client, SharedTorrent>();
 	
 	private TorrentManager torrentManager = TorrentManager.getInstance();
@@ -87,6 +88,10 @@ public class TorrentClientManager implements Observer {
 			Torrent t = Torrent.load(new File(TorrentManager.TORRENT_DIR + torrent.getName() + ".torrent"));
 			SharedTorrent st = new SharedTorrent(t, new File(TorrentManager.FILE_DIR));
 			
+			// Close the old torrent. This is VERY important! If we don't,
+			// we're left with dangling file handlers and Windows can't save the file properly
+			// upon completion.
+			torrent.close();
 			torrent = null;
 
 			// Create a new client object to share the torrent with

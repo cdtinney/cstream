@@ -32,6 +32,8 @@ public class TorrentManager {
 	public final static String TRACKER_HTTP = "6970";
 	public final static String TRACKER_TCP = "6969";
 	public final static String TRACKER_ANNOUNCE = TRACKER_IP + ":" + TRACKER_TCP + "/announce";
+	
+	private final static String userId = OSUtils.generateUserId();
 
 	private static TorrentManager instance = null;
 	
@@ -92,10 +94,8 @@ public class TorrentManager {
 				}
 				
 				// Create a new .torrent file, and load it into a new Torrent object
-				// TODO - Change createdBy to user.name!
-				//File torrentFile = createTorrentFile(songName);
 				File song = new File(FILE_DIR + this.songs.get(songName).getPath());
-				Torrent torrent = loadTorrentFromFile(song, "createdBy");
+				Torrent torrent = loadTorrentFromFile(song, userId);
 				
 				// Add the torrent to our temporary map
 				torrents.put(torrent.getHexInfoHash(), torrent);
