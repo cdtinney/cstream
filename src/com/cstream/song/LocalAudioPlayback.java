@@ -2,7 +2,9 @@ package com.cstream.song;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.BooleanControl;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
@@ -42,6 +44,27 @@ public class LocalAudioPlayback {
 
 	public boolean isPaused() {
 		return AudioState.PAUSED.equals(this.state);
+	}
+	
+	public void setVolume(float value) {
+		
+		if(audioLine != null) {
+			
+			BooleanControl mute = (BooleanControl) audioLine.getControl(BooleanControl.Type.MUTE);
+			FloatControl volumeControl = (FloatControl) audioLine.getControl(FloatControl.Type.VOLUME);
+			
+			if(value == 0) {
+				
+				mute.setValue(true);
+				
+			} else {
+				
+				mute.setValue(false);
+				volumeControl.setValue(value); //10.0f
+				
+			}
+		}
+		
 	}
 
 	public void togglePause() {
@@ -251,7 +274,7 @@ public class LocalAudioPlayback {
 
 			// Try opening the line
 			audioLine.open(audioFormat);
-
+		
 			// Try starting the line
 			audioLine.start();
 

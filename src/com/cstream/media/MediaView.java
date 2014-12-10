@@ -48,9 +48,9 @@ public class MediaView extends HBox {
     	remainingTimeLabel.setText(String.format("%2d:%02d", (remainingTime%3600)/60, (remainingTime%60)));
     	
     	double progress = ((float) currentTime / (float) totalTime) * 100.0;
+    	timeSlider.setDisable(false);
     	timeSlider.setValue(progress);
 
-    	
     }
     
     public void updateNowPlaying(Song song) {
@@ -72,6 +72,10 @@ public class MediaView extends HBox {
     
     public Button getButton(String id) {
     	return FxUtils.lookup(this, id);
+    }
+    
+    public Slider getTimeSlider() {
+    	return this.timeSlider;
     }
     
     public void togglePlayButton(boolean paused) {

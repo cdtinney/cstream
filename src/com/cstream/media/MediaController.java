@@ -31,6 +31,8 @@ public class MediaController extends Controller implements TorrentActivityListen
 	private LocalAudioPlayback audioPlayback;
 	private Song activeSong;
 	private Song queuedSong;
+	
+	private int SeekTime = 0;
 
 	public void initialize() {
 		
@@ -168,6 +170,21 @@ public class MediaController extends Controller implements TorrentActivityListen
 
 		addEventHandler(mediaView, "playButton", "setOnAction", "handlePlayButton");
 		addEventHandler(mediaView, "stopButton", "setOnAction", "handleStopbutton");
+		mediaView.getTimeSlider().valueProperty().addListener((observable, oldValue, newValue) -> {
+			
+			int diff = newValue.intValue() - oldValue.intValue();
+			
+			//TODO: Seek
+			/*
+			if(diff > 1 && diff < 0) {
+				if(activeSong != null) {
+					audioPlayback.stop();
+					SeekTime = newValue.intValue();
+					audioPlayback.playFile(activeSong.getPath(), new SongListener(), newValue.intValue());
+				}
+			}*/
+		    
+		});
 		
 		libraryView.getTable().setRowFactory(tv -> {
 			
@@ -271,7 +288,6 @@ public class MediaController extends Controller implements TorrentActivityListen
 					
 					int remaining = activeSong.getLength() - current;
 					mediaView.updateTimes(time = current, remaining, activeSong.getLength());
-					//mediaView.g
 				}
 				
 			});
