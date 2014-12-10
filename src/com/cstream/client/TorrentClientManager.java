@@ -77,7 +77,7 @@ public class TorrentClientManager implements Observer {
 			}
 			
 			LOGGER.info("Creating new torrent for already created shared torrent");
-			Torrent t = Torrent.load(new File(TorrentManager.FILE_DIR + torrent.getName() + ".torrent"));
+			Torrent t = Torrent.load(new File(TorrentManager.TORRENT_DIR + torrent.getName() + ".torrent"));
 			SharedTorrent st = new SharedTorrent(t, new File(TorrentManager.FILE_DIR));
 			
 			torrent = null;
