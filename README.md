@@ -1,4 +1,4 @@
 cstream
 =======
 
-p2p music streaming
+p2p music sharing
