@@ -1,4 +1,4 @@
 cstream
 =======
 
-p2p music sharing
+Peer-to-peer music sharing via BitTorrent.
